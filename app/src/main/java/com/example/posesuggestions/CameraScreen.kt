@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -33,10 +34,16 @@ fun CameraScreen(viewModel: CameraViewModel) {
         }
     )
 
+    val detectedPose by viewModel.detectedPose.collectAsState()
+
     Box(modifier = Modifier.fillMaxSize()) {
         if (hasCameraPermission) {
             CameraPreview(
                 viewModel = viewModel,
+                modifier = Modifier.fillMaxSize()
+            )
+            PoseOverlay(
+                detectedPose = detectedPose,
                 modifier = Modifier.fillMaxSize()
             )
         } else {

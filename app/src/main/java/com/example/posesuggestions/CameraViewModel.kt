@@ -1,6 +1,7 @@
 package com.example.posesuggestions
 
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
@@ -12,8 +13,10 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 class CameraViewModel : ViewModel() {
-    private val _cameraProvider = MutableStateFlow<ProcessCameraProvider?>(null)
-    
+    private val _detectedPose = MutableStateFlow<DetectedPose?>(null)
+    val detectedPose = _detectedPose.asStateFlow()
+
+    private val poseProcessor = PoseProcessor()
     private val cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
 
     fun bindCamera(
@@ -25,12 +28,21 @@ class CameraViewModel : ViewModel() {
 
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
-            _cameraProvider.value = cameraProvider
 
             val preview = Preview.Builder()
                 .build()
                 .also {
                     it.surfaceProvider = previewView.surfaceProvider
+                }
+
+            val imageAnalysis = ImageAnalysis.Builder()
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
+                .build()
+                .also {
+                    it.setAnalyzer(cameraExecutor, PoseAnalyzer(poseProcessor) { pose, width, height ->
+                        _detectedPose.value = pose.toDetectedPose(width, height)
+                    })
                 }
 
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
@@ -40,7 +52,8 @@ class CameraViewModel : ViewModel() {
                 cameraProvider.bindToLifecycle(
                     lifecycleOwner,
                     cameraSelector,
-                    preview
+                    preview,
+                    imageAnalysis
                 )
             } catch (exc: Exception) {
                 // Handle binding failure
@@ -50,6 +63,7 @@ class CameraViewModel : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
+        poseProcessor.stop()
         cameraExecutor.shutdown()
     }
 }

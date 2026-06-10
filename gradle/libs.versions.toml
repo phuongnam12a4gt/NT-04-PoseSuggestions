@@ -11,6 +11,7 @@ constraintlayout = "2.2.1"
 composeBom = "2025.02.00"
 cameraX = "1.4.1"
 lifecycle = "2.8.7"
+mlkitPoseDetection = "18.0.0-beta5"
 kotlin = "2.1.0"
 
 [libraries]
@@ -33,6 +34,7 @@ androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "l
 androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "cameraX" }
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraX" }
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraX" }
+mlkit-pose-detection = { group = "com.google.mlkit", name = "pose-detection", version.ref = "mlkitPoseDetection" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
