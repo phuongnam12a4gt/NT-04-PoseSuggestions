@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -41,6 +42,7 @@ fun CameraScreen(viewModel: CameraViewModel) {
     val selectedCategory by viewModel.selectedCategory.collectAsState()
     val selectedTemplate by viewModel.selectedTemplate.collectAsState()
     val currentScore by viewModel.currentScore.collectAsState()
+    val countdownValue by viewModel.countdownValue.collectAsState()
 
     val categories = listOf("cool", "selfie", "travel", "gym")
 
@@ -84,6 +86,23 @@ fun CameraScreen(viewModel: CameraViewModel) {
                             else -> Color.White
                         },
                         trackColor = Color.Gray.copy(alpha = 0.5f)
+                    )
+                }
+            }
+
+            // Countdown Overlay
+            countdownValue?.let { count ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.3f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = count.toString(),
+                        style = MaterialTheme.typography.displayLarge,
+                        color = Color.White,
+                        modifier = Modifier.padding(32.dp)
                     )
                 }
             }
