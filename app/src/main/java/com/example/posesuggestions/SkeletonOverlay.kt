@@ -5,15 +5,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.dp
 import com.google.mlkit.vision.pose.PoseLandmark
 
-/**
- * Maps image coordinates to screen coordinates based on the Canvas size.
- */
 class CoordinateMapper(
     private val imageWidth: Int,
     private val imageHeight: Int,
@@ -22,33 +20,46 @@ class CoordinateMapper(
 ) {
     fun mapX(x: Float): Float = x * (screenWidth / imageWidth)
     fun mapY(y: Float): Float = y * (screenHeight / imageHeight)
-    
     fun mapOffset(x: Float, y: Float): Offset = Offset(mapX(x), mapY(y))
 }
 
-/**
- * Handles the drawing logic for the pose skeleton and landmarks.
- */
 class PoseRenderer(
     private val mapper: CoordinateMapper,
 ) {
     fun DrawScope.drawPose(
         pose: DetectedPose,
-        color: Color = Color.Cyan,
-        lineColor: Color = Color.White
+        pointColor: Color = Color.Cyan,
+        lineBrush: Brush = Brush.linearGradient(listOf(Color.White, Color.White))
     ) {
         val landmarks = pose.landmarks.associateBy { it.type }
 
-        // Draw Skeleton Lines
-        drawSkeletonConnections(landmarks, lineColor)
+        // Draw Skeleton Lines with Gradient
+        drawSkeletonConnections(landmarks, lineBrush)
 
-        // Draw Landmark Points
+        // Draw Landmark Points with Glow Effect
         pose.landmarks.forEach { landmark ->
             if (landmark.inFrameLikelihood > 0.5f) {
+                val center = mapper.mapOffset(landmark.x, landmark.y)
+                
+                // Outer Glow
                 drawCircle(
-                    color = color,
-                    radius = 5.dp.toPx(),
-                    center = mapper.mapOffset(landmark.x, landmark.y)
+                    color = pointColor.copy(alpha = 0.3f),
+                    radius = 8.dp.toPx(),
+                    center = center
+                )
+                
+                // Main Point
+                drawCircle(
+                    color = pointColor,
+                    radius = 4.dp.toPx(),
+                    center = center
+                )
+                
+                // Inner Shine
+                drawCircle(
+                    color = Color.White,
+                    radius = 1.5.dp.toPx(),
+                    center = center
                 )
             }
         }
@@ -56,48 +67,39 @@ class PoseRenderer(
 
     private fun DrawScope.drawSkeletonConnections(
         landmarks: Map<Int, PoseLandmarkData>,
-        color: Color
+        brush: Brush
     ) {
         val connections = listOf(
-            // Torso
             PoseLandmark.LEFT_SHOULDER to PoseLandmark.RIGHT_SHOULDER,
             PoseLandmark.LEFT_SHOULDER to PoseLandmark.LEFT_HIP,
             PoseLandmark.RIGHT_SHOULDER to PoseLandmark.RIGHT_HIP,
             PoseLandmark.LEFT_HIP to PoseLandmark.RIGHT_HIP,
-            
-            // Left Arm
             PoseLandmark.LEFT_SHOULDER to PoseLandmark.LEFT_ELBOW,
             PoseLandmark.LEFT_ELBOW to PoseLandmark.LEFT_WRIST,
-            
-            // Right Arm
             PoseLandmark.RIGHT_SHOULDER to PoseLandmark.RIGHT_ELBOW,
             PoseLandmark.RIGHT_ELBOW to PoseLandmark.RIGHT_WRIST,
-            
-            // Left Leg
             PoseLandmark.LEFT_HIP to PoseLandmark.LEFT_KNEE,
             PoseLandmark.LEFT_KNEE to PoseLandmark.LEFT_ANKLE,
-            
-            // Right Leg
             PoseLandmark.RIGHT_HIP to PoseLandmark.RIGHT_KNEE,
             PoseLandmark.RIGHT_KNEE to PoseLandmark.RIGHT_ANKLE
         )
 
         connections.forEach { (start, end) ->
-            drawConnection(landmarks[start], landmarks[end], color)
+            drawConnection(landmarks[start], landmarks[end], brush)
         }
     }
 
     private fun DrawScope.drawConnection(
         start: PoseLandmarkData?,
         end: PoseLandmarkData?,
-        color: Color
+        brush: Brush
     ) {
         if (start != null && end != null && (start.inFrameLikelihood > 0.5f) && (end.inFrameLikelihood > 0.5f)) {
             drawLine(
-                color = color,
+                brush = brush,
                 start = mapper.mapOffset(start.x, start.y),
                 end = mapper.mapOffset(end.x, end.y),
-                strokeWidth = 3.dp.toPx(),
+                strokeWidth = 2.5.dp.toPx(),
                 cap = StrokeCap.Round
             )
         }
@@ -112,39 +114,37 @@ fun SkeletonOverlay(
 ) {
     Canvas(modifier = modifier.fillMaxSize()) {
         val mapper = detectedPose?.let {
-            CoordinateMapper(
-                imageWidth = it.imageWidth,
-                imageHeight = it.imageHeight,
-                screenWidth = size.width,
-                screenHeight = size.height
-            )
+            CoordinateMapper(it.imageWidth, it.imageHeight, size.width, size.height)
         } ?: templatePose?.let {
-            CoordinateMapper(
-                imageWidth = 1,
-                imageHeight = 1,
-                screenWidth = size.width,
-                screenHeight = size.height
-            )
+            CoordinateMapper(1, 1, size.width, size.height)
         }
 
         mapper?.let { m ->
             val renderer = PoseRenderer(m)
             
-            // Draw Template (Ghost)
+            // Draw Template (Ghost - Subtle Purple/Blue Gradient)
             templatePose?.let { template ->
                 with(renderer) {
                     drawPose(
                         template.toDetectedPose(1, 1),
-                        color = Color.Gray.copy(alpha = 0.3f),
-                        lineColor = Color.LightGray.copy(alpha = 0.3f)
+                        pointColor = Color.Magenta.copy(alpha = 0.2f),
+                        lineBrush = Brush.linearGradient(
+                            listOf(Color.Blue.copy(alpha = 0.1f), Color.Magenta.copy(alpha = 0.1f))
+                        )
                     )
                 }
             }
 
-            // Draw Detected Pose
+            // Draw Detected Pose (Vibrant Cyan/Pink Gradient)
             detectedPose?.let { pose ->
                 with(renderer) {
-                    drawPose(pose, color = Color.Cyan, lineColor = Color.White)
+                    drawPose(
+                        pose,
+                        pointColor = Color.Cyan,
+                        lineBrush = Brush.linearGradient(
+                            listOf(Color.Cyan, Color(0xFFE91E63))
+                        )
+                    )
                 }
             }
         }

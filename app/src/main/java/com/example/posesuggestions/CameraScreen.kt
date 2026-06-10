@@ -4,17 +4,29 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import java.util.Locale
 
@@ -23,18 +35,13 @@ fun CameraScreen(viewModel: CameraViewModel) {
     val context = LocalContext.current
     var hasCameraPermission by remember {
         mutableStateOf(
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED
+            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
         )
     }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
-        onResult = { granted ->
-            hasCameraPermission = granted
-        }
+        onResult = { granted -> hasCameraPermission = granted }
     )
 
     val detectedPose by viewModel.detectedPose.collectAsState()
@@ -44,135 +51,280 @@ fun CameraScreen(viewModel: CameraViewModel) {
     val currentScore by viewModel.currentScore.collectAsState()
     val countdownValue by viewModel.countdownValue.collectAsState()
 
-    val categories = listOf("cool", "selfie", "travel", "gym")
-
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         if (hasCameraPermission) {
-            CameraPreview(
-                viewModel = viewModel,
-                modifier = Modifier.fillMaxSize()
-            )
+            CameraPreview(viewModel = viewModel, modifier = Modifier.fillMaxSize())
+            
             SkeletonOverlay(
                 modifier = Modifier.fillMaxSize(),
                 detectedPose = detectedPose,
                 templatePose = selectedTemplate
             )
 
-            // Similarity Score
-            if (selectedTemplate != null) {
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .padding(top = 48.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Similarity: ${currentScore.toInt()}%",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = when {
-                            currentScore > 80f -> Color.Green
-                            currentScore > 50f -> Color.Yellow
-                            else -> Color.White
-                        }
+            // Top HUD: Similarity Score
+            PremiumTopHUD(currentScore, selectedTemplate != null)
+
+            // Center Countdown
+            PremiumCountdown(countdownValue)
+
+            // Bottom Controls Panel
+            PremiumBottomControls(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                templates = templates,
+                selectedTemplate = selectedTemplate,
+                selectedCategory = selectedCategory,
+                onCategorySelect = { viewModel.selectCategory(it) },
+                onTemplateSelect = { viewModel.selectTemplate(it) }
+            )
+            
+        } else {
+            PermissionRequestUI { launcher.launch(Manifest.permission.CAMERA) }
+        }
+    }
+}
+
+@Composable
+fun PremiumTopHUD(score: Float, isTemplateSelected: Boolean) {
+    AnimatedVisibility(
+        visible = isTemplateSelected,
+        enter = fadeIn() + slideInVertically(),
+        exit = fadeOut() + slideOutVertically(),
+        modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(top = 16.dp)
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color.Black.copy(alpha = 0.5f))
+                    .padding(horizontal = 24.dp, vertical = 8.dp)
+                    .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(24.dp))
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.Star,
+                        contentDescription = null,
+                        tint = if (score > 80f) Color.Cyan else Color.White,
+                        modifier = Modifier.size(18.dp)
                     )
-                    LinearProgressIndicator(
-                        progress = { currentScore / 100f },
-                        modifier = Modifier
-                            .width(200.dp)
-                            .padding(top = 8.dp),
-                        color = when {
-                            currentScore > 80f -> Color.Green
-                            currentScore > 50f -> Color.Yellow
-                            else -> Color.White
-                        },
-                        trackColor = Color.Gray.copy(alpha = 0.5f)
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "Match: ${score.toInt()}%",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        ),
+                        color = Color.White
                     )
                 }
             }
-
-            // Countdown Overlay
-            countdownValue?.let { count ->
+            
+            Spacer(Modifier.height(8.dp))
+            
+            // Minimalist Progress Bar
+            Box(
+                modifier = Modifier
+                    .width(120.dp)
+                    .height(4.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.2f))
+            ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.3f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = count.toString(),
-                        style = MaterialTheme.typography.displayLarge,
-                        color = Color.White,
-                        modifier = Modifier.padding(32.dp)
-                    )
-                }
+                        .fillMaxWidth(score / 100f)
+                        .fillMaxHeight()
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(Color.Cyan, Color(0xFFE91E63))
+                            )
+                        )
+                )
             }
+        }
+    }
+}
 
-            // UI Controls
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter)
-                    .padding(16.dp)
-            ) {
-                // Category Selector
+@Composable
+fun PremiumCountdown(count: Int?) {
+    AnimatedVisibility(
+        visible = count != null,
+        enter = scaleIn(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)) + fadeIn(),
+        exit = scaleOut() + fadeOut()
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = count?.toString() ?: "",
+                fontSize = 120.sp,
+                fontWeight = FontWeight.Black,
+                color = Color.White,
+                style = MaterialTheme.typography.displayLarge.copy(
+                    shadow = androidx.compose.ui.graphics.Shadow(
+                        color = Color.Black.copy(alpha = 0.5f),
+                        blurRadius = 20f
+                    )
+                )
+            )
+        }
+    }
+}
+
+@Composable
+fun PremiumBottomControls(
+    modifier: Modifier = Modifier,
+    templates: List<PoseTemplate>,
+    selectedTemplate: PoseTemplate?,
+    selectedCategory: String,
+    onCategorySelect: (String) -> Unit,
+    onTemplateSelect: (PoseTemplate) -> Unit
+) {
+    val categories = listOf("cool", "selfie", "travel", "gym")
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+    ) {
+        // Glassmorphism Template Row
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .clip(RoundedCornerShape(32.dp))
+                .background(Color.White.copy(alpha = 0.1f))
+                .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(32.dp))
+                .padding(vertical = 12.dp)
+        ) {
+            Column {
+                // Category Tabs (TikTok Style)
                 LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    contentPadding = PaddingValues(horizontal = 24.dp)
                 ) {
                     items(categories) { category ->
-                        FilterChip(
-                            selected = selectedCategory == category,
-                            onClick = { viewModel.selectCategory(category) },
-                            label = { Text(category.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }) }
+                        val isSelected = selectedCategory == category
+                        Text(
+                            text = category.uppercase(Locale.ROOT),
+                            color = if (isSelected) Color.White else Color.White.copy(alpha = 0.5f),
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                            fontSize = 12.sp,
+                            modifier = Modifier
+                                .padding(horizontal = 12.dp)
+                                .clickable { onCategorySelect(category) }
                         )
                     }
                 }
 
-                // Template Selector
+                // Horizontal Template List
                 LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(templates) { template ->
-                        Card(
-                            onClick = { viewModel.selectTemplate(template) },
-                            colors = CardDefaults.cardColors(
-                                containerColor = if (selectedTemplate?.id == template.id) 
-                                    MaterialTheme.colorScheme.primaryContainer 
-                                else 
-                                    MaterialTheme.colorScheme.surfaceVariant
-                            ),
-                            modifier = Modifier.size(100.dp, 120.dp)
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.padding(8.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(60.dp)
-                                        .padding(4.dp)
-                                ) {
-                                    // Placeholder for preview image
-                                    Text("📸", modifier = Modifier.align(Alignment.Center))
-                                }
-                                Text(
-                                    text = template.name,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    maxLines = 2
-                                )
-                            }
-                        }
+                        PremiumTemplateItem(
+                            template = template,
+                            isSelected = selectedTemplate?.id == template.id,
+                            onClick = { onTemplateSelect(template) }
+                        )
                     }
                 }
             }
-        } else {
-            Button(
-                onClick = {
-                    launcher.launch(Manifest.permission.CAMERA)
-                },
-                modifier = Modifier.align(Alignment.Center)
+        }
+
+        // Shutter & Actions Area
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp, top = 8.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Secondary button (e.g. Gallery)
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
             ) {
-                Text(text = "Request Camera Permission")
+                Text("🖼️", fontSize = 20.sp)
+            }
+
+            // Main Premium Shutter Button
+            Box(
+                modifier = Modifier
+                    .size(84.dp)
+                    .border(4.dp, Color.White, CircleShape)
+                    .padding(6.dp)
+                    .clip(CircleShape)
+                    .background(Color.White),
+                contentAlignment = Alignment.Center
+            ) {
+                // Inner ring or effect
+            }
+
+            // Flip Camera or similar
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("🔄", fontSize = 20.sp)
+            }
+        }
+    }
+}
+
+@Composable
+fun PremiumTemplateItem(
+    template: PoseTemplate,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.width(72.dp).clickable { onClick() }
+    ) {
+        Box(
+            modifier = Modifier
+                .size(72.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(if (isSelected) Color.White.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.1f))
+                .border(
+                    width = if (isSelected) 2.dp else 0.dp,
+                    color = if (isSelected) Color.Cyan else Color.Transparent,
+                    shape = RoundedCornerShape(16.dp)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("📸", fontSize = 32.sp)
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = template.name,
+            color = Color.White,
+            fontSize = 10.sp,
+            maxLines = 1,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+        )
+    }
+}
+
+@Composable
+fun PermissionRequestUI(onClick: () -> Unit) {
+    Box(modifier = Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text("Camera access is needed", color = Color.White)
+            Spacer(Modifier.height(16.dp))
+            Button(
+                onClick = onClick,
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Cyan)
+            ) {
+                Text("Grant Permission", color = Color.Black)
             }
         }
     }
