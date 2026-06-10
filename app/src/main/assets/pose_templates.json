@@ -1,0 +1,51 @@
+{
+  "templates": [
+    {
+      "id": "cool_1",
+      "name": "Cool Lean",
+      "category": "cool",
+      "previewImage": "cool_lean_preview",
+      "landmarks": [
+        {"type": 11, "x": 0.4, "y": 0.2},
+        {"type": 12, "x": 0.6, "y": 0.2},
+        {"type": 23, "x": 0.45, "y": 0.5},
+        {"type": 24, "x": 0.55, "y": 0.5}
+      ]
+    },
+    {
+      "id": "selfie_1",
+      "name": "Mirror Selfie",
+      "category": "selfie",
+      "previewImage": "mirror_selfie_preview",
+      "landmarks": [
+        {"type": 11, "x": 0.3, "y": 0.3},
+        {"type": 12, "x": 0.7, "y": 0.3},
+        {"type": 14, "x": 0.8, "y": 0.5},
+        {"type": 16, "x": 0.9, "y": 0.7}
+      ]
+    },
+    {
+      "id": "travel_1",
+      "name": "Mountain Pose",
+      "category": "travel",
+      "previewImage": "mountain_pose_preview",
+      "landmarks": [
+        {"type": 11, "x": 0.45, "y": 0.2},
+        {"type": 12, "x": 0.55, "y": 0.2},
+        {"type": 27, "x": 0.48, "y": 0.9},
+        {"type": 28, "x": 0.52, "y": 0.9}
+      ]
+    },
+    {
+      "id": "gym_1",
+      "name": "Bicep Flex",
+      "category": "gym",
+      "previewImage": "bicep_flex_preview",
+      "landmarks": [
+        {"type": 11, "x": 0.4, "y": 0.3},
+        {"type": 13, "x": 0.3, "y": 0.2},
+        {"type": 15, "x": 0.4, "y": 0.1}
+      ]
+    }
+  ]
+}

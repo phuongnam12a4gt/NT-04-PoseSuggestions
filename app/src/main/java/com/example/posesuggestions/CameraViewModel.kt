@@ -5,16 +5,49 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class CameraViewModel : ViewModel() {
+class CameraViewModel(application: android.app.Application) : AndroidViewModel(application) {
+    private val repository = PoseTemplateRepository(application)
+
     private val _detectedPose = MutableStateFlow<DetectedPose?>(null)
     val detectedPose = _detectedPose.asStateFlow()
+
+    private val _templates = MutableStateFlow<List<PoseTemplate>>(emptyList())
+    val templates = _templates.asStateFlow()
+
+    private val _selectedCategory = MutableStateFlow("cool")
+    val selectedCategory = _selectedCategory.asStateFlow()
+
+    private val _selectedTemplate = MutableStateFlow<PoseTemplate?>(null)
+    val selectedTemplate = _selectedTemplate.asStateFlow()
+
+    init {
+        loadTemplates()
+    }
+
+    private fun loadTemplates() {
+        viewModelScope.launch {
+            _templates.value = repository.getTemplatesByCategory(_selectedCategory.value)
+        }
+    }
+
+    fun selectCategory(category: String) {
+        _selectedCategory.value = category
+        _selectedTemplate.value = null
+        loadTemplates()
+    }
+
+    fun selectTemplate(template: PoseTemplate) {
+        _selectedTemplate.value = template
+    }
 
     private val poseProcessor = PoseProcessor()
     private val cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()

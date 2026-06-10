@@ -32,17 +32,21 @@ class CoordinateMapper(
 class PoseRenderer(
     private val mapper: CoordinateMapper,
 ) {
-    fun DrawScope.drawPose(pose: DetectedPose) {
+    fun DrawScope.drawPose(
+        pose: DetectedPose,
+        color: Color = Color.Cyan,
+        lineColor: Color = Color.White
+    ) {
         val landmarks = pose.landmarks.associateBy { it.type }
 
         // Draw Skeleton Lines
-        drawSkeletonConnections(landmarks)
+        drawSkeletonConnections(landmarks, lineColor)
 
         // Draw Landmark Points
         pose.landmarks.forEach { landmark ->
             if (landmark.inFrameLikelihood > 0.5f) {
                 drawCircle(
-                    color = Color.Cyan,
+                    color = color,
                     radius = 5.dp.toPx(),
                     center = mapper.mapOffset(landmark.x, landmark.y)
                 )
@@ -50,7 +54,10 @@ class PoseRenderer(
         }
     }
 
-    private fun DrawScope.drawSkeletonConnections(landmarks: Map<Int, PoseLandmarkData>) {
+    private fun DrawScope.drawSkeletonConnections(
+        landmarks: Map<Int, PoseLandmarkData>,
+        color: Color
+    ) {
         val connections = listOf(
             // Torso
             PoseLandmark.LEFT_SHOULDER to PoseLandmark.RIGHT_SHOULDER,
@@ -76,14 +83,18 @@ class PoseRenderer(
         )
 
         connections.forEach { (start, end) ->
-            drawConnection(landmarks[start], landmarks[end])
+            drawConnection(landmarks[start], landmarks[end], color)
         }
     }
 
-    private fun DrawScope.drawConnection(start: PoseLandmarkData?, end: PoseLandmarkData?) {
+    private fun DrawScope.drawConnection(
+        start: PoseLandmarkData?,
+        end: PoseLandmarkData?,
+        color: Color
+    ) {
         if (start != null && end != null && (start.inFrameLikelihood > 0.5f) && (end.inFrameLikelihood > 0.5f)) {
             drawLine(
-                color = Color.White,
+                color = color,
                 start = mapper.mapOffset(start.x, start.y),
                 end = mapper.mapOffset(end.x, end.y),
                 strokeWidth = 3.dp.toPx(),
@@ -95,20 +106,46 @@ class PoseRenderer(
 
 @Composable
 fun SkeletonOverlay(
-    detectedPose: DetectedPose?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    detectedPose: DetectedPose? = null,
+    templatePose: PoseTemplate? = null,
 ) {
     Canvas(modifier = modifier.fillMaxSize()) {
-        detectedPose?.let { pose ->
-            val mapper = CoordinateMapper(
-                imageWidth = pose.imageWidth,
-                imageHeight = pose.imageHeight,
+        val mapper = detectedPose?.let {
+            CoordinateMapper(
+                imageWidth = it.imageWidth,
+                imageHeight = it.imageHeight,
                 screenWidth = size.width,
                 screenHeight = size.height
             )
-            val renderer = PoseRenderer(mapper)
-            with(renderer) {
-                drawPose(pose)
+        } ?: templatePose?.let {
+            CoordinateMapper(
+                imageWidth = 1,
+                imageHeight = 1,
+                screenWidth = size.width,
+                screenHeight = size.height
+            )
+        }
+
+        mapper?.let { m ->
+            val renderer = PoseRenderer(m)
+            
+            // Draw Template (Ghost)
+            templatePose?.let { template ->
+                with(renderer) {
+                    drawPose(
+                        template.toDetectedPose(1, 1),
+                        color = Color.Gray.copy(alpha = 0.3f),
+                        lineColor = Color.LightGray.copy(alpha = 0.3f)
+                    )
+                }
+            }
+
+            // Draw Detected Pose
+            detectedPose?.let { pose ->
+                with(renderer) {
+                    drawPose(pose, color = Color.Cyan, lineColor = Color.White)
+                }
             }
         }
     }
