@@ -16,9 +16,13 @@ import java.util.concurrent.Executors
 
 class CameraViewModel(application: android.app.Application) : AndroidViewModel(application) {
     private val repository = PoseTemplateRepository(application)
+    private val similarityEngine = PoseSimilarityEngine()
 
     private val _detectedPose = MutableStateFlow<DetectedPose?>(null)
     val detectedPose = _detectedPose.asStateFlow()
+
+    private val _currentScore = MutableStateFlow(0f)
+    val currentScore = _currentScore.asStateFlow()
 
     private val _templates = MutableStateFlow<List<PoseTemplate>>(emptyList())
     val templates = _templates.asStateFlow()
@@ -74,7 +78,14 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
                 .build()
                 .also {
                     it.setAnalyzer(cameraExecutor, PoseAnalyzer(poseProcessor) { pose, width, height ->
-                        _detectedPose.value = pose.toDetectedPose(width, height)
+                        val detected = pose.toDetectedPose(width, height)
+                        _detectedPose.value = detected
+                        
+                        _selectedTemplate.value?.let { template ->
+                            _currentScore.value = similarityEngine.calculateSimilarity(detected, template)
+                        } ?: run {
+                            _currentScore.value = 0f
+                        }
                     })
                 }
 

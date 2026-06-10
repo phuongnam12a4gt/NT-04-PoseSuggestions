@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -39,6 +40,7 @@ fun CameraScreen(viewModel: CameraViewModel) {
     val templates by viewModel.templates.collectAsState()
     val selectedCategory by viewModel.selectedCategory.collectAsState()
     val selectedTemplate by viewModel.selectedTemplate.collectAsState()
+    val currentScore by viewModel.currentScore.collectAsState()
 
     val categories = listOf("cool", "selfie", "travel", "gym")
 
@@ -53,6 +55,38 @@ fun CameraScreen(viewModel: CameraViewModel) {
                 detectedPose = detectedPose,
                 templatePose = selectedTemplate
             )
+
+            // Similarity Score
+            if (selectedTemplate != null) {
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 48.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Similarity: ${currentScore.toInt()}%",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = when {
+                            currentScore > 80f -> Color.Green
+                            currentScore > 50f -> Color.Yellow
+                            else -> Color.White
+                        }
+                    )
+                    LinearProgressIndicator(
+                        progress = { currentScore / 100f },
+                        modifier = Modifier
+                            .width(200.dp)
+                            .padding(top = 8.dp),
+                        color = when {
+                            currentScore > 80f -> Color.Green
+                            currentScore > 50f -> Color.Yellow
+                            else -> Color.White
+                        },
+                        trackColor = Color.Gray.copy(alpha = 0.5f)
+                    )
+                }
+            }
 
             // UI Controls
             Column(
