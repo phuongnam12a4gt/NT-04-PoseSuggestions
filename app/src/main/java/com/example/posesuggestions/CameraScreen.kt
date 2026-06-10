@@ -42,7 +42,7 @@ fun CameraScreen(viewModel: CameraViewModel) {
                 viewModel = viewModel,
                 modifier = Modifier.fillMaxSize()
             )
-            PoseOverlay(
+            SkeletonOverlay(
                 detectedPose = detectedPose,
                 modifier = Modifier.fillMaxSize()
             )
