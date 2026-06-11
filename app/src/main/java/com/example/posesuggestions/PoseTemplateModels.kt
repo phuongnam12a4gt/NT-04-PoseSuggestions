@@ -16,7 +16,16 @@ data class PoseTemplate(
     val category: String,
     val previewImage: String, // Resource name or URL
     val difficulty: String, // "Easy", "Medium", "Hard"
-    val landmarks: List<LandmarkTemplate>
+    val landmarks: List<LandmarkTemplate>,
+    val recommendationMetadata: RecommendationMetadata? = null
+)
+
+@Serializable
+data class RecommendationMetadata(
+    val cameraAngle: String,
+    val bodyOrientation: String,
+    val handPlacement: String,
+    val tags: List<String> // moods, locations, outfit styles
 )
 
 @Serializable

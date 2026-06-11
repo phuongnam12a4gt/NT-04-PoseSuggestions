@@ -35,6 +35,9 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
     private val voiceGuideManager = VoiceGuideManager(application)
     private val poseCoach = PoseCoachEngine(voiceGuideManager, feedbackGenerator)
 
+    private val recommendationEngine = RecommendationEngine(repository)
+    private val promptBuilder = PromptBuilder()
+
     private val challengeEngine = ChallengeEngine { finalScore ->
         _selectedTemplate.value?.let { template ->
             scoreManager.saveHighScore(template.id, finalScore.toInt())
@@ -75,6 +78,12 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
 
     private val _recentTemplates = MutableStateFlow<List<PoseTemplate>>(emptyList())
     val recentTemplates = _recentTemplates.asStateFlow()
+
+    private val _recommendedPose = MutableStateFlow<PoseTemplate?>(null)
+    val recommendedPose = _recommendedPose.asStateFlow()
+
+    private val _recommendationText = MutableStateFlow<String?>(null)
+    val recommendationText = _recommendationText.asStateFlow()
 
     private val _captureThreshold = MutableStateFlow(85f)
     val captureThreshold = _captureThreshold.asStateFlow()
@@ -137,10 +146,24 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
 
     fun selectTemplate(template: PoseTemplate) {
         _selectedTemplate.value = template
+        _recommendedPose.value = null // Clear recommendation when manually selecting
+        _recommendationText.value = null
         repository.addToRecent(template.id)
         refreshUserData()
         cancelCountdown()
         challengeEngine.stop()
+    }
+
+    fun getRecommendations(input: RecommendationInput) {
+        viewModelScope.launch {
+            val recommendations = recommendationEngine.recommendPoses(input)
+            if (recommendations.isNotEmpty()) {
+                val best = recommendations.first()
+                _recommendedPose.value = best
+                _recommendationText.value = promptBuilder.buildRecommendationDescription(best, input)
+                selectTemplate(best)
+            }
+        }
     }
 
     fun startRandomChallenge() {

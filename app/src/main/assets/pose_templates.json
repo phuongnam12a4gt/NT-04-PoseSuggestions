@@ -11,7 +11,13 @@
         {"type": 12, "x": 0.6, "y": 0.2},
         {"type": 23, "x": 0.45, "y": 0.5},
         {"type": 24, "x": 0.55, "y": 0.5}
-      ]
+      ],
+      "recommendationMetadata": {
+        "cameraAngle": "Eye level",
+        "bodyOrientation": "Leaning against wall",
+        "handPlacement": "One hand in pocket",
+        "tags": ["street", "casual", "relaxed", "male", "female"]
+      }
     },
     {
       "id": "selfie_1",
@@ -24,7 +30,13 @@
         {"type": 12, "x": 0.7, "y": 0.3},
         {"type": 14, "x": 0.8, "y": 0.5},
         {"type": 16, "x": 0.9, "y": 0.7}
-      ]
+      ],
+      "recommendationMetadata": {
+        "cameraAngle": "Mirror reflected",
+        "bodyOrientation": "Slightly turned",
+        "handPlacement": "Holding phone at chest level",
+        "tags": ["indoor", "casual", "confident", "female", "male"]
+      }
     },
     {
       "id": "travel_1",
@@ -37,7 +49,13 @@
         {"type": 12, "x": 0.55, "y": 0.2},
         {"type": 27, "x": 0.48, "y": 0.9},
         {"type": 28, "x": 0.52, "y": 0.9}
-      ]
+      ],
+      "recommendationMetadata": {
+        "cameraAngle": "Low angle",
+        "bodyOrientation": "Facing camera, standing tall",
+        "handPlacement": "Relaxed at sides",
+        "tags": ["nature", "outdoor", "adventure", "serene", "male", "female"]
+      }
     },
     {
       "id": "gym_1",
@@ -49,7 +67,13 @@
         {"type": 11, "x": 0.4, "y": 0.3},
         {"type": 13, "x": 0.3, "y": 0.2},
         {"type": 15, "x": 0.4, "y": 0.1}
-      ]
+      ],
+      "recommendationMetadata": {
+        "cameraAngle": "Eye level",
+        "bodyOrientation": "Side profile",
+        "handPlacement": "Flexing arm up",
+        "tags": ["gym", "active", "energetic", "male", "female"]
+      }
     }
   ]
 }

@@ -55,8 +55,10 @@ fun CameraScreen(viewModel: CameraViewModel) {
     val ghostOpacity by viewModel.ghostOpacity.collectAsState()
     val challengeState by viewModel.challengeState.collectAsState()
     val challengeTimeLeft by viewModel.challengeTimeLeft.collectAsState()
+    val recommendationText by viewModel.recommendationText.collectAsState()
 
     var showMarketplace by remember { mutableStateOf(false) }
+    var showRecommendationDialog by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         if (hasCameraPermission) {
@@ -153,7 +155,8 @@ fun CameraScreen(viewModel: CameraViewModel) {
                 onCategorySelect = { viewModel.selectCategory(it) },
                 onTemplateSelect = { viewModel.selectTemplate(it) },
                 onExploreClick = { showMarketplace = true },
-                onChallengeClick = { viewModel.startRandomChallenge() }
+                onChallengeClick = { viewModel.startRandomChallenge() },
+                onRecommendClick = { showRecommendationDialog = true }
             )
 
             if (showMarketplace) {
@@ -161,6 +164,35 @@ fun CameraScreen(viewModel: CameraViewModel) {
                     viewModel = viewModel,
                     onDismiss = { showMarketplace = false }
                 )
+            }
+
+            if (showRecommendationDialog) {
+                RecommendationDialog(
+                    onDismiss = { showRecommendationDialog = false },
+                    onRecommend = { viewModel.getRecommendations(it) }
+                )
+            }
+
+            // AI Recommendation Tooltip
+            AnimatedVisibility(
+                visible = recommendationText != null,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically(),
+                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 280.dp).padding(horizontal = 24.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.Cyan.copy(alpha = 0.9f))
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        text = recommendationText ?: "",
+                        color = Color.Black,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
             
         } else {
@@ -265,7 +297,8 @@ fun PremiumBottomControls(
     onCategorySelect: (String) -> Unit,
     onTemplateSelect: (PoseTemplate) -> Unit,
     onExploreClick: () -> Unit,
-    onChallengeClick: () -> Unit
+    onChallengeClick: () -> Unit,
+    onRecommendClick: () -> Unit
 ) {
     val categories = listOf("All", "cool", "selfie", "travel", "gym")
 
@@ -274,21 +307,43 @@ fun PremiumBottomControls(
             .fillMaxWidth()
             .navigationBarsPadding()
     ) {
-        // Marketplace Entry Button
-        Box(
-            modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color.Cyan.copy(alpha = 0.2f))
-                .clickable { onExploreClick() }
-                .padding(12.dp),
-            contentAlignment = Alignment.Center
+        // AI & Marketplace Actions
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Star, contentDescription = null, tint = Color.Cyan, modifier = Modifier.size(16.dp))
-                Spacer(Modifier.width(8.dp))
-                Text("Explore Pose Marketplace", color = Color.Cyan, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+            // Marketplace Entry
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.White.copy(alpha = 0.1f))
+                    .clickable { onExploreClick() }
+                    .padding(12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Star, contentDescription = null, tint = Color.Cyan, modifier = Modifier.size(14.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Market", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                }
+            }
+
+            // AI Recommendation
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.Cyan.copy(alpha = 0.2f))
+                    .clickable { onRecommendClick() }
+                    .padding(12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Star, contentDescription = null, tint = Color.Cyan, modifier = Modifier.size(14.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("AI Suggest", color = Color.Cyan, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                }
             }
         }
         // Glassmorphism Template Row
