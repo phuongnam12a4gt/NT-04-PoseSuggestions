@@ -27,6 +27,8 @@ import java.util.concurrent.Executors
 class CameraViewModel(application: android.app.Application) : AndroidViewModel(application) {
     private val repository = PoseTemplateRepository(application)
     private val similarityEngine = PoseSimilarityEngine()
+    private val guidanceEngine = PoseGuidanceEngine()
+    private val ttsHelper = TTSHelper(application)
     private val shutterSound = MediaActionSound()
 
     private val _detectedPose = MutableStateFlow<DetectedPose?>(null)
@@ -34,6 +36,9 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
 
     private val _currentScore = MutableStateFlow(0f)
     val currentScore = _currentScore.asStateFlow()
+
+    private val _guidanceMessage = MutableStateFlow<String?>(null)
+    val guidanceMessage = _guidanceMessage.asStateFlow()
 
     private val _templates = MutableStateFlow<List<PoseTemplate>>(emptyList())
     val templates = _templates.asStateFlow()
@@ -119,9 +124,20 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
                         _selectedTemplate.value?.let { template ->
                             val score = similarityEngine.calculateSimilarity(detected, template)
                             _currentScore.value = score
+                            
+                            // Generate guidance
+                            val guidance = guidanceEngine.getGuidance(detected, template)
+                            if (guidance != null && score < 80f) {
+                                _guidanceMessage.value = guidance.message
+                                ttsHelper.speak(guidance.message)
+                            } else {
+                                _guidanceMessage.value = if (score >= 80f) "Hold still!" else null
+                            }
+                            
                             checkAutoCapture(score)
                         } ?: run {
                             _currentScore.value = 0f
+                            _guidanceMessage.value = null
                             cancelCountdown()
                         }
                     })
@@ -207,6 +223,7 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
         super.onCleared()
         poseProcessor.stop()
         shutterSound.release()
+        ttsHelper.shutdown()
         cameraExecutor.shutdown()
     }
 }

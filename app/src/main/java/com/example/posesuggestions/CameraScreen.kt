@@ -50,6 +50,7 @@ fun CameraScreen(viewModel: CameraViewModel) {
     val selectedCategory by viewModel.selectedCategory.collectAsState()
     val selectedTemplate by viewModel.selectedTemplate.collectAsState()
     val currentScore by viewModel.currentScore.collectAsState()
+    val guidanceMessage by viewModel.guidanceMessage.collectAsState()
     val countdownValue by viewModel.countdownValue.collectAsState()
     val ghostOpacity by viewModel.ghostOpacity.collectAsState()
 
@@ -72,6 +73,29 @@ fun CameraScreen(viewModel: CameraViewModel) {
 
             // Top HUD: Similarity Score
             PremiumTopHUD(currentScore, selectedTemplate != null)
+
+            // Guidance Message
+            AnimatedVisibility(
+                visible = guidanceMessage != null,
+                enter = fadeIn() + slideInVertically(),
+                exit = fadeOut() + slideOutVertically(),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 110.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.Black.copy(alpha = 0.6f))
+                        .padding(horizontal = 16.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text = guidanceMessage ?: "",
+                        color = Color.Cyan,
+                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium)
+                    )
+                }
+            }
 
             // Opacity Slider (Right side)
             if (selectedTemplate != null) {
