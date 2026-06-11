@@ -112,9 +112,10 @@ fun SkeletonOverlay(
     detectedPose: DetectedPose? = null,
     detectedPosePartner: DetectedPose? = null,
     templatePose: PoseTemplate? = null,
+    replayPose: DetectedPose? = null,
 ) {
     Canvas(modifier = modifier.fillMaxSize()) {
-        val activePose = detectedPose ?: templatePose?.toDetectedPose(1, 1)
+        val activePose = detectedPose ?: replayPose ?: templatePose?.toDetectedPose(1, 1)
         val mapper = activePose?.let {
             CoordinateMapper(it.imageWidth, it.imageHeight, size.width, size.height)
         }
@@ -123,26 +124,39 @@ fun SkeletonOverlay(
             val renderer = PoseRenderer(m)
             
             // Draw Templates (Ghost)
-            templatePose?.let { template ->
-                with(renderer) {
-                    // Person 1 Template
-                    drawPose(
-                        template.toDetectedPose(1, 1),
-                        pointColor = Color.Magenta.copy(alpha = 0.2f),
-                        lineBrush = Brush.linearGradient(
-                            listOf(Color.Blue.copy(alpha = 0.1f), Color.Magenta.copy(alpha = 0.1f))
-                        )
-                    )
-                    // Person 2 Template (if couple)
-                    template.toPartnerDetectedPose(1, 1)?.let { partnerTemplate ->
-                         drawPose(
-                            partnerTemplate,
-                            pointColor = Color.Yellow.copy(alpha = 0.2f),
+            if (replayPose == null) {
+                templatePose?.let { template ->
+                    with(renderer) {
+                        // Person 1 Template
+                        drawPose(
+                            template.toDetectedPose(1, 1),
+                            pointColor = Color.Magenta.copy(alpha = 0.2f),
                             lineBrush = Brush.linearGradient(
-                                listOf(Color.Green.copy(alpha = 0.1f), Color.Yellow.copy(alpha = 0.1f))
+                                listOf(Color.Blue.copy(alpha = 0.1f), Color.Magenta.copy(alpha = 0.1f))
                             )
                         )
+                        // Person 2 Template (if couple)
+                        template.toPartnerDetectedPose(1, 1)?.let { partnerTemplate ->
+                             drawPose(
+                                partnerTemplate,
+                                pointColor = Color.Yellow.copy(alpha = 0.2f),
+                                lineBrush = Brush.linearGradient(
+                                    listOf(Color.Green.copy(alpha = 0.1f), Color.Yellow.copy(alpha = 0.1f))
+                                )
+                            )
+                        }
                     }
+                }
+            }
+
+            // Draw Replay Pose
+            replayPose?.let { pose ->
+                with(renderer) {
+                    drawPose(
+                        pose,
+                        pointColor = Color.Yellow,
+                        lineBrush = Brush.linearGradient(listOf(Color.Yellow, Color.White))
+                    )
                 }
             }
 

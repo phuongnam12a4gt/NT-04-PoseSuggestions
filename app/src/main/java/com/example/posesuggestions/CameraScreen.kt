@@ -57,6 +57,10 @@ fun CameraScreen(viewModel: CameraViewModel) {
     val challengeState by viewModel.challengeState.collectAsState()
     val challengeTimeLeft by viewModel.challengeTimeLeft.collectAsState()
     val recommendationText by viewModel.recommendationText.collectAsState()
+    
+    val isRecordingPose by viewModel.isRecordingPose.collectAsState()
+    val replayFrame by viewModel.replayFrame.collectAsState()
+    val isReplaying by viewModel.isReplaying.collectAsState()
 
     var showMarketplace by remember { mutableStateOf(false) }
     var showRecommendationDialog by remember { mutableStateOf(false) }
@@ -69,7 +73,8 @@ fun CameraScreen(viewModel: CameraViewModel) {
                 modifier = Modifier.fillMaxSize(),
                 detectedPose = detectedPose,
                 detectedPosePartner = detectedPosePartner,
-                templatePose = selectedTemplate
+                templatePose = selectedTemplate,
+                replayPose = replayFrame
             )
 
             // Heatmap Error Visualization
@@ -89,6 +94,21 @@ fun CameraScreen(viewModel: CameraViewModel) {
 
             // Top HUD: Similarity Score
             PremiumTopHUD(currentScore, selectedTemplate != null)
+
+            // Replay HUD
+            if (isReplaying) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = 48.dp, end = 16.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(Color.Red.copy(alpha = 0.6f))
+                        .clickable { viewModel.stopReplay() }
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Text("STOP REPLAY", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                }
+            }
 
             // Challenge UI
             if (challengeState != ChallengeState.IDLE) {
@@ -158,7 +178,15 @@ fun CameraScreen(viewModel: CameraViewModel) {
                 onTemplateSelect = { viewModel.selectTemplate(it) },
                 onExploreClick = { showMarketplace = true },
                 onChallengeClick = { viewModel.startRandomChallenge() },
-                onRecommendClick = { showRecommendationDialog = true }
+                onRecommendClick = { showRecommendationDialog = true },
+                isRecording = isRecordingPose,
+                onRecordToggle = {
+                    if (isRecordingPose) {
+                        viewModel.stopRecording("Pose_${System.currentTimeMillis()}")
+                    } else {
+                        viewModel.startRecording()
+                    }
+                }
             )
 
             if (showMarketplace) {
@@ -300,7 +328,9 @@ fun PremiumBottomControls(
     onTemplateSelect: (PoseTemplate) -> Unit,
     onExploreClick: () -> Unit,
     onChallengeClick: () -> Unit,
-    onRecommendClick: () -> Unit
+    onRecommendClick: () -> Unit,
+    isRecording: Boolean,
+    onRecordToggle: () -> Unit
 ) {
     val categories = listOf("All", "cool", "selfie", "travel", "gym")
 
@@ -433,10 +463,11 @@ fun PremiumBottomControls(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.15f)),
+                    .background(if (isRecording) Color.Red.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.15f))
+                    .clickable { onRecordToggle() },
                 contentAlignment = Alignment.Center
             ) {
-                Text("🔄", fontSize = 20.sp)
+                Text(if (isRecording) "⏹️" else "⏺️", fontSize = 20.sp)
             }
         }
     }

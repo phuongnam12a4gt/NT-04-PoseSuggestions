@@ -31,6 +31,10 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
     val errorAnalysisEngine = ErrorAnalysisEngine()
     private val scoreManager = ScoreManager(application)
     
+    private val recordingRepository = PoseRecordingRepository(application)
+    private val poseRecorder = PoseRecorder()
+    private val replayEngine = ReplayEngine()
+
     private val feedbackGenerator = FeedbackGenerator()
     private val voiceGuideManager = VoiceGuideManager(application)
     private val poseCoach = PoseCoachEngine(voiceGuideManager, feedbackGenerator)
@@ -95,6 +99,15 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
     private val _countdownValue = MutableStateFlow<Int?>(null)
     val countdownValue = _countdownValue.asStateFlow()
 
+    private val _isRecordingPose = MutableStateFlow(false)
+    val isRecordingPose = _isRecordingPose.asStateFlow()
+
+    private val _recordedPoses = MutableStateFlow<List<PoseRecording>>(emptyList())
+    val recordedPoses = _recordedPoses.asStateFlow()
+
+    val replayFrame = replayEngine.currentFrame
+    val isReplaying = replayEngine.isPlaying
+
     private val _ghostOpacity = MutableStateFlow(0.5f)
     val ghostOpacity = _ghostOpacity.asStateFlow()
 
@@ -108,7 +121,36 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
     init {
         loadTemplates()
         refreshUserData()
+        loadRecordings()
         shutterSound.load(MediaActionSound.SHUTTER_CLICK)
+    }
+
+    private fun loadRecordings() {
+        viewModelScope.launch {
+            _recordedPoses.value = recordingRepository.loadRecordings()
+        }
+    }
+
+    fun startRecording() {
+        _isRecordingPose.value = true
+        poseRecorder.start()
+    }
+
+    fun stopRecording(name: String) {
+        _isRecordingPose.value = false
+        val recording = poseRecorder.stop(name, _selectedTemplate.value?.id)
+        if (recording != null) {
+            recordingRepository.saveRecording(recording)
+            loadRecordings()
+        }
+    }
+
+    fun playRecording(recording: PoseRecording, width: Int, height: Int) {
+        replayEngine.play(recording, width, height)
+    }
+
+    fun stopReplay() {
+        replayEngine.stop()
     }
 
     private fun loadTemplates() {
@@ -221,6 +263,9 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
                         
                         _detectedPose.value = p1
                         _detectedPosePartner.value = p2
+                        
+                        // Record frame if active
+                        p1?.let { poseRecorder.recordFrame(it) }
                         
                         _selectedTemplate.value?.let { template ->
                             val score = if (template.isCouple && p1 != null && p2 != null) {

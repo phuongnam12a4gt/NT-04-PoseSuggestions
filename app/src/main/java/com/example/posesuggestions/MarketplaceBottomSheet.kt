@@ -33,6 +33,7 @@ fun MarketplaceBottomSheet(
     val searchQuery by viewModel.searchQuery.collectAsState()
     val selectedCategory by viewModel.selectedCategory.collectAsState()
     val selectedDifficulty by viewModel.selectedDifficulty.collectAsState()
+    val recordedPoses by viewModel.recordedPoses.collectAsState()
 
     val categories = listOf("All", "cool", "selfie", "travel", "gym")
     val difficulties = listOf("All", "Easy", "Medium", "Hard")
@@ -99,6 +100,29 @@ fun MarketplaceBottomSheet(
             }
 
             LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                // My Recordings
+                if (recordedPoses.isNotEmpty()) {
+                    item {
+                        Text("My Recordings", color = Color.Gray, style = MaterialTheme.typography.labelLarge)
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 8.dp)) {
+                            items(recordedPoses) { recording ->
+                                Card(
+                                    modifier = Modifier.size(120.dp, 80.dp).clickable { 
+                                        viewModel.playRecording(recording, 1000, 1000) // Default dimensions for replay
+                                        onDismiss() 
+                                    },
+                                    colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.1f))
+                                ) {
+                                    Column(Modifier.padding(8.dp), verticalArrangement = Arrangement.Center) {
+                                        Text(recording.name, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+                                        Text("${recording.frames.size} frames", color = Color.Gray, fontSize = 10.sp)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 // Recently Used
                 if (recentTemplates.isNotEmpty()) {
                     item {
