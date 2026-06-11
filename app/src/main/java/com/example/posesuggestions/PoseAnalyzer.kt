@@ -9,7 +9,7 @@ import com.google.mlkit.vision.pose.Pose
 
 class PoseAnalyzer(
     private val processor: PoseProcessor,
-    private val onPoseDetected: (Pose, Int, Int) -> Unit
+    private val onPosesDetected: (List<Pose>, Int, Int) -> Unit
 ) : ImageAnalysis.Analyzer {
 
     @OptIn(ExperimentalGetImage::class)
@@ -23,7 +23,10 @@ class PoseAnalyzer(
             val image = InputImage.fromMediaImage(mediaImage, rotation)
             processor.processImage(image)
                 .addOnSuccessListener { pose ->
-                    onPoseDetected(pose, width, height)
+                    // Currently ML Kit Pose Detection returns a single Pose object.
+                    // We wrap it in a list to support future multi-person updates
+                    // or different models that return multiple poses.
+                    onPosesDetected(listOf(pose), width, height)
                 }
                 .addOnCompleteListener {
                     imageProxy.close()

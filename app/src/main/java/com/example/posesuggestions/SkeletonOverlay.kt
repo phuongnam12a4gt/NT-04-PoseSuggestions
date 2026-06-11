@@ -110,21 +110,22 @@ class PoseRenderer(
 fun SkeletonOverlay(
     modifier: Modifier = Modifier,
     detectedPose: DetectedPose? = null,
+    detectedPosePartner: DetectedPose? = null,
     templatePose: PoseTemplate? = null,
 ) {
     Canvas(modifier = modifier.fillMaxSize()) {
-        val mapper = detectedPose?.let {
+        val activePose = detectedPose ?: templatePose?.toDetectedPose(1, 1)
+        val mapper = activePose?.let {
             CoordinateMapper(it.imageWidth, it.imageHeight, size.width, size.height)
-        } ?: templatePose?.let {
-            CoordinateMapper(1, 1, size.width, size.height)
         }
 
         mapper?.let { m ->
             val renderer = PoseRenderer(m)
             
-            // Draw Template (Ghost - Subtle Purple/Blue Gradient)
+            // Draw Templates (Ghost)
             templatePose?.let { template ->
                 with(renderer) {
+                    // Person 1 Template
                     drawPose(
                         template.toDetectedPose(1, 1),
                         pointColor = Color.Magenta.copy(alpha = 0.2f),
@@ -132,18 +133,33 @@ fun SkeletonOverlay(
                             listOf(Color.Blue.copy(alpha = 0.1f), Color.Magenta.copy(alpha = 0.1f))
                         )
                     )
+                    // Person 2 Template (if couple)
+                    template.toPartnerDetectedPose(1, 1)?.let { partnerTemplate ->
+                         drawPose(
+                            partnerTemplate,
+                            pointColor = Color.Yellow.copy(alpha = 0.2f),
+                            lineBrush = Brush.linearGradient(
+                                listOf(Color.Green.copy(alpha = 0.1f), Color.Yellow.copy(alpha = 0.1f))
+                            )
+                        )
+                    }
                 }
             }
 
-            // Draw Detected Pose (Vibrant Cyan/Pink Gradient)
-            detectedPose?.let { pose ->
-                with(renderer) {
+            // Draw Detected Poses
+            with(renderer) {
+                detectedPose?.let { pose ->
                     drawPose(
                         pose,
                         pointColor = Color.Cyan,
-                        lineBrush = Brush.linearGradient(
-                            listOf(Color.Cyan, Color(0xFFE91E63))
-                        )
+                        lineBrush = Brush.linearGradient(listOf(Color.Cyan, Color(0xFFE91E63)))
+                    )
+                }
+                detectedPosePartner?.let { pose ->
+                    drawPose(
+                        pose,
+                        pointColor = Color.Green,
+                        lineBrush = Brush.linearGradient(listOf(Color.Green, Color.Yellow))
                     )
                 }
             }

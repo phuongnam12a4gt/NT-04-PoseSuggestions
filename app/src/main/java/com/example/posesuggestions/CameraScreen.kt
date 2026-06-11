@@ -46,6 +46,7 @@ fun CameraScreen(viewModel: CameraViewModel) {
     )
 
     val detectedPose by viewModel.detectedPose.collectAsState()
+    val detectedPosePartner by viewModel.detectedPosePartner.collectAsState()
     val templates by viewModel.templates.collectAsState()
     val selectedCategory by viewModel.selectedCategory.collectAsState()
     val selectedTemplate by viewModel.selectedTemplate.collectAsState()
@@ -67,6 +68,7 @@ fun CameraScreen(viewModel: CameraViewModel) {
             SkeletonOverlay(
                 modifier = Modifier.fillMaxSize(),
                 detectedPose = detectedPose,
+                detectedPosePartner = detectedPosePartner,
                 templatePose = selectedTemplate
             )
 

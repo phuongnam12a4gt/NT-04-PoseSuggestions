@@ -34,6 +34,7 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
     private val feedbackGenerator = FeedbackGenerator()
     private val voiceGuideManager = VoiceGuideManager(application)
     private val poseCoach = PoseCoachEngine(voiceGuideManager, feedbackGenerator)
+    private val couplePoseEngine = CouplePoseEngine(similarityEngine)
 
     private val recommendationEngine = RecommendationEngine(repository)
     private val promptBuilder = PromptBuilder()
@@ -48,6 +49,9 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
 
     private val _detectedPose = MutableStateFlow<DetectedPose?>(null)
     val detectedPose = _detectedPose.asStateFlow()
+
+    private val _detectedPosePartner = MutableStateFlow<DetectedPose?>(null)
+    val detectedPosePartner = _detectedPosePartner.asStateFlow()
 
     private val _currentScore = MutableStateFlow(0f)
     val currentScore = _currentScore.asStateFlow()
@@ -208,17 +212,29 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
                 .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
                 .build()
                 .also {
-                    it.setAnalyzer(cameraExecutor, PoseAnalyzer(poseProcessor) { pose, width, height ->
-                        val detected = pose.toDetectedPose(width, height)
-                        _detectedPose.value = detected
+                    it.setAnalyzer(cameraExecutor, PoseAnalyzer(poseProcessor) { poses, width, height ->
+                        val detectedList = poses.map { it.toDetectedPose(width, height) }
+                        
+                        // Assign detected poses to person 1 and person 2
+                        val p1 = detectedList.getOrNull(0)
+                        val p2 = detectedList.getOrNull(1)
+                        
+                        _detectedPose.value = p1
+                        _detectedPosePartner.value = p2
                         
                         _selectedTemplate.value?.let { template ->
-                            val score = similarityEngine.calculateSimilarity(detected, template)
+                            val score = if (template.isCouple && p1 != null && p2 != null) {
+                                val coupleScore = couplePoseEngine.calculateCoupleScore(p1, p2, template)
+                                // Combine into a display score
+                                coupleScore.totalScore
+                            } else if (p1 != null) {
+                                similarityEngine.calculateSimilarity(p1, template)
+                            } else 0f
+
                             _currentScore.value = score
                             
-                            challengeEngine.updateCurrentScore(score)
-                            
-                            val guidance = guidanceEngine.getGuidance(detected, template)
+                            // Coaching & Capture logic
+                            val guidance = p1?.let { guidanceEngine.getGuidance(it, template) }
                             _guidanceMessage.value = guidance?.message
                             
                             if (score < 80f) {
@@ -228,6 +244,7 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
                                 voiceGuideManager.speak("Hold still!")
                             }
                             
+                            challengeEngine.updateCurrentScore(score)
                             checkAutoCapture(score)
                         } ?: run {
                             _currentScore.value = 0f

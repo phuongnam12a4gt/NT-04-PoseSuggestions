@@ -17,8 +17,27 @@ data class PoseTemplate(
     val previewImage: String, // Resource name or URL
     val difficulty: String, // "Easy", "Medium", "Hard"
     val landmarks: List<LandmarkTemplate>,
+    val landmarksPartner: List<LandmarkTemplate>? = null, // For couple poses
     val recommendationMetadata: RecommendationMetadata? = null
-)
+) {
+    val isCouple: Boolean get() = landmarksPartner != null
+}
+
+fun PoseTemplate.toPartnerDetectedPose(width: Int, height: Int): DetectedPose? {
+    val partnerLandmarks = landmarksPartner ?: return null
+    return DetectedPose(
+        landmarks = partnerLandmarks.map {
+            PoseLandmarkData(
+                type = it.type,
+                x = it.x * width,
+                y = it.y * height,
+                inFrameLikelihood = 1.0f
+            )
+        },
+        imageWidth = width,
+        imageHeight = height
+    )
+}
 
 @Serializable
 data class RecommendationMetadata(
