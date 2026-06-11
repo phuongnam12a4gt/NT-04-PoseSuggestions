@@ -33,7 +33,7 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
     private val feedbackGenerator = FeedbackGenerator()
     private val voiceGuideManager = VoiceGuideManager(application)
     private val poseCoach = PoseCoachEngine(voiceGuideManager, feedbackGenerator)
-
+    
     private val shutterSound = MediaActionSound()
 
     private val _detectedPose = MutableStateFlow<DetectedPose?>(null)
@@ -48,11 +48,23 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
     private val _templates = MutableStateFlow<List<PoseTemplate>>(emptyList())
     val templates = _templates.asStateFlow()
 
-    private val _selectedCategory = MutableStateFlow("cool")
+    private val _selectedCategory = MutableStateFlow("All")
     val selectedCategory = _selectedCategory.asStateFlow()
 
     private val _selectedTemplate = MutableStateFlow<PoseTemplate?>(null)
     val selectedTemplate = _selectedTemplate.asStateFlow()
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery = _searchQuery.asStateFlow()
+
+    private val _selectedDifficulty = MutableStateFlow("All")
+    val selectedDifficulty = _selectedDifficulty.asStateFlow()
+
+    private val _favorites = MutableStateFlow<Set<String>>(emptySet())
+    val favorites = _favorites.asStateFlow()
+
+    private val _recentTemplates = MutableStateFlow<List<PoseTemplate>>(emptyList())
+    val recentTemplates = _recentTemplates.asStateFlow()
 
     private val _captureThreshold = MutableStateFlow(85f)
     val captureThreshold = _captureThreshold.asStateFlow()
@@ -63,10 +75,6 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
     private val _ghostOpacity = MutableStateFlow(0.5f)
     val ghostOpacity = _ghostOpacity.asStateFlow()
 
-    fun setGhostOpacity(opacity: Float) {
-        _ghostOpacity.value = opacity
-    }
-
     private var isCapturing = false
     private var countdownJob: Job? = null
     private var imageCapture: ImageCapture? = null
@@ -76,25 +84,56 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
 
     init {
         loadTemplates()
+        refreshUserData()
         shutterSound.load(MediaActionSound.SHUTTER_CLICK)
     }
 
     private fun loadTemplates() {
         viewModelScope.launch {
-            _templates.value = repository.getTemplatesByCategory(_selectedCategory.value)
+            _templates.value = repository.getTemplates(
+                query = _searchQuery.value,
+                category = _selectedCategory.value,
+                difficulty = _selectedDifficulty.value
+            )
         }
+    }
+
+    private fun refreshUserData() {
+        _favorites.value = repository.getFavorites()
+        val recentIds = repository.getRecent()
+        val allTemplates = repository.loadTemplates()
+        _recentTemplates.value = recentIds.mapNotNull { id -> allTemplates.find { it.id == id } }
     }
 
     fun selectCategory(category: String) {
         _selectedCategory.value = category
-        _selectedTemplate.value = null
-        cancelCountdown()
         loadTemplates()
+    }
+
+    fun setSearchQuery(query: String) {
+        _searchQuery.value = query
+        loadTemplates()
+    }
+
+    fun selectDifficulty(difficulty: String) {
+        _selectedDifficulty.value = difficulty
+        loadTemplates()
+    }
+
+    fun toggleFavorite(templateId: String) {
+        repository.toggleFavorite(templateId)
+        refreshUserData()
     }
 
     fun selectTemplate(template: PoseTemplate) {
         _selectedTemplate.value = template
+        repository.addToRecent(template.id)
+        refreshUserData()
         cancelCountdown()
+    }
+
+    fun setGhostOpacity(opacity: Float) {
+        _ghostOpacity.value = opacity
     }
 
     fun bindCamera(
@@ -130,7 +169,6 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
                             val score = similarityEngine.calculateSimilarity(detected, template)
                             _currentScore.value = score
                             
-                            // Generate guidance and coaching
                             val guidance = guidanceEngine.getGuidance(detected, template)
                             _guidanceMessage.value = guidance?.message
                             
@@ -171,7 +209,6 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
         if (score >= _captureThreshold.value && !isCapturing && countdownJob == null) {
             startCountdown()
         } else if (score < _captureThreshold.value - 5f && countdownJob != null) {
-            // Add a small buffer to prevent flickering
             cancelCountdown()
         }
     }
@@ -214,7 +251,7 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                     Toast.makeText(getApplication(), "Pose Captured!", Toast.LENGTH_SHORT).show()
                     viewModelScope.launch {
-                        delay(2000) // Cooldown before next capture
+                        delay(2000)
                         isCapturing = false
                     }
                 }

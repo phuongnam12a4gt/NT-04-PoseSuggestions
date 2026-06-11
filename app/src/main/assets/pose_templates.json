@@ -4,6 +4,7 @@
       "id": "cool_1",
       "name": "Cool Lean",
       "category": "cool",
+      "difficulty": "Easy",
       "previewImage": "cool_lean_preview",
       "landmarks": [
         {"type": 11, "x": 0.4, "y": 0.2},
@@ -16,6 +17,7 @@
       "id": "selfie_1",
       "name": "Mirror Selfie",
       "category": "selfie",
+      "difficulty": "Easy",
       "previewImage": "mirror_selfie_preview",
       "landmarks": [
         {"type": 11, "x": 0.3, "y": 0.3},
@@ -28,6 +30,7 @@
       "id": "travel_1",
       "name": "Mountain Pose",
       "category": "travel",
+      "difficulty": "Medium",
       "previewImage": "mountain_pose_preview",
       "landmarks": [
         {"type": 11, "x": 0.45, "y": 0.2},
@@ -40,6 +43,7 @@
       "id": "gym_1",
       "name": "Bicep Flex",
       "category": "gym",
+      "difficulty": "Hard",
       "previewImage": "bicep_flex_preview",
       "landmarks": [
         {"type": 11, "x": 0.4, "y": 0.3},

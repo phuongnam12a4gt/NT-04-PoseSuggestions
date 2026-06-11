@@ -54,6 +54,8 @@ fun CameraScreen(viewModel: CameraViewModel) {
     val countdownValue by viewModel.countdownValue.collectAsState()
     val ghostOpacity by viewModel.ghostOpacity.collectAsState()
 
+    var showMarketplace by remember { mutableStateOf(false) }
+
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         if (hasCameraPermission) {
             CameraPreview(viewModel = viewModel, modifier = Modifier.fillMaxSize())
@@ -142,8 +144,16 @@ fun CameraScreen(viewModel: CameraViewModel) {
                 selectedTemplate = selectedTemplate,
                 selectedCategory = selectedCategory,
                 onCategorySelect = { viewModel.selectCategory(it) },
-                onTemplateSelect = { viewModel.selectTemplate(it) }
+                onTemplateSelect = { viewModel.selectTemplate(it) },
+                onExploreClick = { showMarketplace = true }
             )
+
+            if (showMarketplace) {
+                MarketplaceBottomSheet(
+                    viewModel = viewModel,
+                    onDismiss = { showMarketplace = false }
+                )
+            }
             
         } else {
             PermissionRequestUI { launcher.launch(Manifest.permission.CAMERA) }
@@ -245,15 +255,33 @@ fun PremiumBottomControls(
     selectedTemplate: PoseTemplate?,
     selectedCategory: String,
     onCategorySelect: (String) -> Unit,
-    onTemplateSelect: (PoseTemplate) -> Unit
+    onTemplateSelect: (PoseTemplate) -> Unit,
+    onExploreClick: () -> Unit
 ) {
-    val categories = listOf("cool", "selfie", "travel", "gym")
+    val categories = listOf("All", "cool", "selfie", "travel", "gym")
 
     Column(
         modifier = modifier
             .fillMaxWidth()
             .navigationBarsPadding()
     ) {
+        // Marketplace Entry Button
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color.Cyan.copy(alpha = 0.2f))
+                .clickable { onExploreClick() }
+                .padding(12.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.Star, contentDescription = null, tint = Color.Cyan, modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Explore Pose Marketplace", color = Color.Cyan, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+            }
+        }
         // Glassmorphism Template Row
         Box(
             modifier = Modifier

@@ -15,6 +15,7 @@ data class PoseTemplate(
     val name: String,
     val category: String,
     val previewImage: String, // Resource name or URL
+    val difficulty: String, // "Easy", "Medium", "Hard"
     val landmarks: List<LandmarkTemplate>
 )
 
