@@ -28,6 +28,7 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
     private val repository = PoseTemplateRepository(application)
     private val similarityEngine = PoseSimilarityEngine()
     private val guidanceEngine = PoseGuidanceEngine()
+    val errorAnalysisEngine = ErrorAnalysisEngine()
     private val ttsHelper = TTSHelper(application)
     private val shutterSound = MediaActionSound()
 

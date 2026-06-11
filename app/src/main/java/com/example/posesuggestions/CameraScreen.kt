@@ -64,6 +64,14 @@ fun CameraScreen(viewModel: CameraViewModel) {
                 templatePose = selectedTemplate
             )
 
+            // Heatmap Error Visualization
+            PoseHeatmapOverlay(
+                detectedPose = detectedPose,
+                template = selectedTemplate,
+                errorAnalysisEngine = viewModel.errorAnalysisEngine,
+                modifier = Modifier.fillMaxSize()
+            )
+
             // Ghost Image Overlay (Scale & Drag)
             GhostOverlay(
                 template = selectedTemplate,
