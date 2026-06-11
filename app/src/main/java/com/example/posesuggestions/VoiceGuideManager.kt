@@ -4,11 +4,13 @@ import android.content.Context
 import android.speech.tts.TextToSpeech
 import java.util.Locale
 
-class TTSHelper(context: Context) : TextToSpeech.OnInitListener {
+class VoiceGuideManager(context: Context) : TextToSpeech.OnInitListener {
     private var tts: TextToSpeech? = TextToSpeech(context, this)
     private var isReady = false
+    
     private var lastSpokenText: String? = null
     private var lastSpokenTime: Long = 0
+    private val MIN_GAP_MILLIS = 3500L // Don't speak too often
 
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
@@ -17,18 +19,22 @@ class TTSHelper(context: Context) : TextToSpeech.OnInitListener {
         }
     }
 
-    fun speak(text: String) {
+    fun speak(text: String, force: Boolean = false) {
         val currentTime = System.currentTimeMillis()
-        // Prevent repetitive feedback within 3 seconds for the same text
-        if (isReady && (text != lastSpokenText || currentTime - lastSpokenTime > 3000)) {
+        
+        // Check for repetitiveness and frequency
+        if (isReady && (force || text != lastSpokenText || currentTime - lastSpokenTime > MIN_GAP_MILLIS)) {
             tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
             lastSpokenText = text
             lastSpokenTime = currentTime
         }
     }
 
-    fun shutdown() {
+    fun stop() {
         tts?.stop()
+    }
+
+    fun shutdown() {
         tts?.shutdown()
     }
 }

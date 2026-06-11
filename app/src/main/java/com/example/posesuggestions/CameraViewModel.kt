@@ -29,7 +29,11 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
     private val similarityEngine = PoseSimilarityEngine()
     private val guidanceEngine = PoseGuidanceEngine()
     val errorAnalysisEngine = ErrorAnalysisEngine()
-    private val ttsHelper = TTSHelper(application)
+    
+    private val feedbackGenerator = FeedbackGenerator()
+    private val voiceGuideManager = VoiceGuideManager(application)
+    private val poseCoach = PoseCoachEngine(voiceGuideManager, feedbackGenerator)
+
     private val shutterSound = MediaActionSound()
 
     private val _detectedPose = MutableStateFlow<DetectedPose?>(null)
@@ -126,13 +130,15 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
                             val score = similarityEngine.calculateSimilarity(detected, template)
                             _currentScore.value = score
                             
-                            // Generate guidance
+                            // Generate guidance and coaching
                             val guidance = guidanceEngine.getGuidance(detected, template)
-                            if (guidance != null && score < 80f) {
-                                _guidanceMessage.value = guidance.message
-                                ttsHelper.speak(guidance.message)
+                            _guidanceMessage.value = guidance?.message
+                            
+                            if (score < 80f) {
+                                poseCoach.provideCoaching(score, guidance)
                             } else {
-                                _guidanceMessage.value = if (score >= 80f) "Hold still!" else null
+                                _guidanceMessage.value = "Hold still!"
+                                voiceGuideManager.speak("Hold still!")
                             }
                             
                             checkAutoCapture(score)
@@ -224,7 +230,7 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
         super.onCleared()
         poseProcessor.stop()
         shutterSound.release()
-        ttsHelper.shutdown()
+        voiceGuideManager.shutdown()
         cameraExecutor.shutdown()
     }
 }
