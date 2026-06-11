@@ -29,10 +29,17 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
     private val similarityEngine = PoseSimilarityEngine()
     private val guidanceEngine = PoseGuidanceEngine()
     val errorAnalysisEngine = ErrorAnalysisEngine()
+    private val scoreManager = ScoreManager(application)
     
     private val feedbackGenerator = FeedbackGenerator()
     private val voiceGuideManager = VoiceGuideManager(application)
     private val poseCoach = PoseCoachEngine(voiceGuideManager, feedbackGenerator)
+
+    private val challengeEngine = ChallengeEngine { finalScore ->
+        _selectedTemplate.value?.let { template ->
+            scoreManager.saveHighScore(template.id, finalScore.toInt())
+        }
+    }
     
     private val shutterSound = MediaActionSound()
 
@@ -53,6 +60,9 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
 
     private val _selectedTemplate = MutableStateFlow<PoseTemplate?>(null)
     val selectedTemplate = _selectedTemplate.asStateFlow()
+
+    val challengeState = challengeEngine.state
+    val challengeTimeLeft = challengeEngine.timeLeft
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery = _searchQuery.asStateFlow()
@@ -130,6 +140,20 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
         repository.addToRecent(template.id)
         refreshUserData()
         cancelCountdown()
+        challengeEngine.stop()
+    }
+
+    fun startRandomChallenge() {
+        val all = repository.loadTemplates()
+        if (all.isNotEmpty()) {
+            val randomPose = all.random()
+            selectTemplate(randomPose)
+            challengeEngine.startChallenge()
+        }
+    }
+
+    fun getHighScore(poseId: String): Int {
+        return scoreManager.getHighScore(poseId)
     }
 
     fun setGhostOpacity(opacity: Float) {
@@ -168,6 +192,8 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
                         _selectedTemplate.value?.let { template ->
                             val score = similarityEngine.calculateSimilarity(detected, template)
                             _currentScore.value = score
+                            
+                            challengeEngine.updateCurrentScore(score)
                             
                             val guidance = guidanceEngine.getGuidance(detected, template)
                             _guidanceMessage.value = guidance?.message

@@ -53,6 +53,8 @@ fun CameraScreen(viewModel: CameraViewModel) {
     val guidanceMessage by viewModel.guidanceMessage.collectAsState()
     val countdownValue by viewModel.countdownValue.collectAsState()
     val ghostOpacity by viewModel.ghostOpacity.collectAsState()
+    val challengeState by viewModel.challengeState.collectAsState()
+    val challengeTimeLeft by viewModel.challengeTimeLeft.collectAsState()
 
     var showMarketplace by remember { mutableStateOf(false) }
 
@@ -83,6 +85,11 @@ fun CameraScreen(viewModel: CameraViewModel) {
 
             // Top HUD: Similarity Score
             PremiumTopHUD(currentScore, selectedTemplate != null)
+
+            // Challenge UI
+            if (challengeState != ChallengeState.IDLE) {
+                ChallengeOverlay(challengeState, challengeTimeLeft, currentScore)
+            }
 
             // Guidance Message
             AnimatedVisibility(
@@ -145,7 +152,8 @@ fun CameraScreen(viewModel: CameraViewModel) {
                 selectedCategory = selectedCategory,
                 onCategorySelect = { viewModel.selectCategory(it) },
                 onTemplateSelect = { viewModel.selectTemplate(it) },
-                onExploreClick = { showMarketplace = true }
+                onExploreClick = { showMarketplace = true },
+                onChallengeClick = { viewModel.startRandomChallenge() }
             )
 
             if (showMarketplace) {
@@ -256,7 +264,8 @@ fun PremiumBottomControls(
     selectedCategory: String,
     onCategorySelect: (String) -> Unit,
     onTemplateSelect: (PoseTemplate) -> Unit,
-    onExploreClick: () -> Unit
+    onExploreClick: () -> Unit,
+    onChallengeClick: () -> Unit
 ) {
     val categories = listOf("All", "cool", "selfie", "travel", "gym")
 
@@ -342,10 +351,11 @@ fun PremiumBottomControls(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.15f)),
+                    .background(Color.White.copy(alpha = 0.15f))
+                    .clickable { onChallengeClick() },
                 contentAlignment = Alignment.Center
             ) {
-                Text("🖼️", fontSize = 20.sp)
+                Icon(Icons.Default.Star, contentDescription = "Challenge", tint = Color.Yellow)
             }
 
             // Main Premium Shutter Button
@@ -407,6 +417,64 @@ fun PremiumTemplateItem(
             maxLines = 1,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
         )
+    }
+}
+
+@Composable
+fun ChallengeOverlay(state: ChallengeState, timeLeft: Int, score: Float) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(if (state == ChallengeState.COUNTDOWN) Color.Black.copy(alpha = 0.5f) else Color.Transparent),
+        contentAlignment = Alignment.Center
+    ) {
+        when (state) {
+            ChallengeState.COUNTDOWN -> {
+                Text(
+                    text = "GET READY!\n$timeLeft",
+                    fontSize = 48.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color.Yellow,
+                    modifier = Modifier.padding(32.dp)
+                )
+            }
+            ChallengeState.ACTIVE -> {
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = 100.dp, end = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "TIME: $timeLeft",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (timeLeft <= 3) Color.Red else Color.White
+                    )
+                    Text(
+                        text = "SCORE: ${score.toInt()}",
+                        fontSize = 20.sp,
+                        color = Color.Cyan
+                    )
+                }
+            }
+            ChallengeState.FINISHED -> {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "TIME'S UP!",
+                        fontSize = 48.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color.White
+                    )
+                    Text(
+                        text = "Final Score: ${score.toInt()}",
+                        fontSize = 32.sp,
+                        color = Color.Cyan
+                    )
+                }
+            }
+            else -> {}
+        }
     }
 }
 
