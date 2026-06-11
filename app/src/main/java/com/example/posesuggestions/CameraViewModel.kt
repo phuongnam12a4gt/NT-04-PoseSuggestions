@@ -50,6 +50,13 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
     private val _countdownValue = MutableStateFlow<Int?>(null)
     val countdownValue = _countdownValue.asStateFlow()
 
+    private val _ghostOpacity = MutableStateFlow(0.5f)
+    val ghostOpacity = _ghostOpacity.asStateFlow()
+
+    fun setGhostOpacity(opacity: Float) {
+        _ghostOpacity.value = opacity
+    }
+
     private var isCapturing = false
     private var countdownJob: Job? = null
     private var imageCapture: ImageCapture? = null

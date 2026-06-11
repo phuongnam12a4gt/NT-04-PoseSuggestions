@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -50,6 +51,7 @@ fun CameraScreen(viewModel: CameraViewModel) {
     val selectedTemplate by viewModel.selectedTemplate.collectAsState()
     val currentScore by viewModel.currentScore.collectAsState()
     val countdownValue by viewModel.countdownValue.collectAsState()
+    val ghostOpacity by viewModel.ghostOpacity.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         if (hasCameraPermission) {
@@ -61,8 +63,42 @@ fun CameraScreen(viewModel: CameraViewModel) {
                 templatePose = selectedTemplate
             )
 
+            // Ghost Image Overlay (Scale & Drag)
+            GhostOverlay(
+                template = selectedTemplate,
+                opacity = ghostOpacity,
+                modifier = Modifier.fillMaxSize()
+            )
+
             // Top HUD: Similarity Score
             PremiumTopHUD(currentScore, selectedTemplate != null)
+
+            // Opacity Slider (Right side)
+            if (selectedTemplate != null) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(end = 16.dp)
+                        .width(40.dp)
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(Color.Black.copy(alpha = 0.4f))
+                        .padding(vertical = 16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Slider(
+                        value = ghostOpacity,
+                        onValueChange = { viewModel.setGhostOpacity(it) },
+                        valueRange = 0f..1f,
+                        modifier = Modifier
+                            .graphicsLayer {
+                                rotationZ = -90f
+                                translationX = 0f
+                            }
+                            .width(160.dp)
+                    )
+                }
+            }
 
             // Center Countdown
             PremiumCountdown(countdownValue)
