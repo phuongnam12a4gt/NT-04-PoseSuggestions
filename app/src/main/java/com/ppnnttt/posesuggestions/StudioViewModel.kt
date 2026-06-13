@@ -26,6 +26,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.UUID
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -177,56 +179,52 @@ class StudioViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun saveAsTemplate(name: String, category: String) {
-        val pose = _extractedPose.value ?: run {
-            Log.e("StudioViewModel", "Save failed: extractedPose is null")
-            return
-        }
-        val source = _sourceBitmap.value ?: run {
-            Log.e("StudioViewModel", "Save failed: sourceBitmap is null")
-            return
-        }
+    fun saveAsTemplate(name: String, category: String, onComplete: () -> Unit) {
+        val pose = _extractedPose.value ?: return
+        val source = _sourceBitmap.value ?: return
         
-        Log.d("StudioViewModel", "Saving template: $name, category: $category")
+        _isProcessing.value = true // Show loading while saving
+        
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // 1. Tạo File path cho ảnh preview (Dùng JPEG để tiết kiệm bộ nhớ)
+                val poseId = "custom_${UUID.randomUUID()}"
+                val fileName = "$poseId.jpg"
+                val file = File(getApplication<Application>().filesDir, fileName)
+                
+                // 2. Lưu ảnh với chất lượng JPEG 80% (Giảm tải cho RAM)
+                FileOutputStream(file).use { out ->
+                    source.compress(Bitmap.CompressFormat.JPEG, 80, out)
+                }
 
-        // 1. Tạo File path cho ảnh preview
-        val poseId = "custom_${UUID.randomUUID()}"
-        val fileName = "$poseId.png"
-        val file = File(getApplication<Application>().filesDir, fileName)
-        
-        // 2. Crop và lưu ảnh người mẫu thực tế
-        try {
-            FileOutputStream(file).use { out ->
-                source.compress(Bitmap.CompressFormat.PNG, 90, out)
+                // 3. Chuẩn hóa landmarks
+                val normalizedLandmarks = normalizeLandmarks(pose.landmarks, pose.imageWidth, pose.imageHeight)
+
+                val template = PoseTemplate(
+                    id = poseId,
+                    name = name,
+                    category = category,
+                    difficulty = "Easy",
+                    previewImage = file.absolutePath,
+                    landmarks = normalizedLandmarks,
+                    isCustom = true
+                )
+                
+                repository.saveCustomTemplate(template)
+                
+                withContext(Dispatchers.Main) {
+                    _extractedPose.value = null
+                    _sourceBitmap.value = null
+                    _isProcessing.value = false
+                    onComplete()
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    _isProcessing.value = false
+                    // Có thể thêm thông báo lỗi ở đây
+                }
             }
-            Log.d("StudioViewModel", "Image saved to: ${file.absolutePath}")
-        } catch (e: Exception) {
-            Log.e("StudioViewModel", "Error saving image: ${e.message}")
-            e.printStackTrace()
         }
-
-        // 3. Chuẩn hóa landmarks
-        try {
-            val normalizedLandmarks = normalizeLandmarks(pose.landmarks, pose.imageWidth, pose.imageHeight)
-
-            val template = PoseTemplate(
-                id = poseId,
-                name = name,
-                category = category,
-                difficulty = "Easy",
-                previewImage = file.absolutePath, // Lưu đường dẫn ảnh thật
-                landmarks = normalizedLandmarks,
-                isCustom = true
-            )
-            repository.saveCustomTemplate(template)
-            Log.d("StudioViewModel", "Template saved successfully to repository")
-        } catch (e: Exception) {
-            Log.e("StudioViewModel", "Error saving template: ${e.message}")
-            e.printStackTrace()
-        }
-        
-        _extractedPose.value = null
-        _sourceBitmap.value = null
     }
 
     private fun getBitmapFromUri(uri: Uri): Bitmap? {

@@ -257,19 +257,23 @@ fun StudioScreen(
                     onClick = { 
                         viewModel.saveAsTemplate(
                             if (poseName.isBlank()) "Pose_${System.currentTimeMillis()}" else poseName, 
-                            selectedCategory
+                            selectedCategory,
+                            onComplete = onNavigateBack
                         )
-                        onNavigateBack()
                     },
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Cyan),
-                    enabled = true // Cho phép lưu ngay cả khi chưa đặt tên (sẽ lấy tên mặc định)
+                    enabled = !isProcessing
                 ) {
-                    Text(
-                        if (poseName.isBlank()) "Quick Save to Library" else "Save as \"$poseName\"", 
-                        color = Color.Black, 
-                        fontWeight = FontWeight.Bold
-                    )
+                    if (isProcessing) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.Black)
+                    } else {
+                        Text(
+                            if (poseName.isBlank()) "Quick Save to Library" else "Save as \"$poseName\"", 
+                            color = Color.Black, 
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }
