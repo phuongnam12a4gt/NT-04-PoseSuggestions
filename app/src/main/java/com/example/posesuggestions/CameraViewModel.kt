@@ -116,6 +116,9 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
     private val _isFrontCamera = MutableStateFlow(false)
     val isFrontCamera = _isFrontCamera.asStateFlow()
 
+    private val _lastCapturedPhoto = MutableStateFlow<File?>(null)
+    val lastCapturedPhoto = _lastCapturedPhoto.asStateFlow()
+
     private var isCapturing = false
     private var countdownJob: Job? = null
     private var imageCapture: ImageCapture? = null
@@ -376,6 +379,7 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
             ContextCompat.getMainExecutor(getApplication()),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                    _lastCapturedPhoto.value = photoFile
                     Toast.makeText(getApplication(), "Pose Captured!", Toast.LENGTH_SHORT).show()
                     viewModelScope.launch {
                         delay(2000)

@@ -12,6 +12,7 @@ composeBom = "2025.02.00"
 cameraX = "1.4.1"
 lifecycle = "2.8.7"
 navigationCompose = "2.8.8"
+coil = "2.7.0"
 mlkitPoseDetection = "18.0.0-beta5"
 kotlinSerialization = "1.8.0"
 kotlin = "2.1.0"
@@ -39,6 +40,7 @@ androidx-camera-view = { group = "androidx.camera", name = "camera-view", versio
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 mlkit-pose-detection = { group = "com.google.mlkit", name = "pose-detection", version.ref = "mlkitPoseDetection" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinSerialization" }
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -3,9 +3,6 @@ package com.example.posesuggestions
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -27,7 +24,8 @@ fun MainScreen(
     onNavigateToCamera: () -> Unit,
     onNavigateToMarketplace: () -> Unit,
     onNavigateToStudio: () -> Unit,
-    onNavigateToChallenges: () -> Unit
+    onNavigateToChallenges: () -> Unit,
+    onNavigateToGallery: () -> Unit
 ) {
     Scaffold(
         containerColor = Color(0xFF080808)
@@ -64,7 +62,7 @@ fun MainScreen(
 
             Spacer(Modifier.height(32.dp))
 
-            // Hero Section - Rõ ràng mục đích chính
+            // Hero Section
             MainActionCard(
                 title = "Smart Photo Assistant",
                 subtitle = "Chụp ảnh đẹp với hướng dẫn AI và tự động chụp khi khớp dáng.",
@@ -83,7 +81,7 @@ fun MainScreen(
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            // Features Grid với mô tả chi tiết
+            // Features Grid
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 SecondaryActionCard(
                     title = "Pose Studio",
@@ -103,17 +101,25 @@ fun MainScreen(
                     )
                     SmallFeatureCard(
                         modifier = Modifier.weight(1f),
-                        title = "Thử thách",
-                        icon = Icons.Default.Star,
-                        color = Color(0xFFFFAB00),
-                        onClick = onNavigateToChallenges
+                        title = "Lịch sử",
+                        icon = Icons.Default.List,
+                        color = Color(0xFFE91E63),
+                        onClick = onNavigateToGallery
                     )
                 }
+                
+                SmallFeatureCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    title = "Thử thách Pose",
+                    icon = Icons.Default.Star,
+                    color = Color(0xFFFFAB00),
+                    onClick = onNavigateToChallenges
+                )
             }
             
             Spacer(Modifier.weight(1f))
             
-            // Tips of the day
+            // Quick Tip
             Card(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
@@ -179,14 +185,16 @@ fun SecondaryActionCard(title: String, description: String, icon: ImageVector, c
 @Composable
 fun SmallFeatureCard(modifier: Modifier, title: String, icon: ImageVector, color: Color, onClick: () -> Unit) {
     Card(
-        modifier = modifier.height(100.dp).clickable { onClick() },
+        modifier = modifier.height(80.dp).clickable { onClick() },
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f))
     ) {
-        Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(icon, contentDescription = null, tint = color)
-            Spacer(Modifier.height(8.dp))
-            Text(title, color = Color.White, fontWeight = FontWeight.Medium, fontSize = 14.sp)
+        Row(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(color.copy(alpha = 0.1f)), contentAlignment = Alignment.Center) {
+                Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(20.dp))
+            }
+            Spacer(Modifier.width(16.dp))
+            Text(title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
         }
     }
 }

@@ -17,6 +17,7 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val cameraViewModel: CameraViewModel = viewModel()
             val studioViewModel: StudioViewModel = viewModel()
+            val galleryViewModel: GalleryViewModel = viewModel()
 
             NavHost(navController = navController, startDestination = "main") {
                 composable("main") {
@@ -24,7 +25,8 @@ class MainActivity : ComponentActivity() {
                         onNavigateToCamera = { navController.navigate("camera") },
                         onNavigateToMarketplace = { navController.navigate("camera") },
                         onNavigateToStudio = { navController.navigate("studio") },
-                        onNavigateToChallenges = { navController.navigate("camera") }
+                        onNavigateToChallenges = { navController.navigate("camera") },
+                        onNavigateToGallery = { navController.navigate("gallery") }
                     )
                 }
                 composable("camera") {
@@ -32,6 +34,9 @@ class MainActivity : ComponentActivity() {
                 }
                 composable("studio") {
                     StudioScreen(studioViewModel, onNavigateBack = { navController.popBackStack() })
+                }
+                composable("gallery") {
+                    GalleryScreen(galleryViewModel, onNavigateBack = { navController.popBackStack() })
                 }
             }
         }

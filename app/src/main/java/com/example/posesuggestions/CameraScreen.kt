@@ -28,7 +28,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.layout.ContentScale
 import androidx.core.content.ContextCompat
+import coil.compose.AsyncImage
 import java.util.Locale
 
 @Composable
@@ -61,6 +63,7 @@ fun CameraScreen(viewModel: CameraViewModel) {
     val isRecordingPose by viewModel.isRecordingPose.collectAsState()
     val replayFrame by viewModel.replayFrame.collectAsState()
     val isReplaying by viewModel.isReplaying.collectAsState()
+    val lastCapturedPhoto by viewModel.lastCapturedPhoto.collectAsState()
 
     var showMarketplace by remember { mutableStateOf(false) }
     var showRecommendationDialog by remember { mutableStateOf(false) }
@@ -191,7 +194,8 @@ fun CameraScreen(viewModel: CameraViewModel) {
                         viewModel.startRecording()
                     }
                 },
-                onFlipCamera = { viewModel.toggleCamera() }
+                onFlipCamera = { viewModel.toggleCamera() },
+                lastCapturedPhoto = lastCapturedPhoto
             )
 
             if (showMarketplace) {
@@ -336,7 +340,8 @@ fun PremiumBottomControls(
     onRecommendClick: () -> Unit,
     isRecording: Boolean,
     onRecordToggle: () -> Unit,
-    onFlipCamera: () -> Unit
+    onFlipCamera: () -> Unit,
+    lastCapturedPhoto: java.io.File?
 ) {
     val categories = listOf("All", "cool", "selfie", "travel", "gym")
 
@@ -439,16 +444,25 @@ fun PremiumBottomControls(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Secondary button (e.g. Gallery)
+            // Thumbnail
             Box(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape)
                     .background(Color.White.copy(alpha = 0.15f))
-                    .clickable { onChallengeClick() },
+                    .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Star, contentDescription = "Challenge", tint = Color.Yellow)
+                if (lastCapturedPhoto != null) {
+                    AsyncImage(
+                        model = lastCapturedPhoto,
+                        contentDescription = "Last captured",
+                        modifier = Modifier.fillMaxSize().clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(Icons.Default.Star, contentDescription = null, tint = Color.White)
+                }
             }
 
             // Main Premium Shutter Button
@@ -461,7 +475,7 @@ fun PremiumBottomControls(
                     .background(Color.White),
                 contentAlignment = Alignment.Center
             ) {
-                // Inner ring or effect
+                // Shutter ring
             }
 
             // Flip Camera Button
