@@ -12,6 +12,8 @@ import com.google.mlkit.vision.common.InputImage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
 import java.util.UUID
 
 class StudioViewModel(application: Application) : AndroidViewModel(application) {
@@ -24,14 +26,18 @@ class StudioViewModel(application: Application) : AndroidViewModel(application) 
     private val _extractedPose = MutableStateFlow<DetectedPose?>(null)
     val extractedPose = _extractedPose.asStateFlow()
 
+    private val _sourceBitmap = MutableStateFlow<Bitmap?>(null)
+    val sourceBitmap = _sourceBitmap.asStateFlow()
+
     fun extractPoseFromImage(uri: Uri) {
         viewModelScope.launch {
             _isProcessing.value = true
             try {
                 val bitmap = getBitmapFromUri(uri)
                 if (bitmap != null) {
+                    _sourceBitmap.value = bitmap
                     val image = InputImage.fromBitmap(bitmap, 0)
-                    poseProcessor.processImage(image)
+                    poseProcessor.processImage(image, isStatic = true)
                         .addOnSuccessListener { pose ->
                             val detected = pose.toDetectedPose(bitmap.width, bitmap.height)
                             _extractedPose.value = detected
@@ -49,16 +55,39 @@ class StudioViewModel(application: Application) : AndroidViewModel(application) 
 
     fun saveAsTemplate(name: String, category: String) {
         val pose = _extractedPose.value ?: return
+        val source = _sourceBitmap.value ?: return
+        
+        // 1. Tạo File path cho ảnh preview
+        val poseId = "custom_${UUID.randomUUID()}"
+        val fileName = "$poseId.png"
+        val file = File(getApplication<Application>().filesDir, fileName)
+        
+        // 2. Crop và lưu ảnh người mẫu thực tế
+        try {
+            val out = FileOutputStream(file)
+            source.compress(Bitmap.CompressFormat.PNG, 90, out)
+            out.flush()
+            out.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        // 3. Chuẩn hóa landmarks
+        val normalizedLandmarks = normalizeLandmarks(pose.landmarks, pose.imageWidth, pose.imageHeight)
+
         val template = PoseTemplate(
-            id = "custom_${UUID.randomUUID()}",
+            id = poseId,
             name = name,
             category = category,
             difficulty = "Easy",
-            previewImage = "custom_pose", // Placeholder
-            landmarks = pose.landmarks.map { LandmarkTemplate(it.type, it.x / pose.imageWidth, it.y / pose.imageHeight) }
+            previewImage = file.absolutePath, // Lưu đường dẫn ảnh thật
+            landmarks = normalizedLandmarks,
+            isCustom = true
         )
         repository.saveCustomTemplate(template)
+        
         _extractedPose.value = null
+        _sourceBitmap.value = null
     }
 
     private fun getBitmapFromUri(uri: Uri): Bitmap? {
