@@ -69,12 +69,16 @@ fun CameraScreen(viewModel: CameraViewModel) {
         if (hasCameraPermission) {
             CameraPreview(viewModel = viewModel, modifier = Modifier.fillMaxSize())
             
+            // Composition Grid
+            CompositionOverlay(modifier = Modifier.fillMaxSize())
+
             SkeletonOverlay(
                 modifier = Modifier.fillMaxSize(),
                 detectedPose = detectedPose,
                 detectedPosePartner = detectedPosePartner,
                 templatePose = selectedTemplate,
-                replayPose = replayFrame
+                replayPose = replayFrame,
+                currentScore = currentScore
             )
 
             // Heatmap Error Visualization

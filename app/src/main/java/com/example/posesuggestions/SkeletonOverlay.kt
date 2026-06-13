@@ -1,8 +1,13 @@
 package com.example.posesuggestions
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -113,7 +118,15 @@ fun SkeletonOverlay(
     detectedPosePartner: DetectedPose? = null,
     templatePose: PoseTemplate? = null,
     replayPose: DetectedPose? = null,
+    currentScore: Float = 0f
 ) {
+    // Smart HUD: Fade out guide when pose is nearly perfect
+    val guideAlpha by animateFloatAsState(
+        targetValue = if (currentScore > 90f) 0.1f else 1f,
+        animationSpec = tween(durationMillis = 500),
+        label = "GuideAlpha"
+    )
+
     Canvas(modifier = modifier.fillMaxSize()) {
         val activePose = detectedPose ?: replayPose ?: templatePose?.toDetectedPose(1, 1)
         val mapper = activePose?.let {
@@ -130,18 +143,24 @@ fun SkeletonOverlay(
                         // Person 1 Template
                         drawPose(
                             template.toDetectedPose(1, 1),
-                            pointColor = Color.Magenta.copy(alpha = 0.2f),
+                            pointColor = Color.Magenta.copy(alpha = 0.2f * guideAlpha),
                             lineBrush = Brush.linearGradient(
-                                listOf(Color.Blue.copy(alpha = 0.1f), Color.Magenta.copy(alpha = 0.1f))
+                                listOf(
+                                    Color.Blue.copy(alpha = 0.1f * guideAlpha),
+                                    Color.Magenta.copy(alpha = 0.1f * guideAlpha)
+                                )
                             )
                         )
                         // Person 2 Template (if couple)
                         template.toPartnerDetectedPose(1, 1)?.let { partnerTemplate ->
                              drawPose(
                                 partnerTemplate,
-                                pointColor = Color.Yellow.copy(alpha = 0.2f),
+                                pointColor = Color.Yellow.copy(alpha = 0.2f * guideAlpha),
                                 lineBrush = Brush.linearGradient(
-                                    listOf(Color.Green.copy(alpha = 0.1f), Color.Yellow.copy(alpha = 0.1f))
+                                    listOf(
+                                        Color.Green.copy(alpha = 0.1f * guideAlpha),
+                                        Color.Yellow.copy(alpha = 0.1f * guideAlpha)
+                                    )
                                 )
                             )
                         }
@@ -154,8 +173,13 @@ fun SkeletonOverlay(
                 with(renderer) {
                     drawPose(
                         pose,
-                        pointColor = Color.Yellow,
-                        lineBrush = Brush.linearGradient(listOf(Color.Yellow, Color.White))
+                        pointColor = Color.Yellow.copy(alpha = guideAlpha),
+                        lineBrush = Brush.linearGradient(
+                            listOf(
+                                Color.Yellow.copy(alpha = guideAlpha),
+                                Color.White.copy(alpha = guideAlpha)
+                            )
+                        )
                     )
                 }
             }
@@ -165,15 +189,25 @@ fun SkeletonOverlay(
                 detectedPose?.let { pose ->
                     drawPose(
                         pose,
-                        pointColor = Color.Cyan,
-                        lineBrush = Brush.linearGradient(listOf(Color.Cyan, Color(0xFFE91E63)))
+                        pointColor = Color.Cyan.copy(alpha = guideAlpha),
+                        lineBrush = Brush.linearGradient(
+                            listOf(
+                                Color.Cyan.copy(alpha = guideAlpha),
+                                Color(0xFFE91E63).copy(alpha = guideAlpha)
+                            )
+                        )
                     )
                 }
                 detectedPosePartner?.let { pose ->
                     drawPose(
                         pose,
-                        pointColor = Color.Green,
-                        lineBrush = Brush.linearGradient(listOf(Color.Green, Color.Yellow))
+                        pointColor = Color.Green.copy(alpha = guideAlpha),
+                        lineBrush = Brush.linearGradient(
+                            listOf(
+                                Color.Green.copy(alpha = guideAlpha),
+                                Color.Yellow.copy(alpha = guideAlpha)
+                            )
+                        )
                     )
                 }
             }
