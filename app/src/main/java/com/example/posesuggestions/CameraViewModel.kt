@@ -39,6 +39,8 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
     private val voiceGuideManager = VoiceGuideManager(application)
     private val poseCoach = PoseCoachEngine(voiceGuideManager, feedbackGenerator)
     private val couplePoseEngine = CouplePoseEngine(similarityEngine)
+    private val smoothingFilter = PoseSmoothingFilter(alpha = 0.3f) // Lọc mạnh để cực mượt
+    private val smoothingFilterPartner = PoseSmoothingFilter(alpha = 0.3f)
 
     private val recommendationEngine = RecommendationEngine(repository)
     private val promptBuilder = PromptBuilder()
@@ -110,6 +112,9 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
 
     private val _ghostOpacity = MutableStateFlow(0.5f)
     val ghostOpacity = _ghostOpacity.asStateFlow()
+
+    private val _isFrontCamera = MutableStateFlow(false)
+    val isFrontCamera = _isFrontCamera.asStateFlow()
 
     private var isCapturing = false
     private var countdownJob: Job? = null
@@ -229,6 +234,10 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
         _ghostOpacity.value = opacity
     }
 
+    fun toggleCamera() {
+        _isFrontCamera.value = !_isFrontCamera.value
+    }
+
     fun bindCamera(
         lifecycleOwner: LifecycleOwner,
         previewView: androidx.camera.view.PreviewView
@@ -257,9 +266,12 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
                     it.setAnalyzer(cameraExecutor, PoseAnalyzer(poseProcessor) { poses, width, height ->
                         val detectedList = poses.map { it.toDetectedPose(width, height) }
                         
-                        // Assign detected poses to person 1 and person 2
-                        val p1 = detectedList.getOrNull(0)
-                        val p2 = detectedList.getOrNull(1)
+                        // Lọc mượt cho từng người
+                        val p1Raw = detectedList.getOrNull(0)
+                        val p2Raw = detectedList.getOrNull(1)
+                        
+                        val p1 = p1Raw?.let { smoothingFilter.filter(it) }
+                        val p2 = p2Raw?.let { smoothingFilterPartner.filter(it) }
                         
                         _detectedPose.value = p1
                         _detectedPosePartner.value = p2
@@ -299,7 +311,11 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
                     })
                 }
 
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+            val cameraSelector = if (_isFrontCamera.value) {
+                CameraSelector.DEFAULT_FRONT_CAMERA
+            } else {
+                CameraSelector.DEFAULT_BACK_CAMERA
+            }
 
             try {
                 cameraProvider.unbindAll()

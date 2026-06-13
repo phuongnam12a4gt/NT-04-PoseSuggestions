@@ -190,7 +190,8 @@ fun CameraScreen(viewModel: CameraViewModel) {
                     } else {
                         viewModel.startRecording()
                     }
-                }
+                },
+                onFlipCamera = { viewModel.toggleCamera() }
             )
 
             if (showMarketplace) {
@@ -334,7 +335,8 @@ fun PremiumBottomControls(
     onChallengeClick: () -> Unit,
     onRecommendClick: () -> Unit,
     isRecording: Boolean,
-    onRecordToggle: () -> Unit
+    onRecordToggle: () -> Unit,
+    onFlipCamera: () -> Unit
 ) {
     val categories = listOf("All", "cool", "selfie", "travel", "gym")
 
@@ -462,16 +464,16 @@ fun PremiumBottomControls(
                 // Inner ring or effect
             }
 
-            // Flip Camera or similar
+            // Flip Camera Button
             Box(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape)
-                    .background(if (isRecording) Color.Red.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.15f))
-                    .clickable { onRecordToggle() },
+                    .background(Color.White.copy(alpha = 0.15f))
+                    .clickable { onFlipCamera() },
                 contentAlignment = Alignment.Center
             ) {
-                Text(if (isRecording) "⏹️" else "⏺️", fontSize = 20.sp)
+                Text("🔄", fontSize = 20.sp)
             }
         }
     }

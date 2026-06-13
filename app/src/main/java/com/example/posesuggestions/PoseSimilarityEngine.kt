@@ -10,10 +10,15 @@ class PoseSimilarityEngine {
 
     /**
      * Calculates a similarity score between 0 and 100.
+     * Updated to handle aspect ratio normalization.
      */
     fun calculateSimilarity(userPose: DetectedPose, template: PoseTemplate): Float {
         val userLandmarks = userPose.landmarks.associateBy { it.type }
         val templateLandmarks = template.landmarks.associateBy { it.type }
+
+        // We use the user's image dimensions as the reference for both
+        val targetWidth = userPose.imageWidth.toFloat()
+        val targetHeight = userPose.imageHeight.toFloat()
 
         val anglesToCompare = listOf(
             Triple(PoseLandmark.LEFT_SHOULDER, PoseLandmark.LEFT_ELBOW, PoseLandmark.LEFT_WRIST),
@@ -21,9 +26,7 @@ class PoseSimilarityEngine {
             Triple(PoseLandmark.LEFT_HIP, PoseLandmark.LEFT_KNEE, PoseLandmark.LEFT_ANKLE),
             Triple(PoseLandmark.RIGHT_HIP, PoseLandmark.RIGHT_KNEE, PoseLandmark.RIGHT_ANKLE),
             Triple(PoseLandmark.LEFT_ELBOW, PoseLandmark.LEFT_SHOULDER, PoseLandmark.LEFT_HIP),
-            Triple(PoseLandmark.RIGHT_ELBOW, PoseLandmark.RIGHT_SHOULDER, PoseLandmark.RIGHT_HIP),
-            Triple(PoseLandmark.LEFT_SHOULDER, PoseLandmark.LEFT_HIP, PoseLandmark.LEFT_KNEE),
-            Triple(PoseLandmark.RIGHT_SHOULDER, PoseLandmark.RIGHT_HIP, PoseLandmark.RIGHT_KNEE)
+            Triple(PoseLandmark.RIGHT_ELBOW, PoseLandmark.RIGHT_SHOULDER, PoseLandmark.RIGHT_HIP)
         )
 
         var totalScore = 0f
@@ -35,38 +38,48 @@ class PoseSimilarityEngine {
                 userLandmarks[triple.second],
                 userLandmarks[triple.third]
             )
+            
+            // IMPORTANT: Multiply template (0..1) by target dimensions to get consistent pixel-space angles
             val templateAngle = calculateAngleFromTemplate(
                 templateLandmarks[triple.first],
                 templateLandmarks[triple.second],
-                templateLandmarks[triple.third]
+                templateLandmarks[triple.third],
+                targetWidth,
+                targetHeight
             )
 
             if (userAngle != null && templateAngle != null) {
                 val diff = abs(userAngle - templateAngle)
-                // Normalize difference: 0 degrees diff = 100%, 180 degrees diff = 0%
-                // But practically, 45 degrees is already quite a big difference.
-                val angleScore = (1f - (diff / 180f)).coerceIn(0f, 1f)
+                val angleScore = (1f - (diff / 45f)).coerceIn(0f, 1f) // 45 degrees diff = 0%
                 totalScore += angleScore
                 validAngles++
             }
         }
 
         if (validAngles == 0) return 0f
-
         val rawScore = (totalScore / validAngles) * 100f
         return normalizeScore(rawScore)
     }
 
     private fun calculateAngle(first: PoseLandmarkData?, mid: PoseLandmarkData?, last: PoseLandmarkData?): Float? {
-        if (first == null || mid == null || last == null) return null
-        if (first.inFrameLikelihood < 0.5f || mid.inFrameLikelihood < 0.5f || last.inFrameLikelihood < 0.5f) return null
-        
+        if (first == null || mid == null || last == null || mid.inFrameLikelihood < 0.5f) return null
         return calculateAngleBetweenPoints(first.x, first.y, mid.x, mid.y, last.x, last.y)
     }
 
-    private fun calculateAngleFromTemplate(first: LandmarkTemplate?, mid: LandmarkTemplate?, last: LandmarkTemplate?): Float? {
+    private fun calculateAngleFromTemplate(
+        first: LandmarkTemplate?, 
+        mid: LandmarkTemplate?, 
+        last: LandmarkTemplate?,
+        width: Float,
+        height: Float
+    ): Float? {
         if (first == null || mid == null || last == null) return null
-        return calculateAngleBetweenPoints(first.x, first.y, mid.x, mid.y, last.x, last.y)
+        // Map to pixel space before calculating angle
+        return calculateAngleBetweenPoints(
+            first.x * width, first.y * height,
+            mid.x * width, mid.y * height,
+            last.x * width, last.y * height
+        )
     }
 
     private fun calculateAngleBetweenPoints(x1: Float, y1: Float, x2: Float, y2: Float, x3: Float, y3: Float): Float {

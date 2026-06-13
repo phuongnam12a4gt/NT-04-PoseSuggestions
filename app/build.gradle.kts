@@ -63,7 +63,7 @@ dependencies {
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
-    implementation(libs.mlkit.pose.detection)
+    implementation("com.google.mlkit:pose-detection-accurate:18.0.0-beta5")
     implementation(libs.kotlinx.serialization.json)
 
     testImplementation(libs.junit)

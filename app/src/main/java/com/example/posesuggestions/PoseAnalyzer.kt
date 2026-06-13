@@ -21,7 +21,7 @@ class PoseAnalyzer(
             val height = if (rotation == 90 || rotation == 270) imageProxy.width else imageProxy.height
             
             val image = InputImage.fromMediaImage(mediaImage, rotation)
-            processor.processImage(image)
+            processor.processImage(image, isStatic = false)
                 .addOnSuccessListener { pose ->
                     // Currently ML Kit Pose Detection returns a single Pose object.
                     // We wrap it in a list to support future multi-person updates

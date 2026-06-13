@@ -10,9 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.dp
 import com.google.mlkit.vision.pose.PoseLandmark
@@ -38,35 +36,37 @@ class PoseRenderer(
     ) {
         val landmarks = pose.landmarks.associateBy { it.type }
 
-        // Draw Skeleton Lines with Gradient
+        // 1. Vẽ các khối cơ thể (Torso, Pelvis) để rõ dáng người hơn
+        drawBodyBlocks(landmarks, pointColor.copy(alpha = 0.2f))
+
+        // 2. Vẽ Skeleton Lines với đường nét dày hơn, bo tròn
         drawSkeletonConnections(landmarks, lineBrush)
 
-        // Draw Landmark Points with Glow Effect
+        // 3. Vẽ các khớp xương (Landmarks)
         pose.landmarks.forEach { landmark ->
             if (landmark.inFrameLikelihood > 0.5f) {
                 val center = mapper.mapOffset(landmark.x, landmark.y)
-                
-                // Outer Glow
-                drawCircle(
-                    color = pointColor.copy(alpha = 0.3f),
-                    radius = 8.dp.toPx(),
-                    center = center
-                )
-                
-                // Main Point
-                drawCircle(
-                    color = pointColor,
-                    radius = 4.dp.toPx(),
-                    center = center
-                )
-                
-                // Inner Shine
-                drawCircle(
-                    color = Color.White,
-                    radius = 1.5.dp.toPx(),
-                    center = center
-                )
+                drawCircle(color = pointColor, radius = 4.dp.toPx(), center = center)
+                drawCircle(color = Color.White, radius = 1.5.dp.toPx(), center = center)
             }
+        }
+    }
+
+    private fun DrawScope.drawBodyBlocks(landmarks: Map<Int, PoseLandmarkData>, color: Color) {
+        val lShoulder = landmarks[PoseLandmark.LEFT_SHOULDER]
+        val rShoulder = landmarks[PoseLandmark.RIGHT_SHOULDER]
+        val lHip = landmarks[PoseLandmark.LEFT_HIP]
+        val rHip = landmarks[PoseLandmark.RIGHT_HIP]
+
+        if (lShoulder != null && rShoulder != null && lHip != null && rHip != null) {
+            val path = Path().apply {
+                moveTo(mapper.mapX(lShoulder.x), mapper.mapY(lShoulder.y))
+                lineTo(mapper.mapX(rShoulder.x), mapper.mapY(rShoulder.y))
+                lineTo(mapper.mapX(rHip.x), mapper.mapY(rHip.y))
+                lineTo(mapper.mapX(lHip.x), mapper.mapY(lHip.y))
+                close()
+            }
+            drawPath(path = path, color = color)
         }
     }
 
@@ -75,10 +75,6 @@ class PoseRenderer(
         brush: Brush
     ) {
         val connections = listOf(
-            PoseLandmark.LEFT_SHOULDER to PoseLandmark.RIGHT_SHOULDER,
-            PoseLandmark.LEFT_SHOULDER to PoseLandmark.LEFT_HIP,
-            PoseLandmark.RIGHT_SHOULDER to PoseLandmark.RIGHT_HIP,
-            PoseLandmark.LEFT_HIP to PoseLandmark.RIGHT_HIP,
             PoseLandmark.LEFT_SHOULDER to PoseLandmark.LEFT_ELBOW,
             PoseLandmark.LEFT_ELBOW to PoseLandmark.LEFT_WRIST,
             PoseLandmark.RIGHT_SHOULDER to PoseLandmark.RIGHT_ELBOW,
@@ -86,29 +82,32 @@ class PoseRenderer(
             PoseLandmark.LEFT_HIP to PoseLandmark.LEFT_KNEE,
             PoseLandmark.LEFT_KNEE to PoseLandmark.LEFT_ANKLE,
             PoseLandmark.RIGHT_HIP to PoseLandmark.RIGHT_KNEE,
-            PoseLandmark.RIGHT_KNEE to PoseLandmark.RIGHT_ANKLE
+            PoseLandmark.RIGHT_KNEE to PoseLandmark.RIGHT_ANKLE,
+            PoseLandmark.LEFT_SHOULDER to rShoulderId(),
+            PoseLandmark.LEFT_HIP to rHipId(),
+            PoseLandmark.LEFT_SHOULDER to lHipId(),
+            PoseLandmark.RIGHT_SHOULDER to rHipId()
         )
 
         connections.forEach { (start, end) ->
-            drawConnection(landmarks[start], landmarks[end], brush)
+            val s = landmarks[start]
+            val e = landmarks[end]
+            if (s != null && e != null && s.inFrameLikelihood > 0.5f && e.inFrameLikelihood > 0.5f) {
+                drawLine(
+                    brush = brush,
+                    start = mapper.mapOffset(s.x, s.y),
+                    end = mapper.mapOffset(e.x, e.y),
+                    strokeWidth = 4.dp.toPx(),
+                    cap = StrokeCap.Round
+                )
+            }
         }
     }
 
-    private fun DrawScope.drawConnection(
-        start: PoseLandmarkData?,
-        end: PoseLandmarkData?,
-        brush: Brush
-    ) {
-        if (start != null && end != null && (start.inFrameLikelihood > 0.5f) && (end.inFrameLikelihood > 0.5f)) {
-            drawLine(
-                brush = brush,
-                start = mapper.mapOffset(start.x, start.y),
-                end = mapper.mapOffset(end.x, end.y),
-                strokeWidth = 2.5.dp.toPx(),
-                cap = StrokeCap.Round
-            )
-        }
-    }
+    private fun lShoulderId() = PoseLandmark.LEFT_SHOULDER
+    private fun rShoulderId() = PoseLandmark.RIGHT_SHOULDER
+    private fun lHipId() = PoseLandmark.LEFT_HIP
+    private fun rHipId() = PoseLandmark.RIGHT_HIP
 }
 
 @Composable

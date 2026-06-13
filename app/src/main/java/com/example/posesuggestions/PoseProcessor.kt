@@ -5,19 +5,28 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.pose.Pose
 import com.google.mlkit.vision.pose.PoseDetection
 import com.google.mlkit.vision.pose.PoseDetector
-import com.google.mlkit.vision.pose.defaults.PoseDetectorOptions
+import com.google.mlkit.vision.pose.accurate.AccuratePoseDetectorOptions
 
 class PoseProcessor {
-    private val options = PoseDetectorOptions.Builder()
-        .setDetectorMode(PoseDetectorOptions.STREAM_MODE)
+    private val optionsStream = AccuratePoseDetectorOptions.Builder()
+        .setDetectorMode(AccuratePoseDetectorOptions.STREAM_MODE)
+        .setPreferredHardwareConfigs(AccuratePoseDetectorOptions.CPU_GPU) // Sử dụng GPU để nhanh hơn
         .build()
 
-    private val detector: PoseDetector = PoseDetection.getClient(options)
+    private val optionsStatic = AccuratePoseDetectorOptions.Builder()
+        .setDetectorMode(AccuratePoseDetectorOptions.SINGLE_IMAGE_MODE)
+        .setPreferredHardwareConfigs(AccuratePoseDetectorOptions.CPU_GPU)
+        .build()
 
-    fun processImage(image: InputImage): Task<Pose> =
-        detector.process(image)
+    private val detectorStream: PoseDetector = PoseDetection.getClient(optionsStream)
+    private val detectorStatic: PoseDetector = PoseDetection.getClient(optionsStatic)
+
+    fun processImage(image: InputImage, isStatic: Boolean = false): Task<Pose> {
+        return if (isStatic) detectorStatic.process(image) else detectorStream.process(image)
+    }
 
     fun stop() {
-        detector.close()
+        detectorStream.close()
+        detectorStatic.close()
     }
 }

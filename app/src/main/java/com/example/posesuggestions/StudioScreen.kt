@@ -3,6 +3,7 @@ package com.example.posesuggestions
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,22 +81,42 @@ fun StudioScreen(
                     }
                 }
             } else {
-                // Review & Save State
+                // Review & Save State (Sử dụng GhostOverlay để xem thử tính năng kéo/zoom)
+                Text(
+                    "CHẾ ĐỘ XEM THỬ (THỬ KÉO & ZOOM)",
+                    color = Color.Cyan.copy(alpha = 0.7f),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(300.dp)
+                        .height(380.dp)
                         .clip(RoundedCornerShape(24.dp))
-                        .background(Color.Black),
+                        .background(Color.Black.copy(alpha = 0.5f))
+                        .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(24.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    SkeletonOverlay(
-                        modifier = Modifier.fillMaxSize(),
-                        detectedPose = extractedPose
+                    // Tạo một Template tạm thời với thuật toán chuẩn hóa mới
+                    val tempTemplate = PoseTemplate(
+                        id = "preview",
+                        name = poseName,
+                        category = selectedCategory,
+                        difficulty = "Easy",
+                        previewImage = "",
+                        landmarks = normalizeLandmarks(extractedPose!!.landmarks, extractedPose!!.imageWidth, extractedPose!!.imageHeight)
+                    )
+
+                    GhostOverlay(
+                        template = tempTemplate,
+                        opacity = 0.8f,
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
 
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(20.dp))
 
                 OutlinedTextField(
                     value = poseName,
