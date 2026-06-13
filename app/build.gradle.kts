@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.posesuggestions"
+    namespace = "com.ppnnttt.posesuggestions"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.example.posesuggestions"
+        applicationId = "com.ppnnttt.posesuggestions"
         minSdk = 24
         targetSdk = 37
         versionCode = 1
