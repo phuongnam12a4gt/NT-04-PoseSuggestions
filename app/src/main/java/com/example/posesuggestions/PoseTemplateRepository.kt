@@ -1,6 +1,7 @@
 package com.example.posesuggestions
 
 import android.content.Context
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.InputStreamReader
 
@@ -13,7 +14,7 @@ class PoseTemplateRepository(private val context: Context) {
     private val prefs = context.getSharedPreferences("pose_prefs", Context.MODE_PRIVATE)
 
     fun loadTemplates(): List<PoseTemplate> {
-        return try {
+        val assetTemplates = try {
             val inputStream = context.assets.open("pose_templates.json")
             val reader = InputStreamReader(inputStream)
             val config = json.decodeFromString<PoseTemplatesConfig>(reader.readText())
@@ -22,6 +23,24 @@ class PoseTemplateRepository(private val context: Context) {
             e.printStackTrace()
             emptyList()
         }
+
+        val customTemplates = loadCustomTemplates()
+        return assetTemplates + customTemplates
+    }
+
+    private fun loadCustomTemplates(): List<PoseTemplate> {
+        val customStr = prefs.getString("custom_templates", "[]") ?: "[]"
+        return try {
+            json.decodeFromString<List<PoseTemplate>>(customStr)
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    fun saveCustomTemplate(template: PoseTemplate) {
+        val customTemplates = loadCustomTemplates().toMutableList()
+        customTemplates.add(template)
+        prefs.edit().putString("custom_templates", json.encodeToString(customTemplates)).apply()
     }
 
     fun getTemplates(

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -29,185 +30,163 @@ fun MainScreen(
     onNavigateToChallenges: () -> Unit
 ) {
     Scaffold(
-        containerColor = Color(0xFF0F0F0F)
+        containerColor = Color(0xFF080808)
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(24.dp)
+                .padding(horizontal = 20.dp)
         ) {
-            // Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        "Hello, Creator!",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        "Ready for a perfect shot?",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Gray
-                    )
-                }
+            Spacer(Modifier.height(24.dp))
+            
+            // App Identity
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
-                        .size(48.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.White.copy(alpha = 0.1f)),
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(Brush.linearGradient(listOf(Color.Cyan, Color.Magenta))),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.Default.Person, contentDescription = null, tint = Color.White)
+                    Icon(Icons.Default.Star, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
                 }
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    "POSE AI",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 2.sp
+                    ),
+                    color = Color.White
+                )
             }
 
             Spacer(Modifier.height(32.dp))
 
-            // Hero Section: AI Camera Entry
-            HeroCard(onClick = onNavigateToCamera)
+            // Hero Section - Rõ ràng mục đích chính
+            MainActionCard(
+                title = "Smart Photo Assistant",
+                subtitle = "Chụp ảnh đẹp với hướng dẫn AI và tự động chụp khi khớp dáng.",
+                icon = Icons.Default.Add,
+                gradient = listOf(Color(0xFF6200EE), Color(0xFFB00020)),
+                onClick = onNavigateToCamera
+            )
 
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(24.dp))
 
             Text(
-                "Explore Features",
-                style = MaterialTheme.typography.titleLarge,
+                "Nâng tầm sáng tạo",
+                style = MaterialTheme.typography.titleMedium,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            // Features Grid
-            val features = listOf(
-                FeatureItem("Marketplace", "Find new poses", Icons.Default.ThumbUp, Color(0xFF6200EE), onNavigateToMarketplace),
-                FeatureItem("Studio", "Import & Create", Icons.Default.Star, Color(0xFF03DAC5), onNavigateToStudio),
-                FeatureItem("Challenges", "Daily Goals", Icons.Default.Star, Color(0xFFFFAB00), onNavigateToChallenges),
-                FeatureItem("History", "Your Gallery", Icons.Default.List, Color(0xFFE91E63), {})
-            )
-
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.weight(1f)
+            // Features Grid với mô tả chi tiết
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                SecondaryActionCard(
+                    title = "Pose Studio",
+                    description = "Bạn thấy dáng nào đẹp trên mạng? Hãy tải ảnh lên, AI sẽ biến nó thành mẫu của riêng bạn.",
+                    icon = Icons.Default.Add,
+                    color = Color(0xFF03DAC5),
+                    onClick = onNavigateToStudio
+                )
+                
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    SmallFeatureCard(
+                        modifier = Modifier.weight(1f),
+                        title = "Khám phá",
+                        icon = Icons.Default.Search,
+                        color = Color(0xFFBB86FC),
+                        onClick = onNavigateToMarketplace
+                    )
+                    SmallFeatureCard(
+                        modifier = Modifier.weight(1f),
+                        title = "Thử thách",
+                        icon = Icons.Default.Star,
+                        color = Color(0xFFFFAB00),
+                        onClick = onNavigateToChallenges
+                    )
+                }
+            }
+            
+            Spacer(Modifier.weight(1f))
+            
+            // Tips of the day
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
+                shape = RoundedCornerShape(16.dp)
             ) {
-                items(features) { feature ->
-                    FeatureCard(feature)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun HeroCard(onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(180.dp)
-            .clickable { onClick() },
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.linearGradient(
-                        listOf(Color(0xFF00F2FE), Color(0xFF4FACFE))
-                    )
-                )
-                .padding(24.dp)
-        ) {
-            Column(modifier = Modifier.align(Alignment.CenterStart)) {
-                Text(
-                    "AI Smart Camera",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    "Real-time guidance for\nprofessional photos",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Black.copy(alpha = 0.7f)
-                )
-                Spacer(Modifier.height(16.dp))
-                Surface(
-                    color = Color.Black,
-                    shape = RoundedCornerShape(12.dp)
-                ) {
+                Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Info, contentDescription = null, tint = Color.Yellow)
+                    Spacer(Modifier.width(12.dp))
                     Text(
-                        "Start Posing",
-                        color = Color.White,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        style = MaterialTheme.typography.labelLarge
+                        "Mẹo: Bạn có thể dùng 2 ngón tay để phóng to ảnh mẫu cho khớp với cơ thể.",
+                        color = Color.Gray,
+                        fontSize = 12.sp
                     )
                 }
             }
-            Icon(
-                Icons.Default.Add,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(80.dp)
-                    .align(Alignment.CenterEnd)
-                    .offset(x = 20.dp),
-                tint = Color.Black.copy(alpha = 0.1f)
-            )
         }
     }
 }
 
-data class FeatureItem(
-    val title: String,
-    val description: String,
-    val icon: ImageVector,
-    val color: Color,
-    val onClick: () -> Unit
-)
-
 @Composable
-fun FeatureCard(item: FeatureItem) {
+fun MainActionCard(title: String, subtitle: String, icon: ImageVector, gradient: List<Color>, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(140.dp)
-            .clickable { item.onClick() },
-        shape = RoundedCornerShape(20.dp),
+            .height(200.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(28.dp)
+    ) {
+        Box(modifier = Modifier.fillMaxSize().background(Brush.linearGradient(gradient))) {
+            Column(modifier = Modifier.padding(24.dp).align(Alignment.CenterStart).fillMaxWidth(0.7f)) {
+                Surface(color = Color.White.copy(alpha = 0.2f), shape = CircleShape) {
+                    Text("PHỔ BIẾN NHẤT", modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), fontSize = 10.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                }
+                Spacer(Modifier.height(12.dp))
+                Text(title, style = MaterialTheme.typography.headlineSmall, color = Color.White, fontWeight = FontWeight.Bold)
+                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.8f))
+            }
+            Icon(icon, contentDescription = null, modifier = Modifier.size(120.dp).align(Alignment.CenterEnd).offset(x = 30.dp), tint = Color.White.copy(alpha = 0.1f))
+        }
+    }
+}
+
+@Composable
+fun SecondaryActionCard(title: String, description: String, icon: ImageVector, color: Color, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth().clickable { onClick() },
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f))
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(item.color.copy(alpha = 0.2f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(item.icon, contentDescription = null, tint = item.color)
+        Row(modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(modifier = Modifier.size(56.dp).clip(RoundedCornerShape(16.dp)).background(color.copy(alpha = 0.1f)), contentAlignment = Alignment.Center) {
+                Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(28.dp))
             }
+            Spacer(Modifier.width(16.dp))
             Column {
-                Text(
-                    item.title,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
-                )
-                Text(
-                    item.description,
-                    color = Color.Gray,
-                    fontSize = 12.sp
-                )
+                Text(title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Text(description, color = Color.Gray, fontSize = 13.sp, lineHeight = 18.sp)
             }
+        }
+    }
+}
+
+@Composable
+fun SmallFeatureCard(modifier: Modifier, title: String, icon: ImageVector, color: Color, onClick: () -> Unit) {
+    Card(
+        modifier = modifier.height(100.dp).clickable { onClick() },
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f))
+    ) {
+        Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(icon, contentDescription = null, tint = color)
+            Spacer(Modifier.height(8.dp))
+            Text(title, color = Color.White, fontWeight = FontWeight.Medium, fontSize = 14.sp)
         }
     }
 }
