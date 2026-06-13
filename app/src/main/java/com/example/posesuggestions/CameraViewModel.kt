@@ -1,6 +1,8 @@
 package com.example.posesuggestions
 
+import android.media.AudioManager
 import android.media.MediaActionSound
+import android.media.ToneGenerator
 import android.os.Environment
 import android.widget.Toast
 import androidx.camera.core.CameraSelector
@@ -45,13 +47,33 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
     private val recommendationEngine = RecommendationEngine(repository)
     private val promptBuilder = PromptBuilder()
 
-    private val challengeEngine = ChallengeEngine { finalScore ->
-        _selectedTemplate.value?.let { template ->
-            scoreManager.saveHighScore(template.id, finalScore.toInt())
+    private val challengeEngine = ChallengeEngine(
+        onTick = { time, isCountdown ->
+            if (isCountdown) {
+                toneGenerator.startTone(ToneGenerator.TONE_CDMA_PIP, 150)
+            } else if (time <= 3) {
+                toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 100)
+            }
+        },
+        onStateChanged = { state ->
+            if (state == ChallengeState.ACTIVE) {
+                toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP2, 300)
+            } else if (state == ChallengeState.FINISHED) {
+                toneGenerator.startTone(ToneGenerator.TONE_CDMA_HIGH_L, 500)
+            }
+        },
+        onChallengeFinished = { finalScore ->
+            _selectedTemplate.value?.let { template ->
+                scoreManager.saveHighScore(template.id, finalScore.toInt())
+            }
         }
-    }
+    )
+    
+    private val _challengeDifficulty = MutableStateFlow("Medium")
+    val challengeDifficulty = _challengeDifficulty.asStateFlow()
     
     private val shutterSound = MediaActionSound()
+    private val toneGenerator = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100)
 
     private val _detectedPose = MutableStateFlow<DetectedPose?>(null)
     val detectedPose = _detectedPose.asStateFlow()
@@ -225,8 +247,18 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
         if (all.isNotEmpty()) {
             val randomPose = all.random()
             selectTemplate(randomPose)
-            challengeEngine.startChallenge()
+            
+            val duration = when(_challengeDifficulty.value) {
+                "Easy" -> 15
+                "Hard" -> 5
+                else -> 10
+            }
+            challengeEngine.startChallenge(duration)
         }
+    }
+
+    fun setChallengeDifficulty(difficulty: String) {
+        _challengeDifficulty.value = difficulty
     }
 
     fun getHighScore(poseId: String): Int {
@@ -398,6 +430,7 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
         super.onCleared()
         poseProcessor.stop()
         shutterSound.release()
+        toneGenerator.release()
         voiceGuideManager.shutdown()
         cameraExecutor.shutdown()
     }

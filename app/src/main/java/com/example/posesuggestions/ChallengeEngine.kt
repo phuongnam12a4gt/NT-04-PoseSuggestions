@@ -12,6 +12,8 @@ enum class ChallengeState {
 }
 
 class ChallengeEngine(
+    private val onTick: (Int, Boolean) -> Unit = { _, _ -> }, // time, isCountdown
+    private val onStateChanged: (ChallengeState) -> Unit = {},
     private val onChallengeFinished: (Float) -> Unit
 ) {
     private var challengeJob: Job? = null
@@ -30,25 +32,32 @@ class ChallengeEngine(
         maxScoreAchieved = 0f
         challengeJob = scope.launch {
             // Pre-start countdown
-            _state.value = ChallengeState.COUNTDOWN
+            updateState(ChallengeState.COUNTDOWN)
             for (i in 3 downTo 1) {
                 _timeLeft.value = i
+                onTick(i, true)
                 delay(1000)
             }
 
             // Challenge active
-            _state.value = ChallengeState.ACTIVE
+            updateState(ChallengeState.ACTIVE)
             for (i in durationSeconds downTo 1) {
                 _timeLeft.value = i
+                onTick(i, false)
                 delay(1000)
             }
 
-            _state.value = ChallengeState.FINISHED
+            updateState(ChallengeState.FINISHED)
             onChallengeFinished(maxScoreAchieved)
             
-            delay(3000)
-            _state.value = ChallengeState.IDLE
+            delay(4000)
+            updateState(ChallengeState.IDLE)
         }
+    }
+
+    private fun updateState(newState: ChallengeState) {
+        _state.value = newState
+        onStateChanged(newState)
     }
 
     fun updateCurrentScore(score: Float) {

@@ -119,7 +119,12 @@ fun CameraScreen(viewModel: CameraViewModel) {
 
             // Challenge UI
             if (challengeState != ChallengeState.IDLE) {
-                ChallengeOverlay(challengeState, challengeTimeLeft, currentScore)
+                ChallengeOverlay(
+                    state = challengeState, 
+                    timeLeft = challengeTimeLeft, 
+                    score = currentScore,
+                    highScore = selectedTemplate?.let { viewModel.getHighScore(it.id) } ?: 0
+                )
             }
 
             // Guidance Message
@@ -195,7 +200,9 @@ fun CameraScreen(viewModel: CameraViewModel) {
                     }
                 },
                 onFlipCamera = { viewModel.toggleCamera() },
-                lastCapturedPhoto = lastCapturedPhoto
+                lastCapturedPhoto = lastCapturedPhoto,
+                selectedDifficulty = viewModel.challengeDifficulty.collectAsState().value,
+                onDifficultySelect = { viewModel.setChallengeDifficulty(it) }
             )
 
             if (showMarketplace) {
@@ -341,9 +348,12 @@ fun PremiumBottomControls(
     isRecording: Boolean,
     onRecordToggle: () -> Unit,
     onFlipCamera: () -> Unit,
-    lastCapturedPhoto: java.io.File?
+    lastCapturedPhoto: java.io.File?,
+    selectedDifficulty: String,
+    onDifficultySelect: (String) -> Unit
 ) {
     val categories = listOf("All", "cool", "selfie", "travel", "gym")
+    val difficulties = listOf("Easy", "Medium", "Hard")
 
     Column(
         modifier = modifier
@@ -387,6 +397,42 @@ fun PremiumBottomControls(
                     Spacer(Modifier.width(6.dp))
                     Text("AI Suggest", color = Color.Cyan, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 }
+            }
+
+            // Challenge Button
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.Yellow.copy(alpha = 0.2f))
+                    .clickable { onChallengeClick() }
+                    .padding(12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("🏆", fontSize = 14.sp)
+                    Spacer(Modifier.width(6.dp))
+                    Text("Challenge", color = Color.Yellow, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                }
+            }
+        }
+
+        // Difficulty Selector
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            difficulties.forEach { diff ->
+                val isSelected = selectedDifficulty == diff
+                Text(
+                    text = diff,
+                    color = if (isSelected) Color.Yellow else Color.White.copy(alpha = 0.5f),
+                    fontSize = 11.sp,
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .clickable { onDifficultySelect(diff) }
+                )
             }
         }
         // Glassmorphism Template Row
@@ -529,7 +575,7 @@ fun PremiumTemplateItem(
 }
 
 @Composable
-fun ChallengeOverlay(state: ChallengeState, timeLeft: Int, score: Float) {
+fun ChallengeOverlay(state: ChallengeState, timeLeft: Int, score: Float, highScore: Int = 0) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -551,7 +597,7 @@ fun ChallengeOverlay(state: ChallengeState, timeLeft: Int, score: Float) {
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(top = 100.dp, end = 24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.End
                 ) {
                     Text(
                         text = "TIME: $timeLeft",
@@ -560,24 +606,53 @@ fun ChallengeOverlay(state: ChallengeState, timeLeft: Int, score: Float) {
                         color = if (timeLeft <= 3) Color.Red else Color.White
                     )
                     Text(
-                        text = "SCORE: ${score.toInt()}",
+                        text = "SCORE: ${score.toInt()}%",
                         fontSize = 20.sp,
                         color = Color.Cyan
                     )
+                    if (highScore > 0) {
+                        Text(
+                            text = "BEST: $highScore%",
+                            fontSize = 14.sp,
+                            color = Color.White.copy(alpha = 0.6f)
+                        )
+                    }
                 }
             }
             ChallengeState.FINISHED -> {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(32.dp))
+                        .background(Color.Black.copy(alpha = 0.8f))
+                        .padding(48.dp)
+                        .border(2.dp, Color.Cyan, RoundedCornerShape(32.dp))
+                        .padding(24.dp)
+                ) {
                     Text(
-                        text = "TIME'S UP!",
-                        fontSize = 48.sp,
+                        text = if (score >= 80f) "POSE MASTER!" else "WELL DONE!",
+                        fontSize = 32.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color.White
+                        color = if (score >= 80f) Color.Cyan else Color.White
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        text = "Your Accuracy",
+                        fontSize = 16.sp,
+                        color = Color.White.copy(alpha = 0.6f)
                     )
                     Text(
-                        text = "Final Score: ${score.toInt()}",
-                        fontSize = 32.sp,
-                        color = Color.Cyan
+                        text = "${score.toInt()}%",
+                        fontSize = 64.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Yellow
+                    )
+                    Spacer(Modifier.height(24.dp))
+                    LinearProgressIndicator(
+                        progress = { score / 100f },
+                        modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
+                        color = Color.Cyan,
+                        trackColor = Color.White.copy(alpha = 0.2f),
                     )
                 }
             }
