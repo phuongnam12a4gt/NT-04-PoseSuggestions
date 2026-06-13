@@ -18,13 +18,29 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("C:\\Users\\DucHieu\\Downloads\\appkeystore.jks")
+            storePassword = "STORE_PASSWORD"
+            keyAlias = "release"
+            keyPassword = "KEY_PASSWORD"
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            signingConfig = signingConfigs.getByName("release")
+            ndk {
+                debugSymbolLevel = "FULL"
+            }
         }
     }
     compileOptions {
