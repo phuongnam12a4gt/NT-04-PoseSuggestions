@@ -2,4 +2,9 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="ic_launcher_background">#080808</color>
+    <color name="neon_cyan">#00FFFF</color>
+    <color name="neon_magenta">#FF00FF</color>
+    <color name="icon_gradient_start">#0F0F0F</color>
+    <color name="icon_gradient_end">#1A1A2E</color>
 </resources>
