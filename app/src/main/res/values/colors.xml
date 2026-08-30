@@ -7,4 +7,5 @@
     <color name="neon_magenta">#FF00FF</color>
     <color name="icon_gradient_start">#0F0F0F</color>
     <color name="icon_gradient_end">#1A1A2E</color>
+    <color name="pose_launcher_background">#06135A</color>
 </resources>
