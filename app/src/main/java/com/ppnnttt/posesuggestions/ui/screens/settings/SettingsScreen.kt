@@ -1,4 +1,7 @@
-package com.ppnnttt.posesuggestions
+package com.ppnnttt.posesuggestions.ui.screens.settings
+
+import com.ppnnttt.posesuggestions.AppLanguageManager
+import com.ppnnttt.posesuggestions.R
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

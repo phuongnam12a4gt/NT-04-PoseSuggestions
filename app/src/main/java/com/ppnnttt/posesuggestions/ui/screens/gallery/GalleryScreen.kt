@@ -1,4 +1,6 @@
-package com.ppnnttt.posesuggestions
+package com.ppnnttt.posesuggestions.ui.screens.gallery
+
+import com.ppnnttt.posesuggestions.R
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

@@ -1,5 +1,5 @@
 kotlin version: 2.2.10
-error message: java.nio.file.AccessDeniedException: C:\Users\DucHieu\AppData\Local\kotlin\daemon\kotlin-daemon-client-tsmarker7089425703693684241.tmp
+error message: java.nio.file.AccessDeniedException: C:\Users\DucHieu\AppData\Local\kotlin\daemon\kotlin-daemon-client-tsmarker17230959197678852167.tmp
 
 error message: Daemon compilation failed: Could not connect to Kotlin compile daemon
 java.lang.RuntimeException: Could not connect to Kotlin compile daemon

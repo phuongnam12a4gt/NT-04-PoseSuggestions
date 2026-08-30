@@ -80,6 +80,7 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation("com.google.mlkit:pose-detection-accurate:18.0.0-beta5")
+    implementation("com.google.android.gms:play-services-mlkit-subject-segmentation:16.0.0-beta1")
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.coil.compose)
 

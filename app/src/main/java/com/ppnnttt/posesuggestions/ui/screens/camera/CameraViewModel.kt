@@ -1,4 +1,7 @@
-package com.ppnnttt.posesuggestions
+package com.ppnnttt.posesuggestions.ui.screens.camera
+
+import com.ppnnttt.posesuggestions.*
+import com.ppnnttt.posesuggestions.R
 
 import android.media.AudioManager
 import android.media.MediaActionSound

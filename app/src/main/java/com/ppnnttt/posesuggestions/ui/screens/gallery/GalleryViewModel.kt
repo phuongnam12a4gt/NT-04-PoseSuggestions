@@ -1,4 +1,4 @@
-package com.ppnnttt.posesuggestions
+package com.ppnnttt.posesuggestions.ui.screens.gallery
 
 import android.app.Application
 import android.os.Environment

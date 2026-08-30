@@ -1,5 +1,15 @@
 package com.ppnnttt.posesuggestions
 
+import com.ppnnttt.posesuggestions.ui.screens.camera.CameraScreen
+import com.ppnnttt.posesuggestions.ui.screens.camera.CameraViewModel
+import com.ppnnttt.posesuggestions.ui.screens.editor.PhotoEditorScreen
+import com.ppnnttt.posesuggestions.ui.screens.gallery.GalleryScreen
+import com.ppnnttt.posesuggestions.ui.screens.gallery.GalleryViewModel
+import com.ppnnttt.posesuggestions.ui.screens.main.MainScreen
+import com.ppnnttt.posesuggestions.ui.screens.settings.SettingsScreen
+import com.ppnnttt.posesuggestions.ui.screens.studio.StudioScreen
+import com.ppnnttt.posesuggestions.ui.screens.studio.StudioViewModel
+
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -26,7 +36,7 @@ class MainActivity : AppCompatActivity() {
                         onNavigateToCamera = { navController.navigate("camera") },
                         onNavigateToMarketplace = { navController.navigate("camera") },
                         onNavigateToStudio = { navController.navigate("studio") },
-                        onNavigateToChallenges = { navController.navigate("camera") },
+                        onNavigateToPhotoEditor = { navController.navigate("photo_editor") },
                         onNavigateToGallery = { navController.navigate("gallery") },
                         onNavigateToSettings = { navController.navigate("settings") }
                     )
@@ -45,6 +55,9 @@ class MainActivity : AppCompatActivity() {
                 }
                 composable("settings") {
                     SettingsScreen(onNavigateBack = { navController.popBackStack() })
+                }
+                composable("photo_editor") {
+                    PhotoEditorScreen(onNavigateBack = { navController.popBackStack() })
                 }
             }
         }

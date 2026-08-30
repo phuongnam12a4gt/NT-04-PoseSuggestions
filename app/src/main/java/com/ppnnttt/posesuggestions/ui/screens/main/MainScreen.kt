@@ -1,4 +1,6 @@
-package com.ppnnttt.posesuggestions
+package com.ppnnttt.posesuggestions.ui.screens.main
+
+import com.ppnnttt.posesuggestions.R
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,7 +27,7 @@ fun MainScreen(
     onNavigateToCamera: () -> Unit,
     onNavigateToMarketplace: () -> Unit,
     onNavigateToStudio: () -> Unit,
-    onNavigateToChallenges: () -> Unit,
+    onNavigateToPhotoEditor: () -> Unit,
     onNavigateToGallery: () -> Unit,
     onNavigateToSettings: () -> Unit
 ) {
@@ -120,10 +122,10 @@ fun MainScreen(
                 
                 SmallFeatureCard(
                     modifier = Modifier.fillMaxWidth(),
-                    title = stringResource(R.string.pose_challenge),
-                    icon = Icons.Default.Star,
+                    title = stringResource(R.string.photo_editor),
+                    icon = Icons.Default.Edit,
                     color = Color(0xFFFFAB00),
-                    onClick = onNavigateToChallenges
+                    onClick = onNavigateToPhotoEditor
                 )
             }
             

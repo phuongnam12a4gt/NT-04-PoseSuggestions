@@ -1,4 +1,7 @@
-package com.ppnnttt.posesuggestions
+package com.ppnnttt.posesuggestions.ui.screens.camera
+
+import com.ppnnttt.posesuggestions.*
+import com.ppnnttt.posesuggestions.R
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -179,7 +182,6 @@ fun CameraScreen(
                 onCategorySelect = { viewModel.selectCategory(it) },
                 onTemplateSelect = { viewModel.selectTemplate(it) },
                 onExploreClick = { showMarketplace = true },
-                onChallengeClick = { viewModel.startRandomChallenge() },
                 onRecommendClick = { showRecommendationDialog = true },
                 isRecording = isRecordingPose,
                 onRecordToggle = {
@@ -336,7 +338,6 @@ fun PremiumBottomControls(
     onCategorySelect: (String) -> Unit,
     onTemplateSelect: (PoseTemplate) -> Unit,
     onExploreClick: () -> Unit,
-    onChallengeClick: () -> Unit,
     onRecommendClick: () -> Unit,
     isRecording: Boolean,
     onRecordToggle: () -> Unit,
@@ -447,7 +448,6 @@ fun PremiumBottomControls(
                 Slider(value = ghostOpacity, onValueChange = onGhostOpacityChange, valueRange = 0.15f..1f)
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     item { AssistChip(onClick = onRecommendClick, label = { Text(stringResource(R.string.ai_suggest)) }) }
-                    item { AssistChip(onClick = onChallengeClick, label = { Text(stringResource(R.string.challenge)) }) }
                     item {
                         AssistChip(
                             onClick = onRecordToggle,

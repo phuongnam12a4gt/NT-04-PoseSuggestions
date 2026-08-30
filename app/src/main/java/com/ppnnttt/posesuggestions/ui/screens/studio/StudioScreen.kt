@@ -1,4 +1,8 @@
-package com.ppnnttt.posesuggestions
+package com.ppnnttt.posesuggestions.ui.screens.studio
+
+import com.ppnnttt.posesuggestions.*
+import com.ppnnttt.posesuggestions.R
+import com.ppnnttt.posesuggestions.ui.screens.camera.PremiumCountdown
 
 import android.Manifest
 import android.content.pm.PackageManager

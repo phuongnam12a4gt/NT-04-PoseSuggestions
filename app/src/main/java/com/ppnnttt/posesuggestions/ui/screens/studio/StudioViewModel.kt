@@ -1,4 +1,7 @@
-package com.ppnnttt.posesuggestions
+package com.ppnnttt.posesuggestions.ui.screens.studio
+
+import com.ppnnttt.posesuggestions.*
+import com.ppnnttt.posesuggestions.R
 
 import android.app.Application
 import android.graphics.Bitmap

@@ -1,4 +1,4 @@
-package com.ppnnttt.posesuggestions
+package com.ppnnttt.posesuggestions.ui.screens.camera
 
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.fillMaxSize
