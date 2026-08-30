@@ -1,5 +1,7 @@
 package com.ppnnttt.posesuggestions
 
+import android.content.Context
+
 data class RecommendationInput(
     val locationType: String,
     val outfitStyle: String,
@@ -38,12 +40,18 @@ class RecommendationEngine(private val repository: PoseTemplateRepository) {
     }
 }
 
-class PromptBuilder {
+class PromptBuilder(private val context: Context) {
     fun buildRecommendationDescription(template: PoseTemplate, input: RecommendationInput): String {
-        val metadata = template.recommendationMetadata ?: return "Try this pose!"
+        val metadata = template.recommendationMetadata ?: return context.getString(R.string.try_this_pose)
         
-        return "Based on your ${input.mood} mood at a ${input.locationType}, I recommend the \"${template.name}\". " +
-                "Try a ${metadata.cameraAngle} camera angle. " +
-                "Orient your body by ${metadata.bodyOrientation} and place your hands ${metadata.handPlacement}."
+        return context.getString(
+            R.string.recommendation_description,
+            input.mood,
+            input.locationType,
+            template.name,
+            metadata.cameraAngle,
+            metadata.bodyOrientation,
+            metadata.handPlacement
+        )
     }
 }

@@ -1,10 +1,11 @@
 package com.ppnnttt.posesuggestions
 
+import android.content.Context
 import com.google.mlkit.vision.pose.PoseLandmark
 import kotlin.math.abs
 import kotlin.math.atan2
 
-class PoseGuidanceEngine {
+class PoseGuidanceEngine(private val context: Context) {
 
     data class Guidance(
         val message: String,
@@ -17,12 +18,12 @@ class PoseGuidanceEngine {
         val templateLandmarks = template.landmarks.associateBy { it.type }
 
         val jointsToAnalyze = listOf(
-            JointAngle(PoseLandmark.LEFT_SHOULDER, PoseLandmark.LEFT_ELBOW, PoseLandmark.LEFT_WRIST, "left arm"),
-            JointAngle(PoseLandmark.RIGHT_SHOULDER, PoseLandmark.RIGHT_ELBOW, PoseLandmark.RIGHT_WRIST, "right arm"),
-            JointAngle(PoseLandmark.LEFT_HIP, PoseLandmark.LEFT_KNEE, PoseLandmark.LEFT_ANKLE, "left leg"),
-            JointAngle(PoseLandmark.RIGHT_HIP, PoseLandmark.RIGHT_KNEE, PoseLandmark.RIGHT_ANKLE, "right leg"),
-            JointAngle(PoseLandmark.LEFT_ELBOW, PoseLandmark.LEFT_SHOULDER, PoseLandmark.LEFT_HIP, "left shoulder"),
-            JointAngle(PoseLandmark.RIGHT_ELBOW, PoseLandmark.RIGHT_SHOULDER, PoseLandmark.RIGHT_HIP, "right shoulder")
+            JointAngle(PoseLandmark.LEFT_SHOULDER, PoseLandmark.LEFT_ELBOW, PoseLandmark.LEFT_WRIST, R.string.left_arm),
+            JointAngle(PoseLandmark.RIGHT_SHOULDER, PoseLandmark.RIGHT_ELBOW, PoseLandmark.RIGHT_WRIST, R.string.right_arm),
+            JointAngle(PoseLandmark.LEFT_HIP, PoseLandmark.LEFT_KNEE, PoseLandmark.LEFT_ANKLE, R.string.left_leg),
+            JointAngle(PoseLandmark.RIGHT_HIP, PoseLandmark.RIGHT_KNEE, PoseLandmark.RIGHT_ANKLE, R.string.right_leg),
+            JointAngle(PoseLandmark.LEFT_ELBOW, PoseLandmark.LEFT_SHOULDER, PoseLandmark.LEFT_HIP, R.string.left_shoulder),
+            JointAngle(PoseLandmark.RIGHT_ELBOW, PoseLandmark.RIGHT_SHOULDER, PoseLandmark.RIGHT_HIP, R.string.right_shoulder)
         )
 
         var maxError = 15f // Threshold to provide guidance
@@ -44,9 +45,9 @@ class PoseGuidanceEngine {
                 val diff = templateAngle - userAngle
                 if (abs(diff) > maxError) {
                     maxError = abs(diff)
-                    val action = if (diff > 0) "Bend" else "Straighten"
+                    val messageRes = if (diff > 0) R.string.bend_joint else R.string.straighten_joint
                     bestGuidance = Guidance(
-                        message = "$action your ${joint.name}",
+                        message = context.getString(messageRes, context.getString(joint.nameRes)),
                         jointType = joint.p2,
                         errorMagnitude = abs(diff)
                     )
@@ -57,7 +58,7 @@ class PoseGuidanceEngine {
         return bestGuidance
     }
 
-    private data class JointAngle(val p1: Int, val p2: Int, val p3: Int, val name: String)
+    private data class JointAngle(val p1: Int, val p2: Int, val p3: Int, val nameRes: Int)
 
     private fun calculateAngle(first: PoseLandmarkData?, mid: PoseLandmarkData?, last: PoseLandmarkData?): Float? {
         if (first == null || mid == null || last == null || mid.inFrameLikelihood < 0.5f) return null

@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
+import androidx.compose.ui.res.stringResource
 import kotlin.math.roundToInt
 
 @Composable
@@ -31,6 +32,7 @@ fun GhostOverlay(
     var scale by remember { mutableFloatStateOf(1f) }
     
     val frameSize = 320.dp
+    val placeBodyText = stringResource(R.string.place_body_here)
 
     Box(
         modifier = modifier
@@ -87,16 +89,11 @@ fun GhostOverlay(
                 val innerW = w - 2 * p
                 val innerH = h - 2 * p
                 
-                val innerMapper = CoordinateMapper(1, 1, innerW, innerH)
-                val innerRenderer = PoseRenderer(innerMapper)
-                
-                with(innerRenderer) {
-                    drawPose(
-                        template.toDetectedPose(1, 1),
-                        pointColor = Color.Cyan.copy(alpha = opacity),
-                        lineBrush = Brush.linearGradient(listOf(Color.Cyan.copy(alpha = opacity), Color.Blue.copy(alpha = opacity)))
-                    )
-                }
+                drawHumanMannequin(
+                    pose = template.toDetectedPose(1, 1),
+                    opacity = opacity,
+                    targetSize = Size(innerW, innerH)
+                )
             }
 
             // 5. Vẽ viền lỗ thủng
@@ -120,7 +117,7 @@ fun GhostOverlay(
                 .align(Alignment.Center)
         ) {
             Text(
-                "ĐẶT CƠ THỂ VÀO ĐÂY",
+                placeBodyText,
                 color = Color.Cyan,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,

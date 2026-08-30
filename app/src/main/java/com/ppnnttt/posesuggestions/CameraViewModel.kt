@@ -29,7 +29,7 @@ import java.util.concurrent.Executors
 class CameraViewModel(application: android.app.Application) : AndroidViewModel(application) {
     private val repository = PoseTemplateRepository(application)
     private val similarityEngine = PoseSimilarityEngine()
-    private val guidanceEngine = PoseGuidanceEngine()
+    private val guidanceEngine = PoseGuidanceEngine(application)
     val errorAnalysisEngine = ErrorAnalysisEngine()
     private val scoreManager = ScoreManager(application)
     
@@ -37,7 +37,7 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
     private val poseRecorder = PoseRecorder()
     private val replayEngine = ReplayEngine()
 
-    private val feedbackGenerator = FeedbackGenerator()
+    private val feedbackGenerator = FeedbackGenerator(application)
     private val voiceGuideManager = VoiceGuideManager(application)
     private val poseCoach = PoseCoachEngine(voiceGuideManager, feedbackGenerator)
     private val couplePoseEngine = CouplePoseEngine(similarityEngine)
@@ -45,7 +45,7 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
     private val smoothingFilterPartner = PoseSmoothingFilter(alpha = 0.3f)
 
     private val recommendationEngine = RecommendationEngine(repository)
-    private val promptBuilder = PromptBuilder()
+    private val promptBuilder = PromptBuilder(application)
 
     private val challengeEngine = ChallengeEngine(
         onTick = { time, isCountdown ->
@@ -332,7 +332,7 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
                             if (score < 80f) {
                                 poseCoach.provideCoaching(score, guidance)
                             } else {
-                                _guidanceMessage.value = "Hold still!"
+                                _guidanceMessage.value = getApplication<android.app.Application>().getString(R.string.hold_still)
                                 voiceGuideManager.speak("Hold still!")
                             }
                             
@@ -412,7 +412,7 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                     _lastCapturedPhoto.value = photoFile
-                    Toast.makeText(getApplication(), "Pose Captured!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(getApplication(), getApplication<android.app.Application>().getString(R.string.pose_captured), Toast.LENGTH_SHORT).show()
                     viewModelScope.launch {
                         delay(2000)
                         isCapturing = false
@@ -424,6 +424,12 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
                 }
             }
         )
+    }
+
+    /** Allows the camera UI to trigger a photo immediately. */
+    fun takePhoto() {
+        cancelCountdown()
+        capturePhoto()
     }
 
     override fun onCleared() {

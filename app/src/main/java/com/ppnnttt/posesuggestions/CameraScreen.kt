@@ -15,16 +15,18 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,7 +36,10 @@ import coil.compose.AsyncImage
 import java.util.Locale
 
 @Composable
-fun CameraScreen(viewModel: CameraViewModel) {
+fun CameraScreen(
+    viewModel: CameraViewModel,
+    onNavigateBack: () -> Unit
+) {
     val context = LocalContext.current
     var hasCameraPermission by remember {
         mutableStateOf(
@@ -71,26 +76,38 @@ fun CameraScreen(viewModel: CameraViewModel) {
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         if (hasCameraPermission) {
             CameraPreview(viewModel = viewModel, modifier = Modifier.fillMaxSize())
+
+            IconButton(
+                onClick = onNavigateBack,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .zIndex(10f)
+                    .statusBarsPadding()
+                    .padding(start = 12.dp, top = 8.dp)
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(Color.Black.copy(alpha = 0.58f))
+                    .border(1.dp, Color.White.copy(alpha = 0.16f), CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.back),
+                    tint = Color.White
+                )
+            }
             
-            // Composition Grid
-            CompositionOverlay(modifier = Modifier.fillMaxSize())
-
-            SkeletonOverlay(
-                modifier = Modifier.fillMaxSize(),
-                detectedPose = detectedPose,
-                detectedPosePartner = detectedPosePartner,
-                templatePose = selectedTemplate,
-                replayPose = replayFrame,
-                currentScore = currentScore
-            )
-
-            // Heatmap Error Visualization
-            PoseHeatmapOverlay(
-                detectedPose = detectedPose,
-                template = selectedTemplate,
-                errorAnalysisEngine = viewModel.errorAnalysisEngine,
-                modifier = Modifier.fillMaxSize()
-            )
+            // Before a template is selected, show detection feedback only. Once a
+            // template is active, the mannequin becomes the single visual target.
+            if (selectedTemplate == null) {
+                SkeletonOverlay(
+                    modifier = Modifier.fillMaxSize(),
+                    detectedPose = detectedPose,
+                    detectedPosePartner = detectedPosePartner,
+                    templatePose = null,
+                    replayPose = replayFrame,
+                    currentScore = currentScore
+                )
+            }
 
             // Ghost Image Overlay (Scale & Drag)
             GhostOverlay(
@@ -113,7 +130,7 @@ fun CameraScreen(viewModel: CameraViewModel) {
                         .clickable { viewModel.stopReplay() }
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
-                    Text("STOP REPLAY", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Text(stringResource(R.string.stop_replay), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 }
             }
 
@@ -150,33 +167,6 @@ fun CameraScreen(viewModel: CameraViewModel) {
                 }
             }
 
-            // Opacity Slider (Right side)
-            if (selectedTemplate != null) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .padding(end = 16.dp)
-                        .width(40.dp)
-                        .height(200.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Color.Black.copy(alpha = 0.4f))
-                        .padding(vertical = 16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Slider(
-                        value = ghostOpacity,
-                        onValueChange = { viewModel.setGhostOpacity(it) },
-                        valueRange = 0f..1f,
-                        modifier = Modifier
-                            .graphicsLayer {
-                                rotationZ = -90f
-                                translationX = 0f
-                            }
-                            .width(160.dp)
-                    )
-                }
-            }
-
             // Center Countdown
             PremiumCountdown(countdownValue)
 
@@ -202,7 +192,10 @@ fun CameraScreen(viewModel: CameraViewModel) {
                 onFlipCamera = { viewModel.toggleCamera() },
                 lastCapturedPhoto = lastCapturedPhoto,
                 selectedDifficulty = viewModel.challengeDifficulty.collectAsState().value,
-                onDifficultySelect = { viewModel.setChallengeDifficulty(it) }
+                onDifficultySelect = { viewModel.setChallengeDifficulty(it) },
+                ghostOpacity = ghostOpacity,
+                onGhostOpacityChange = { viewModel.setGhostOpacity(it) },
+                onCaptureClick = { viewModel.takePhoto() }
             )
 
             if (showMarketplace) {
@@ -272,7 +265,7 @@ fun PremiumTopHUD(score: Float, isTemplateSelected: Boolean) {
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = "Match: ${score.toInt()}%",
+                        text = stringResource(R.string.pose_match, score.toInt()),
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.sp
@@ -336,6 +329,206 @@ fun PremiumCountdown(count: Int?) {
 
 @Composable
 fun PremiumBottomControls(
+    modifier: Modifier = Modifier,
+    templates: List<PoseTemplate>,
+    selectedTemplate: PoseTemplate?,
+    selectedCategory: String,
+    onCategorySelect: (String) -> Unit,
+    onTemplateSelect: (PoseTemplate) -> Unit,
+    onExploreClick: () -> Unit,
+    onChallengeClick: () -> Unit,
+    onRecommendClick: () -> Unit,
+    isRecording: Boolean,
+    onRecordToggle: () -> Unit,
+    onFlipCamera: () -> Unit,
+    lastCapturedPhoto: java.io.File?,
+    selectedDifficulty: String,
+    onDifficultySelect: (String) -> Unit,
+    ghostOpacity: Float,
+    onGhostOpacityChange: (Float) -> Unit,
+    onCaptureClick: () -> Unit
+) {
+    val categories = listOf("All", "cool", "selfie", "travel", "gym")
+    var showPosePicker by remember { mutableStateOf(selectedTemplate == null) }
+    var showMoreTools by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                Brush.verticalGradient(
+                    listOf(Color.Transparent, Color.Black.copy(alpha = 0.82f), Color.Black)
+                )
+            )
+            .navigationBarsPadding()
+            .padding(top = 28.dp, bottom = 12.dp)
+    ) {
+        AnimatedVisibility(
+            visible = showPosePicker,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color(0xFF17191D).copy(alpha = 0.96f))
+                    .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(24.dp))
+                    .padding(vertical = 16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(stringResource(R.string.choose_pose), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        Text(stringResource(R.string.choose_pose_hint), color = Color.White.copy(alpha = 0.62f), fontSize = 12.sp)
+                    }
+                    if (selectedTemplate != null) {
+                        TextButton(onClick = { showPosePicker = false }) {
+                            Text(stringResource(R.string.done), color = Color.Cyan, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    items(categories) { category ->
+                        FilterChip(
+                            selected = selectedCategory == category,
+                            onClick = { onCategorySelect(category) },
+                            label = { Text(localizedOptionLabel(category)) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = Color.Cyan,
+                                selectedLabelColor = Color.Black,
+                                labelColor = Color.White
+                            )
+                        )
+                    }
+                }
+
+                if (templates.isEmpty()) {
+                    Text(
+                        stringResource(R.string.no_poses),
+                        color = Color.White.copy(alpha = 0.65f),
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
+                    )
+                } else {
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(templates, key = { it.id }) { template ->
+                            PremiumTemplateItem(
+                                template = template,
+                                isSelected = selectedTemplate?.id == template.id,
+                                onClick = {
+                                    onTemplateSelect(template)
+                                    showPosePicker = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        AnimatedVisibility(visible = showMoreTools && !showPosePicker) {
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 20.dp, vertical = 8.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color(0xFF17191D).copy(alpha = 0.96f))
+                    .padding(16.dp)
+            ) {
+                Text(stringResource(R.string.pose_visibility), color = Color.White, fontWeight = FontWeight.SemiBold)
+                Slider(value = ghostOpacity, onValueChange = onGhostOpacityChange, valueRange = 0.15f..1f)
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    item { AssistChip(onClick = onRecommendClick, label = { Text(stringResource(R.string.ai_suggest)) }) }
+                    item { AssistChip(onClick = onChallengeClick, label = { Text(stringResource(R.string.challenge)) }) }
+                    item {
+                        AssistChip(
+                            onClick = onRecordToggle,
+                            label = { Text(stringResource(if (isRecording) R.string.stop_recording else R.string.record_pose)) }
+                        )
+                    }
+                    item { AssistChip(onClick = onExploreClick, label = { Text(stringResource(R.string.explore)) }) }
+                }
+            }
+        }
+
+        if (!showPosePicker) {
+            selectedTemplate?.let { template ->
+                Row(
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp, vertical = 4.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(stringResource(R.string.selected_pose), color = Color.Cyan, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                        Text(template.name, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+                    }
+                    TextButton(onClick = { showPosePicker = true }) {
+                        Text(stringResource(R.string.change_pose), color = Color.White)
+                    }
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(52.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.14f))
+                        .clickable { showMoreTools = !showMoreTools },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(stringResource(if (showMoreTools) R.string.close else R.string.customize), color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                }
+
+                Box(
+                    modifier = Modifier
+                        .size(82.dp)
+                        .border(4.dp, Color.White, CircleShape)
+                        .padding(6.dp)
+                        .clip(CircleShape)
+                        .background(Color.White)
+                        .clickable { onCaptureClick() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(Modifier.size(58.dp).border(2.dp, Color.Black.copy(alpha = 0.12f), CircleShape))
+                }
+
+                Box(
+                    modifier = Modifier
+                        .size(52.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.14f))
+                        .clickable { onFlipCamera() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(stringResource(R.string.flip_camera), color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+            Text(
+                stringResource(R.string.auto_capture_hint),
+                color = Color.White.copy(alpha = 0.55f),
+                fontSize = 11.sp,
+                modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 4.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun LegacyPremiumBottomControls(
     modifier: Modifier = Modifier,
     templates: List<PoseTemplate>,
     selectedTemplate: PoseTemplate?,
@@ -585,7 +778,7 @@ fun ChallengeOverlay(state: ChallengeState, timeLeft: Int, score: Float, highSco
         when (state) {
             ChallengeState.COUNTDOWN -> {
                 Text(
-                    text = "GET READY!\n$timeLeft",
+                    text = stringResource(R.string.get_ready, timeLeft),
                     fontSize = 48.sp,
                     fontWeight = FontWeight.Black,
                     color = Color.Yellow,
@@ -600,19 +793,19 @@ fun ChallengeOverlay(state: ChallengeState, timeLeft: Int, score: Float, highSco
                     horizontalAlignment = Alignment.End
                 ) {
                     Text(
-                        text = "TIME: $timeLeft",
+                        text = stringResource(R.string.time_left, timeLeft),
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = if (timeLeft <= 3) Color.Red else Color.White
                     )
                     Text(
-                        text = "SCORE: ${score.toInt()}%",
+                        text = stringResource(R.string.score_value, score.toInt()),
                         fontSize = 20.sp,
                         color = Color.Cyan
                     )
                     if (highScore > 0) {
                         Text(
-                            text = "BEST: $highScore%",
+                            text = stringResource(R.string.best_score, highScore),
                             fontSize = 14.sp,
                             color = Color.White.copy(alpha = 0.6f)
                         )
@@ -630,14 +823,14 @@ fun ChallengeOverlay(state: ChallengeState, timeLeft: Int, score: Float, highSco
                         .padding(24.dp)
                 ) {
                     Text(
-                        text = if (score >= 80f) "POSE MASTER!" else "WELL DONE!",
+                        text = stringResource(if (score >= 80f) R.string.pose_master else R.string.well_done),
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Black,
                         color = if (score >= 80f) Color.Cyan else Color.White
                     )
                     Spacer(Modifier.height(16.dp))
                     Text(
-                        text = "Your Accuracy",
+                        text = stringResource(R.string.your_accuracy),
                         fontSize = 16.sp,
                         color = Color.White.copy(alpha = 0.6f)
                     )
@@ -665,13 +858,13 @@ fun ChallengeOverlay(state: ChallengeState, timeLeft: Int, score: Float, highSco
 fun PermissionRequestUI(onClick: () -> Unit) {
     Box(modifier = Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Camera access is needed", color = Color.White)
+            Text(stringResource(R.string.camera_permission_needed), color = Color.White)
             Spacer(Modifier.height(16.dp))
             Button(
                 onClick = onClick,
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Cyan)
             ) {
-                Text("Grant Permission", color = Color.Black)
+                Text(stringResource(R.string.grant_permission), color = Color.Black)
             }
         }
     }

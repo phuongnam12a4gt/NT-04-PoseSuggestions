@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,7 +50,7 @@ fun MarketplaceBottomSheet(
                 .padding(horizontal = 16.dp)
         ) {
             Text(
-                "Pose Marketplace",
+                stringResource(R.string.pose_marketplace),
                 style = MaterialTheme.typography.headlineSmall,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
@@ -61,7 +62,7 @@ fun MarketplaceBottomSheet(
                 value = searchQuery,
                 onValueChange = { viewModel.setSearchQuery(it) },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Search poses...", color = Color.Gray) },
+                placeholder = { Text(stringResource(R.string.search_poses), color = Color.Gray) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray) },
                 colors = TextFieldDefaults.colors(
                     focusedTextColor = Color.White,
@@ -81,7 +82,7 @@ fun MarketplaceBottomSheet(
                     FilterChip(
                         selected = selectedCategory == category,
                         onClick = { viewModel.selectCategory(category) },
-                        label = { Text(category) }
+                        label = { Text(localizedOptionLabel(category)) }
                     )
                 }
             }
@@ -94,7 +95,7 @@ fun MarketplaceBottomSheet(
                     FilterChip(
                         selected = selectedDifficulty == difficulty,
                         onClick = { viewModel.selectDifficulty(difficulty) },
-                        label = { Text(difficulty) }
+                        label = { Text(localizedOptionLabel(difficulty)) }
                     )
                 }
             }
@@ -103,7 +104,7 @@ fun MarketplaceBottomSheet(
                 // My Recordings
                 if (recordedPoses.isNotEmpty()) {
                     item {
-                        Text("My Recordings", color = Color.Gray, style = MaterialTheme.typography.labelLarge)
+                        Text(stringResource(R.string.my_recordings), color = Color.Gray, style = MaterialTheme.typography.labelLarge)
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 8.dp)) {
                             items(recordedPoses) { recording ->
                                 Card(
@@ -115,7 +116,7 @@ fun MarketplaceBottomSheet(
                                 ) {
                                     Column(Modifier.padding(8.dp), verticalArrangement = Arrangement.Center) {
                                         Text(recording.name, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1)
-                                        Text("${recording.frames.size} frames", color = Color.Gray, fontSize = 10.sp)
+                                        Text(stringResource(R.string.frame_count, recording.frames.size), color = Color.Gray, fontSize = 10.sp)
                                     }
                                 }
                             }
@@ -126,7 +127,7 @@ fun MarketplaceBottomSheet(
                 // Recently Used
                 if (recentTemplates.isNotEmpty()) {
                     item {
-                        Text("Recently Used", color = Color.Gray, style = MaterialTheme.typography.labelLarge)
+                        Text(stringResource(R.string.recently_used), color = Color.Gray, style = MaterialTheme.typography.labelLarge)
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 8.dp)) {
                             items(recentTemplates) { template ->
                                 PoseCard(template, favorites.contains(template.id), { viewModel.toggleFavorite(template.id) }, { viewModel.selectTemplate(template); onDismiss() })
@@ -137,7 +138,7 @@ fun MarketplaceBottomSheet(
 
                 // All Templates
                 item {
-                    Text("Explore Poses", color = Color.Gray, style = MaterialTheme.typography.labelLarge)
+                    Text(stringResource(R.string.explore_poses), color = Color.Gray, style = MaterialTheme.typography.labelLarge)
                 }
                 
                 items(templates.chunked(2)) { rowItems ->
@@ -185,9 +186,9 @@ fun PoseCard(
                 Spacer(Modifier.height(8.dp))
                 Text(template.name, color = Color.White, fontWeight = FontWeight.Bold, maxLines = 1)
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(template.difficulty, color = Color.Cyan, fontSize = 10.sp)
+                    Text(localizedOptionLabel(template.difficulty), color = Color.Cyan, fontSize = 10.sp)
                     Spacer(Modifier.width(8.dp))
-                    Text(template.category, color = Color.Gray, fontSize = 10.sp)
+                    Text(localizedOptionLabel(template.category), color = Color.Gray, fontSize = 10.sp)
                 }
             }
 

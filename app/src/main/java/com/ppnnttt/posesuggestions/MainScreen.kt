@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -25,7 +26,8 @@ fun MainScreen(
     onNavigateToMarketplace: () -> Unit,
     onNavigateToStudio: () -> Unit,
     onNavigateToChallenges: () -> Unit,
-    onNavigateToGallery: () -> Unit
+    onNavigateToGallery: () -> Unit,
+    onNavigateToSettings: () -> Unit
 ) {
     Scaffold(
         containerColor = Color(0xFF080808)
@@ -58,14 +60,22 @@ fun MainScreen(
                     ),
                     color = Color.White
                 )
+                Spacer(Modifier.weight(1f))
+                IconButton(onClick = onNavigateToSettings) {
+                    Icon(
+                        Icons.Default.Settings,
+                        contentDescription = stringResource(R.string.settings),
+                        tint = Color.White
+                    )
+                }
             }
 
             Spacer(Modifier.height(32.dp))
 
             // Hero Section
             MainActionCard(
-                title = "Smart Photo Assistant",
-                subtitle = "Chụp ảnh đẹp với hướng dẫn AI và tự động chụp khi khớp dáng.",
+                title = stringResource(R.string.smart_photo_assistant),
+                subtitle = stringResource(R.string.smart_photo_description),
                 icon = Icons.Default.Add,
                 gradient = listOf(Color(0xFF6200EE), Color(0xFFB00020)),
                 onClick = onNavigateToCamera
@@ -74,7 +84,7 @@ fun MainScreen(
             Spacer(Modifier.height(24.dp))
 
             Text(
-                "Nâng tầm sáng tạo",
+                stringResource(R.string.create_more),
                 style = MaterialTheme.typography.titleMedium,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
@@ -84,8 +94,8 @@ fun MainScreen(
             // Features Grid
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 SecondaryActionCard(
-                    title = "Pose Studio",
-                    description = "Bạn thấy dáng nào đẹp trên mạng? Hãy tải ảnh lên, AI sẽ biến nó thành mẫu của riêng bạn.",
+                    title = stringResource(R.string.pose_studio),
+                    description = stringResource(R.string.pose_studio_description),
                     icon = Icons.Default.Add,
                     color = Color(0xFF03DAC5),
                     onClick = onNavigateToStudio
@@ -94,14 +104,14 @@ fun MainScreen(
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     SmallFeatureCard(
                         modifier = Modifier.weight(1f),
-                        title = "Khám phá",
+                        title = stringResource(R.string.explore),
                         icon = Icons.Default.Search,
                         color = Color(0xFFBB86FC),
                         onClick = onNavigateToMarketplace
                     )
                     SmallFeatureCard(
                         modifier = Modifier.weight(1f),
-                        title = "Lịch sử",
+                        title = stringResource(R.string.history),
                         icon = Icons.Default.List,
                         color = Color(0xFFE91E63),
                         onClick = onNavigateToGallery
@@ -110,7 +120,7 @@ fun MainScreen(
                 
                 SmallFeatureCard(
                     modifier = Modifier.fillMaxWidth(),
-                    title = "Thử thách Pose",
+                    title = stringResource(R.string.pose_challenge),
                     icon = Icons.Default.Star,
                     color = Color(0xFFFFAB00),
                     onClick = onNavigateToChallenges
@@ -129,7 +139,7 @@ fun MainScreen(
                     Icon(Icons.Default.Info, contentDescription = null, tint = Color.Yellow)
                     Spacer(Modifier.width(12.dp))
                     Text(
-                        "Mẹo: Bạn có thể dùng 2 ngón tay để phóng to ảnh mẫu cho khớp với cơ thể.",
+                        stringResource(R.string.zoom_tip),
                         color = Color.Gray,
                         fontSize = 12.sp
                     )
@@ -151,7 +161,7 @@ fun MainActionCard(title: String, subtitle: String, icon: ImageVector, gradient:
         Box(modifier = Modifier.fillMaxSize().background(Brush.linearGradient(gradient))) {
             Column(modifier = Modifier.padding(24.dp).align(Alignment.CenterStart).fillMaxWidth(0.7f)) {
                 Surface(color = Color.White.copy(alpha = 0.2f), shape = CircleShape) {
-                    Text("PHỔ BIẾN NHẤT", modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), fontSize = 10.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.most_popular), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), fontSize = 10.sp, color = Color.White, fontWeight = FontWeight.Bold)
                 }
                 Spacer(Modifier.height(12.dp))
                 Text(title, style = MaterialTheme.typography.headlineSmall, color = Color.White, fontWeight = FontWeight.Bold)

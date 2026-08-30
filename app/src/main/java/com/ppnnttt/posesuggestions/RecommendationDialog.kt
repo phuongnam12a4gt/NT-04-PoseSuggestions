@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun RecommendationDialog(
@@ -45,17 +46,17 @@ fun RecommendationDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    "AI Pose Suggestion",
+                    stringResource(R.string.ai_pose_suggestion),
                     style = MaterialTheme.typography.headlineSmall,
                     color = Color.White,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(Modifier.height(16.dp))
 
-                SelectionRow("Location", locations, location) { location = it }
-                SelectionRow("Outfit", outfits, outfit) { outfit = it }
-                SelectionRow("Gender", genders, gender) { gender = it }
-                SelectionRow("Mood", moods, mood) { mood = it }
+                SelectionRow(stringResource(R.string.location), locations, location) { location = it }
+                SelectionRow(stringResource(R.string.outfit), outfits, outfit) { outfit = it }
+                SelectionRow(stringResource(R.string.gender), genders, gender) { gender = it }
+                SelectionRow(stringResource(R.string.mood), moods, mood) { mood = it }
 
                 Spacer(Modifier.height(24.dp))
 
@@ -68,7 +69,7 @@ fun RecommendationDialog(
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Cyan)
                 ) {
-                    Text("Generate Recommendation", color = Color.Black, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.generate_recommendation), color = Color.Black, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -93,7 +94,7 @@ fun SelectionRow(label: String, options: List<String>, selected: String, onSelec
                         .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
                     Text(
-                        option,
+                        localizedOptionLabel(option),
                         color = if (isSelected) Color.Black else Color.White,
                         fontSize = 12.sp
                     )

@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import coil.compose.AsyncImage
 import java.io.File
 
@@ -34,7 +35,7 @@ fun GalleryScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Captured Poses", color = Color.White) },
+                title = { Text(stringResource(R.string.captured_poses), color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.White)
@@ -47,7 +48,7 @@ fun GalleryScreen(
     ) { padding ->
         if (images.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Text("No captured poses yet", color = Color.Gray)
+                Text(stringResource(R.string.no_captured_poses), color = Color.Gray)
             }
         } else {
             LazyVerticalGrid(
@@ -72,16 +73,16 @@ fun ImageItem(file: File, onDelete: () -> Unit) {
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text("Delete Photo?") },
-            text = { Text("Are you sure you want to delete this captured pose?") },
+            title = { Text(stringResource(R.string.delete_photo_title)) },
+            text = { Text(stringResource(R.string.delete_photo_message)) },
             confirmButton = {
                 TextButton(onClick = { onDelete(); showDialog = false }) {
-                    Text("Delete", color = Color.Red)
+                    Text(stringResource(R.string.delete), color = Color.Red)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -109,7 +110,7 @@ fun ImageItem(file: File, onDelete: () -> Unit) {
                     .padding(4.dp)
                     .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
             ) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White, modifier = Modifier.size(20.dp))
+                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete), tint = Color.White, modifier = Modifier.size(20.dp))
             }
         }
     }

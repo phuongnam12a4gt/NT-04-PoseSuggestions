@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.compose.ui.graphics.asImageBitmap
@@ -61,7 +62,7 @@ fun StudioScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Pose Studio", color = Color.White) },
+                title = { Text(stringResource(R.string.pose_studio), color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.White)
@@ -122,7 +123,7 @@ fun StudioScreen(
                 } else {
                     // Selection Menu
                     Text(
-                        "CHOOSE A METHOD",
+                        stringResource(R.string.choose_method),
                         color = Color.Cyan,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
@@ -149,7 +150,7 @@ fun StudioScreen(
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Icon(Icons.Default.Add, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(32.dp))
                                     Spacer(Modifier.height(12.dp))
-                                    Text("Upload Image", color = Color.Gray, fontSize = 14.sp)
+                                    Text(stringResource(R.string.upload_image), color = Color.Gray, fontSize = 14.sp)
                                 }
                             }
                         }
@@ -175,8 +176,8 @@ fun StudioScreen(
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text("📸", fontSize = 32.sp)
                                 Spacer(Modifier.height(12.dp))
-                                Text("Pose Studio", color = Color.Cyan, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                                Text("(3s Timer)", color = Color.Cyan.copy(alpha = 0.6f), fontSize = 10.sp)
+                                Text(stringResource(R.string.use_camera), color = Color.Cyan, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                Text(stringResource(R.string.timer_3s), color = Color.Cyan.copy(alpha = 0.6f), fontSize = 10.sp)
                             }
                         }
                     }
@@ -184,7 +185,7 @@ fun StudioScreen(
             } else {
                 // Review & Save State (Sử dụng GhostOverlay để xem thử tính năng kéo/zoom)
                 Text(
-                    "CHẾ ĐỘ XEM THỬ (THỬ KÉO & ZOOM)",
+                    stringResource(R.string.preview_drag_zoom),
                     color = Color.Cyan.copy(alpha = 0.7f),
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
@@ -241,7 +242,7 @@ fun StudioScreen(
                 OutlinedTextField(
                     value = poseName,
                     onValueChange = { poseName = it },
-                    label = { Text("Pose Name") },
+                    label = { Text(stringResource(R.string.pose_name)) },
                     modifier = Modifier.fillMaxWidth(),
                     colors = TextFieldDefaults.colors(
                         focusedTextColor = Color.White,
@@ -269,7 +270,7 @@ fun StudioScreen(
                         CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.Black)
                     } else {
                         Text(
-                            if (poseName.isBlank()) "Quick Save to Library" else "Save as \"$poseName\"", 
+                            if (poseName.isBlank()) stringResource(R.string.quick_save_library) else stringResource(R.string.save_as, poseName),
                             color = Color.Black, 
                             fontWeight = FontWeight.Bold
                         )
