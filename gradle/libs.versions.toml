@@ -16,6 +16,7 @@ coil = "2.7.0"
 mlkitPoseDetection = "18.0.0-beta5"
 kotlinSerialization = "1.8.0"
 kotlin = "2.1.0"
+work = "2.11.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,6 +42,7 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 mlkit-pose-detection = { group = "com.google.mlkit", name = "pose-detection", version.ref = "mlkitPoseDetection" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinSerialization" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
