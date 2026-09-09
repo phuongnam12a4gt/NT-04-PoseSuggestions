@@ -74,35 +74,31 @@ class StudioViewModel(application: Application) : AndroidViewModel(application) 
 
     private fun captureAndProcess() {
         val capture = imageCapture ?: return
-        capture.takePicture(
-            cameraExecutor,
-            object : ImageCapture.OnImageCapturedCallback() {
-                override fun onCaptureSuccess(image: ImageProxy) {
-                    val bitmap = imageProxyToBitmap(image)
-                    image.close()
-                    
-                    if (bitmap != null) {
-                        _sourceBitmap.value = bitmap
-                        _isProcessing.value = true
-                        val inputImage = InputImage.fromBitmap(bitmap, 0)
-                        poseProcessor.processImage(inputImage, isStatic = true)
-                            .addOnSuccessListener { pose ->
-                                val detected = pose.toDetectedPose(bitmap.width, bitmap.height)
-                                _extractedPose.value = detected
-                                _isProcessing.value = false
-                                _isCameraActive.value = false
-                            }
-                            .addOnFailureListener {
-                                _isProcessing.value = false
-                            }
+        _isProcessing.value = true
+        val photoFile = File(getApplication<Application>().cacheDir, "studio_${System.currentTimeMillis()}.jpg")
+        val options = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+        capture.takePicture(options, cameraExecutor, object : ImageCapture.OnImageSavedCallback {
+            override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                val bitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
+                if (bitmap == null) {
+                    _isProcessing.value = false
+                    return
+                }
+                _sourceBitmap.value = bitmap
+                val inputImage = InputImage.fromBitmap(bitmap, 0)
+                poseProcessor.processImage(inputImage, isStatic = true)
+                    .addOnSuccessListener { pose ->
+                        _extractedPose.value = pose.toDetectedPose(bitmap.width, bitmap.height)
+                        _isProcessing.value = false
+                        _isCameraActive.value = false
                     }
-                }
-
-                override fun onError(exception: ImageCaptureException) {
-                    // Handle error
-                }
+                    .addOnFailureListener { _isProcessing.value = false }
             }
-        )
+
+            override fun onError(exception: ImageCaptureException) {
+                _isProcessing.value = false
+            }
+        })
     }
 
     private fun imageProxyToBitmap(image: ImageProxy): Bitmap? {

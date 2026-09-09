@@ -3,6 +3,7 @@ package com.ppnnttt.posesuggestions
 import com.ppnnttt.posesuggestions.ui.screens.camera.CameraScreen
 import com.ppnnttt.posesuggestions.ui.screens.camera.CameraViewModel
 import com.ppnnttt.posesuggestions.ui.screens.editor.PhotoEditorScreen
+import com.ppnnttt.posesuggestions.ui.screens.editor.VideoEditorScreen
 import com.ppnnttt.posesuggestions.ui.screens.gallery.GalleryScreen
 import com.ppnnttt.posesuggestions.ui.screens.gallery.GalleryViewModel
 import com.ppnnttt.posesuggestions.ui.screens.main.MainScreen
@@ -37,6 +38,7 @@ class MainActivity : AppCompatActivity() {
                         onNavigateToMarketplace = { navController.navigate("camera") },
                         onNavigateToStudio = { navController.navigate("studio") },
                         onNavigateToPhotoEditor = { navController.navigate("photo_editor") },
+                        onNavigateToVideoEditor = { navController.navigate("video_editor") },
                         onNavigateToGallery = { navController.navigate("gallery") },
                         onNavigateToSettings = { navController.navigate("settings") }
                     )
@@ -58,6 +60,9 @@ class MainActivity : AppCompatActivity() {
                 }
                 composable("photo_editor") {
                     PhotoEditorScreen(onNavigateBack = { navController.popBackStack() })
+                }
+                composable("video_editor") {
+                    VideoEditorScreen(onNavigateBack = { navController.popBackStack() })
                 }
             }
         }

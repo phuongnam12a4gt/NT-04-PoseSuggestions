@@ -4,6 +4,8 @@ import com.ppnnttt.posesuggestions.R
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,6 +30,7 @@ fun MainScreen(
     onNavigateToMarketplace: () -> Unit,
     onNavigateToStudio: () -> Unit,
     onNavigateToPhotoEditor: () -> Unit,
+    onNavigateToVideoEditor: () -> Unit,
     onNavigateToGallery: () -> Unit,
     onNavigateToSettings: () -> Unit
 ) {
@@ -39,6 +42,7 @@ fun MainScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .padding(horizontal = 20.dp)
+                .verticalScroll(rememberScrollState())
         ) {
             Spacer(Modifier.height(24.dp))
             
@@ -127,9 +131,17 @@ fun MainScreen(
                     color = Color(0xFFFFAB00),
                     onClick = onNavigateToPhotoEditor
                 )
+
+                SmallFeatureCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    title = "Video editor",
+                    icon = Icons.Default.PlayArrow,
+                    color = Color(0xFF64B5F6),
+                    onClick = onNavigateToVideoEditor
+                )
             }
-            
-            Spacer(Modifier.weight(1f))
+
+            Spacer(Modifier.height(20.dp))
             
             // Quick Tip
             Card(
