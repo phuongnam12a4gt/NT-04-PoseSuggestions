@@ -22,10 +22,20 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        delegate.localNightMode = androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
         AppLanguageManager.applySavedLanguage(this)
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = androidx.activity.SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
+            navigationBarStyle = androidx.activity.SystemBarStyle.dark(android.graphics.Color.BLACK)
+        )
         setContent {
+            androidx.compose.material3.MaterialTheme(colorScheme = androidx.compose.material3.darkColorScheme(
+                primary = androidx.compose.ui.graphics.Color.Cyan,
+                onPrimary = androidx.compose.ui.graphics.Color.Black,
+                surface = androidx.compose.ui.graphics.Color(0xFF17171F),
+                background = androidx.compose.ui.graphics.Color(0xFF080808)
+            )) {
             val navController = rememberNavController()
             val cameraViewModel: CameraViewModel = viewModel()
             val studioViewModel: StudioViewModel = viewModel()
@@ -35,7 +45,7 @@ class MainActivity : AppCompatActivity() {
                 composable("main") {
                     MainScreen(
                         onNavigateToCamera = { navController.navigate("camera") },
-                        onNavigateToMarketplace = { navController.navigate("camera") },
+                        onNavigateToMarketplace = { navController.navigate("explore") },
                         onNavigateToStudio = { navController.navigate("studio") },
                         onNavigateToPhotoEditor = { navController.navigate("photo_editor") },
                         onNavigateToVideoEditor = { navController.navigate("video_editor") },
@@ -46,24 +56,36 @@ class MainActivity : AppCompatActivity() {
                 composable("camera") {
                     CameraScreen(
                         viewModel = cameraViewModel,
-                        onNavigateBack = { navController.popBackStack() }
+                        onNavigateBack = { navController.popBackStack() },
+                        onOpenGallery = { navController.navigate("gallery") }
                     )
+                }
+                composable("explore") {
+                    CameraScreen(cameraViewModel, onNavigateBack = { navController.popBackStack() },
+                        onOpenGallery = { navController.navigate("gallery") }, initialShowMarketplace = true)
                 }
                 composable("studio") {
                     StudioScreen(studioViewModel, onNavigateBack = { navController.popBackStack() })
                 }
                 composable("gallery") {
-                    GalleryScreen(galleryViewModel, onNavigateBack = { navController.popBackStack() })
+                    GalleryScreen(galleryViewModel, onNavigateBack = { navController.popBackStack() },
+                        onTakePhoto = { navController.navigate("camera") },
+                        onEditPhoto = { file ->
+                            navController.currentBackStackEntry?.savedStateHandle?.set("edit_photo", file.absolutePath)
+                            navController.navigate("photo_editor")
+                        })
                 }
                 composable("settings") {
                     SettingsScreen(onNavigateBack = { navController.popBackStack() })
                 }
                 composable("photo_editor") {
-                    PhotoEditorScreen(onNavigateBack = { navController.popBackStack() })
+                    PhotoEditorScreen(onNavigateBack = { navController.popBackStack() },
+                        initialPhoto = navController.previousBackStackEntry?.savedStateHandle?.get<String>("edit_photo"))
                 }
                 composable("video_editor") {
                     VideoEditorScreen(onNavigateBack = { navController.popBackStack() })
                 }
+            }
             }
         }
     }

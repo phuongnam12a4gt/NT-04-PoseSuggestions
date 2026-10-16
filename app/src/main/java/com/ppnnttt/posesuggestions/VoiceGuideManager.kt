@@ -4,7 +4,7 @@ import android.content.Context
 import android.speech.tts.TextToSpeech
 import java.util.Locale
 
-class VoiceGuideManager(context: Context) : TextToSpeech.OnInitListener {
+class VoiceGuideManager(private val context: Context) : TextToSpeech.OnInitListener {
     private var tts: TextToSpeech? = TextToSpeech(context, this)
     private var isReady = false
     
@@ -14,7 +14,7 @@ class VoiceGuideManager(context: Context) : TextToSpeech.OnInitListener {
 
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
-            tts?.language = Locale.US
+            tts?.language = Locale.forLanguageTag(AppLanguageManager.getLanguage(context))
             isReady = true
         }
     }
@@ -23,7 +23,7 @@ class VoiceGuideManager(context: Context) : TextToSpeech.OnInitListener {
         val currentTime = System.currentTimeMillis()
         
         // Check for repetitiveness and frequency
-        if (isReady && (force || text != lastSpokenText || currentTime - lastSpokenTime > MIN_GAP_MILLIS)) {
+        if (isReady && (force || currentTime - lastSpokenTime >= MIN_GAP_MILLIS)) {
             tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
             lastSpokenText = text
             lastSpokenTime = currentTime

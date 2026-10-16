@@ -134,7 +134,7 @@ fun MainScreen(
 
                 SmallFeatureCard(
                     modifier = Modifier.fillMaxWidth(),
-                    title = "Video editor",
+                    title = stringResource(R.string.video_editor),
                     icon = Icons.Default.PlayArrow,
                     color = Color(0xFF64B5F6),
                     onClick = onNavigateToVideoEditor
@@ -168,12 +168,14 @@ fun MainActionCard(title: String, subtitle: String, icon: ImageVector, gradient:
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(200.dp)
+            .heightIn(min = 200.dp)
+            .background(Brush.linearGradient(gradient), RoundedCornerShape(28.dp))
             .clickable { onClick() },
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         shape = RoundedCornerShape(28.dp)
     ) {
-        Box(modifier = Modifier.fillMaxSize().background(Brush.linearGradient(gradient))) {
-            Column(modifier = Modifier.padding(24.dp).align(Alignment.CenterStart).fillMaxWidth(0.7f)) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(24.dp).align(Alignment.CenterStart).fillMaxWidth(0.88f)) {
                 Surface(color = Color.White.copy(alpha = 0.2f), shape = CircleShape) {
                     Text(stringResource(R.string.most_popular), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), fontSize = 10.sp, color = Color.White, fontWeight = FontWeight.Bold)
                 }
@@ -209,16 +211,16 @@ fun SecondaryActionCard(title: String, description: String, icon: ImageVector, c
 @Composable
 fun SmallFeatureCard(modifier: Modifier, title: String, icon: ImageVector, color: Color, onClick: () -> Unit) {
     Card(
-        modifier = modifier.height(80.dp).clickable { onClick() },
+        modifier = modifier.heightIn(min = 88.dp).clickable { onClick() },
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f))
     ) {
-        Row(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(color.copy(alpha = 0.1f)), contentAlignment = Alignment.Center) {
+        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(modifier = Modifier.size(32.dp).clip(CircleShape).background(color.copy(alpha = 0.1f)), contentAlignment = Alignment.Center) {
                 Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(20.dp))
             }
-            Spacer(Modifier.width(16.dp))
-            Text(title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Spacer(Modifier.width(8.dp))
+            Text(title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp, modifier = Modifier.weight(1f))
         }
     }
 }

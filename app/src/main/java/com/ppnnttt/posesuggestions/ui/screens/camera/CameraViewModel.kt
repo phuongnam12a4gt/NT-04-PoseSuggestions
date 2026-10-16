@@ -99,6 +99,7 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
     private val _selectedTemplate = MutableStateFlow<PoseTemplate?>(null)
     val selectedTemplate = _selectedTemplate.asStateFlow()
 
+    val challengeFinalScore = challengeEngine.finalScore
     val challengeState = challengeEngine.state
     val challengeTimeLeft = challengeEngine.timeLeft
 
@@ -144,7 +145,54 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
     private val _lastCapturedPhoto = MutableStateFlow<File?>(null)
     val lastCapturedPhoto = _lastCapturedPhoto.asStateFlow()
 
+    private val _cameraError = MutableStateFlow<String?>(null)
+    val cameraError = _cameraError.asStateFlow()
+
+    private val settings = application.getSharedPreferences("camera_settings", android.content.Context.MODE_PRIVATE)
+    private val _autoCaptureEnabled = MutableStateFlow(settings.getBoolean("auto_capture", false))
+    val autoCaptureEnabled = _autoCaptureEnabled.asStateFlow()
+    private val _voiceEnabled = MutableStateFlow(settings.getBoolean("voice", false))
+    val voiceEnabled = _voiceEnabled.asStateFlow()
+    private val autoCaptureGate = AutoCaptureGate()
+    private var lastPoseTime = 0L
+    private var bindingGeneration = 0
+    private var cameraProvider: ProcessCameraProvider? = null
+    private var isCameraBound = false
     private var isCapturing = false
+
+    fun setAutoCaptureEnabled(enabled: Boolean) {
+        _autoCaptureEnabled.value = enabled
+        settings.edit().putBoolean("auto_capture", enabled).apply()
+        cancelCountdown()
+        autoCaptureGate.reset()
+    }
+
+    fun setVoiceEnabled(enabled: Boolean) {
+        _voiceEnabled.value = enabled
+        settings.edit().putBoolean("voice", enabled).apply()
+        if (!enabled) voiceGuideManager.stop()
+    }
+
+    fun refreshLibrary() { loadTemplates(); refreshUserData() }
+
+    fun releaseCamera() {
+        bindingGeneration++
+        isCameraBound = false
+        cameraProvider?.unbindAll()
+        imageCapture = null
+        cancelCountdown()
+        challengeEngine.stop()
+        replayEngine.stop()
+        voiceGuideManager.stop()
+        if (_isRecordingPose.value) stopRecording("Pose_${System.currentTimeMillis()}")
+        _detectedPose.value = null
+        _detectedPosePartner.value = null
+        _currentScore.value = 0f
+        _guidanceMessage.value = null
+        smoothingFilter.reset()
+        smoothingFilterPartner.reset()
+    }
+
     private var countdownJob: Job? = null
     private var imageCapture: ImageCapture? = null
 
@@ -160,7 +208,7 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
 
     private fun loadRecordings() {
         viewModelScope.launch {
-            _recordedPoses.value = recordingRepository.loadRecordings()
+            _recordedPoses.value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { recordingRepository.loadRecordings() }
         }
     }
 
@@ -173,8 +221,17 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
         _isRecordingPose.value = false
         val recording = poseRecorder.stop(name, _selectedTemplate.value?.id)
         if (recording != null) {
-            recordingRepository.saveRecording(recording)
-            loadRecordings()
+            viewModelScope.launch {
+                try {
+                    if (recording.frames.isEmpty()) {
+                        _cameraError.value = getApplication<android.app.Application>().getString(R.string.recording_empty)
+                    } else {
+                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { recordingRepository.saveRecording(recording) }
+                        loadRecordings()
+                        Toast.makeText(getApplication(), getApplication<android.app.Application>().getString(R.string.recording_saved), Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) { _cameraError.value = getApplication<android.app.Application>().getString(R.string.recording_failed) }
+            }
         }
     }
 
@@ -224,7 +281,10 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
     }
 
     fun selectTemplate(template: PoseTemplate) {
+        autoCaptureGate.reset()
+        _currentScore.value = 0f
         _selectedTemplate.value = template
+        _recommendationText.value = null
         _recommendedPose.value = null // Clear recommendation when manually selecting
         _recommendationText.value = null
         repository.addToRecent(template.id)
@@ -240,13 +300,20 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
                 val best = recommendations.first()
                 _recommendedPose.value = best
                 _recommendationText.value = promptBuilder.buildRecommendationDescription(best, input)
-                selectTemplate(best)
+                // Do not call selectTemplate here: it clears recommendation state.
+                _selectedTemplate.value = best
+                repository.addToRecent(best.id)
+                refreshUserData()
+                cancelCountdown()
+                challengeEngine.stop()
+            } else {
+                _cameraError.value = getApplication<android.app.Application>().getString(R.string.no_recommendation)
             }
         }
     }
 
     fun startRandomChallenge() {
-        val all = repository.loadTemplates()
+        val all = repository.loadTemplates().filter { !it.isCouple }
         if (all.isNotEmpty()) {
             val randomPose = all.random()
             selectTemplate(randomPose)
@@ -276,15 +343,25 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
         _isFrontCamera.value = !_isFrontCamera.value
     }
 
+    fun dismissRecommendation() { _recommendationText.value = null }
+
+    fun clearCameraError() { _cameraError.value = null }
+
     fun bindCamera(
         lifecycleOwner: LifecycleOwner,
         previewView: androidx.camera.view.PreviewView
     ) {
+        val generation = ++bindingGeneration
+        cancelCountdown()
+        isCameraBound = false
         val context = previewView.context
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
 
         cameraProviderFuture.addListener({
+            try {
+            if (generation != bindingGeneration) return@addListener
             val cameraProvider = cameraProviderFuture.get()
+            this.cameraProvider = cameraProvider
 
             val preview = Preview.Builder()
                 .build()
@@ -302,7 +379,10 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
                 .build()
                 .also {
                     it.setAnalyzer(cameraExecutor, PoseAnalyzer(poseProcessor) { poses, width, height ->
+                        if (generation != bindingGeneration || !isCameraBound) return@PoseAnalyzer
                         val detectedList = poses.map { it.toDetectedPose(width, height) }
+                            .filter { pose -> pose.landmarks.count { it.inFrameLikelihood >= 0.5f } >= 6 }
+                        lastPoseTime = android.os.SystemClock.elapsedRealtime()
                         
                         // Lọc mượt cho từng người
                         val p1Raw = detectedList.getOrNull(0)
@@ -322,7 +402,7 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
                                 val coupleScore = couplePoseEngine.calculateCoupleScore(p1, p2, template)
                                 // Combine into a display score
                                 coupleScore.totalScore
-                            } else if (p1 != null) {
+                            } else if (!template.isCouple && p1 != null) {
                                 similarityEngine.calculateSimilarity(p1, template)
                             } else 0f
 
@@ -332,12 +412,13 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
                             val guidance = p1?.let { guidanceEngine.getGuidance(it, template) }
                             _guidanceMessage.value = guidance?.message
                             
-                            if (score < 80f) {
+                            if (_voiceEnabled.value && !isReplaying.value && score < 80f && p1 != null) {
                                 poseCoach.provideCoaching(score, guidance)
-                            } else {
+                            } else if (score >= 80f) {
                                 _guidanceMessage.value = getApplication<android.app.Application>().getString(R.string.hold_still)
-                                voiceGuideManager.speak("Hold still!")
+                                if (_voiceEnabled.value && !isReplaying.value) voiceGuideManager.speak(_guidanceMessage.value!!)
                             }
+                            if (p1 == null || !p1.hasUsableBody()) _guidanceMessage.value = getApplication<android.app.Application>().getString(R.string.step_into_frame)
                             
                             challengeEngine.updateCurrentScore(score)
                             checkAutoCapture(score)
@@ -355,7 +436,6 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
                 CameraSelector.DEFAULT_BACK_CAMERA
             }
 
-            try {
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(
                     lifecycleOwner,
@@ -364,14 +444,15 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
                     imageAnalysis,
                     imageCapture
                 )
+                isCameraBound = true
             } catch (exc: Exception) {
-                // Handle binding failure
+                _cameraError.value = getApplication<android.app.Application>().getString(R.string.camera_start_failed)
             }
         }, ContextCompat.getMainExecutor(context))
     }
 
     private fun checkAutoCapture(score: Float) {
-        if (score >= _captureThreshold.value && !isCapturing && countdownJob == null) {
+        if (_autoCaptureEnabled.value && autoCaptureGate.canStart(score) && !isCapturing && countdownJob == null && challengeState.value == ChallengeState.IDLE && !isReplaying.value) {
             startCountdown()
         } else if (score < _captureThreshold.value - 5f && countdownJob != null) {
             cancelCountdown()
@@ -383,9 +464,16 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
             for (i in 3 downTo 1) {
                 _countdownValue.value = i
                 delay(1000)
+                if (!isCameraBound || android.os.SystemClock.elapsedRealtime() - lastPoseTime >= 1200) {
+                    _countdownValue.value = null
+                    countdownJob = null
+                    return@launch
+                }
             }
             _countdownValue.value = null
-            capturePhoto()
+            countdownJob = null
+            val fresh = android.os.SystemClock.elapsedRealtime() - lastPoseTime < 1200
+            if (_autoCaptureEnabled.value && isCameraBound && fresh && _currentScore.value >= _captureThreshold.value - 5f) capturePhoto()
         }
     }
 
@@ -397,15 +485,18 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
 
     private fun capturePhoto() {
         val capture = imageCapture ?: return
+        if (!isCameraBound) return
         if (isCapturing) return
         isCapturing = true
+        autoCaptureGate.captured()
 
         val photoFile = File(
             getApplication<android.app.Application>().getExternalFilesDir(Environment.DIRECTORY_PICTURES),
             SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US).format(System.currentTimeMillis()) + ".jpg"
         )
 
-        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+        val metadata = ImageCapture.Metadata().apply { isReversedHorizontal = _isFrontCamera.value }
+        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).setMetadata(metadata).build()
 
         shutterSound.play(MediaActionSound.SHUTTER_CLICK)
 
@@ -424,6 +515,7 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
 
                 override fun onError(exception: ImageCaptureException) {
                     isCapturing = false
+                    _cameraError.value = getApplication<android.app.Application>().getString(R.string.photo_save_failed)
                 }
             }
         )
@@ -437,6 +529,7 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
 
     override fun onCleared() {
         super.onCleared()
+        releaseCamera()
         poseProcessor.stop()
         shutterSound.release()
         toneGenerator.release()

@@ -1,25 +1,175 @@
 <resources>
     <string name="app_name">PoseSuggestions</string>
-    <string name="settings">Cài đặt</string><string name="back">Quay lại</string>
-    <string name="language">Ngôn ngữ ứng dụng</string><string name="language_description">Chọn ngôn ngữ sử dụng trong toàn bộ ứng dụng.</string>
-    <string name="choose_pose">Chọn dáng mẫu</string><string name="choose_pose_hint">Chạm một dáng để bắt đầu căn chỉnh</string>
-    <string name="done">Xong</string><string name="all">Tất cả</string><string name="no_poses">Không có dáng trong danh mục này</string>
-    <string name="pose_visibility">Độ rõ dáng mẫu</string><string name="ai_suggest">AI gợi ý</string><string name="challenge">Thử thách</string>
-    <string name="record_pose">Ghi dáng</string><string name="stop_recording">Dừng ghi</string><string name="explore">Khám phá</string>
-    <string name="selected_pose">DÁNG ĐANG CHỌN</string><string name="change_pose">Đổi dáng</string><string name="customize">Tuỳ chỉnh</string>
-    <string name="close">Đóng</string><string name="flip_camera">Đổi camera</string>
-    <string name="auto_capture_hint">Giữ đúng dáng — app sẽ tự chụp khi điểm khớp đủ cao</string><string name="pose_match">Độ khớp %1$d%%</string>
-    <string name="smart_photo_assistant">Trợ lý chụp ảnh thông minh</string><string name="smart_photo_description">Chụp ảnh đẹp hơn với hướng dẫn AI và tự động chụp khi khớp dáng.</string><string name="create_more">Nâng tầm sáng tạo</string>
-    <string name="pose_studio">Studio tạo dáng</string><string name="pose_studio_description">Tải dáng bạn yêu thích lên và biến nó thành mẫu riêng.</string><string name="history">Lịch sử</string><string name="pose_challenge">Thử thách tạo dáng</string><string name="zoom_tip">Mẹo: Dùng hai ngón tay để đổi kích thước và căn dáng với cơ thể.</string><string name="most_popular">PHỔ BIẾN NHẤT</string>
-    <string name="captured_poses">Ảnh tạo dáng đã chụp</string><string name="no_captured_poses">Chưa có ảnh tạo dáng</string><string name="delete_photo_title">Xóa ảnh?</string><string name="delete_photo_message">Bạn có chắc muốn xóa ảnh tạo dáng này?</string><string name="delete">Xóa</string><string name="cancel">Hủy</string>
-    <string name="place_body_here">ĐẶT CƠ THỂ VÀO ĐÂY</string><string name="stop_replay">DỪNG PHÁT LẠI</string><string name="camera_permission_needed">Ứng dụng cần quyền truy cập camera</string><string name="grant_permission">Cấp quyền</string>
-    <string name="choose_method">CHỌN CÁCH TẠO DÁNG</string><string name="upload_image">Tải ảnh lên</string><string name="use_camera">Dùng camera</string><string name="timer_3s">Hẹn giờ 3 giây</string><string name="preview_drag_zoom">XEM THỬ — KÉO VÀ THU PHÓNG</string><string name="pose_name">Tên dáng</string><string name="quick_save_library">Lưu nhanh vào thư viện</string><string name="save_as">Lưu thành “%1$s”</string>
-    <string name="pose_marketplace">Kho dáng mẫu</string><string name="search_poses">Tìm kiếm dáng…</string><string name="my_recordings">Bản ghi của tôi</string><string name="frame_count">%1$d khung hình</string><string name="recently_used">Dùng gần đây</string><string name="explore_poses">Khám phá dáng</string>
-    <string name="ai_pose_suggestion">AI gợi ý dáng</string><string name="location">Địa điểm</string><string name="outfit">Trang phục</string><string name="gender">Giới tính</string><string name="mood">Cảm xúc</string><string name="generate_recommendation">Tạo gợi ý</string><string name="hold_still">Giữ nguyên!</string><string name="pose_captured">Đã chụp dáng!</string>
-    <string name="left_arm">tay trái</string><string name="right_arm">tay phải</string><string name="left_leg">chân trái</string><string name="right_leg">chân phải</string><string name="left_shoulder">vai trái</string><string name="right_shoulder">vai phải</string><string name="bend_joint">Co %1$s lại</string><string name="straighten_joint">Duỗi thẳng %1$s</string><string name="feedback_great">Rất tốt!</string><string name="feedback_perfect">Hoàn hảo!</string><string name="feedback_aligned">Căn dáng rất chuẩn!</string><string name="feedback_almost">Gần đúng rồi, tiếp tục nhé!</string><string name="feedback_close">Sắp được rồi!</string><string name="feedback_improving">Bạn đang tiến bộ!</string>
-    <string name="try_this_pose">Hãy thử dáng này!</string><string name="recommendation_description">Với cảm xúc %1$s tại %2$s, hãy thử “%3$s”. Đặt góc máy %4$s, hướng cơ thể %5$s và đặt tay %6$s.</string>
-    <string name="get_ready">CHUẨN BỊ!\n%1$d</string><string name="time_left">THỜI GIAN: %1$d</string><string name="score_value">ĐIỂM: %1$d%%</string><string name="best_score">CAO NHẤT: %1$d%%</string><string name="pose_master">BẬC THẦY TẠO DÁNG!</string><string name="well_done">LÀM TỐT LẮM!</string><string name="your_accuracy">Độ chính xác</string>
-    <string name="easy">Dễ</string><string name="medium">Trung bình</string><string name="hard">Khó</string><string name="cool">Cá tính</string><string name="selfie">Tự chụp</string><string name="travel">Du lịch</string><string name="gym">Phòng tập</string><string name="outdoor">Ngoài trời</string><string name="indoor">Trong nhà</string><string name="nature">Thiên nhiên</string><string name="street">Đường phố</string><string name="casual">Thường ngày</string><string name="active">Năng động</string><string name="formal">Trang trọng</string><string name="streetwear">Đường phố</string><string name="male">Nam</string><string name="female">Nữ</string><string name="non_binary">Phi nhị nguyên</string><string name="confident">Tự tin</string><string name="relaxed">Thư giãn</string><string name="energetic">Tràn năng lượng</string><string name="serene">Thanh thản</string>
-    <string name="photo_editor">Chỉnh sửa ảnh</string><string name="no_photo_selected">Chọn một ảnh để bắt đầu chỉnh sửa</string><string name="choose_photo">Chọn ảnh</string><string name="brightness">Độ sáng</string><string name="contrast">Độ tương phản</string><string name="saturation">Độ bão hòa</string><string name="rotate">Xoay</string><string name="reset">Đặt lại</string><string name="save">Lưu</string><string name="photo_saved">Đã lưu ảnh chỉnh sửa</string><string name="photo_save_failed">Không thể lưu ảnh</string>
-    <string name="remove_background">Tách chủ thể · Xóa nền</string><string name="extracting_subject">Đang tách chủ thể…</string>
+    <string name="settings">Cài đặt</string>
+    <string name="back">Quay lại</string>
+    <string name="language">Ngôn ngữ ứng dụng</string>
+    <string name="language_description">Chọn ngôn ngữ hiển thị trong ứng dụng.</string>
+    <string name="choose_pose">Chọn dáng chụp</string>
+    <string name="choose_pose_hint">Chạm vào một dáng để bắt đầu làm theo</string>
+    <string name="done">Xong</string>
+    <string name="all">Tất cả</string>
+    <string name="no_poses">Chưa có dáng phù hợp. Thử đổi bộ lọc.</string>
+    <string name="pose_visibility">Độ rõ của dáng mẫu</string>
+    <string name="ai_suggest">Gợi ý dáng</string>
+    <string name="challenge">Thử thách</string>
+    <string name="record_pose">Ghi chuyển động</string>
+    <string name="stop_recording">Dừng ghi</string>
+    <string name="explore">Khám phá dáng</string>
+    <string name="selected_pose">DÁNG ĐANG CHỌN</string>
+    <string name="change_pose">Đổi dáng</string>
+    <string name="customize">Công cụ</string>
+    <string name="close">Đóng</string>
+    <string name="flip_camera">Đổi camera</string>
+    <string name="auto_capture_hint">Giữ dáng 3 giây để tự chụp. Đổi tư thế để chụp tiếp.</string>
+    <string name="pose_match">Độ khớp %1$d%%</string>
+    <string name="smart_photo_assistant">Chụp ảnh theo dáng</string>
+    <string name="smart_photo_description">Chọn dáng yêu thích, làm theo hướng dẫn và chụp khi sẵn sàng.</string>
+    <string name="create_more">Thêm cảm hứng</string>
+    <string name="pose_studio">Tạo dáng riêng</string>
+    <string name="pose_studio_description">Biến ảnh tham khảo thành dáng mẫu của bạn.</string>
+    <string name="history">Ảnh đã chụp</string>
+    <string name="pose_challenge">Thử thách tạo dáng</string>
+    <string name="zoom_tip">Mẹo: Dùng hai ngón tay để phóng to hoặc di chuyển dáng mẫu.</string>
+    <string name="most_popular">BẮT ĐẦU CHỤP</string>
+    <string name="captured_poses">Ảnh đã chụp</string>
+    <string name="no_captured_poses">Chưa có ảnh. Chụp bức ảnh đầu tiên của bạn nhé!</string>
+    <string name="delete_photo_title">Xóa ảnh này?</string>
+    <string name="delete_photo_message">Ảnh sẽ bị xóa khỏi ứng dụng. Hành động này không thể hoàn tác.</string>
+    <string name="delete">Xóa</string>
+    <string name="cancel">Hủy</string>
+    <string name="place_body_here">ĐỨNG THEO DÁNG MẪU</string>
+    <string name="stop_replay">DỪNG PHÁT LẠI</string>
+    <string name="camera_permission_needed">Cho phép camera để xem trước và chụp ảnh.</string>
+    <string name="grant_permission">Cho phép camera</string>
+    <string name="choose_method">CHỌN ẢNH THAM KHẢO</string>
+    <string name="upload_image">Chọn từ máy</string>
+    <string name="use_camera">Chụp dáng mới</string>
+    <string name="timer_3s">Hẹn giờ 3 giây</string>
+    <string name="preview_drag_zoom">XEM TRƯỚC DÁNG MẪU</string>
+    <string name="pose_name">Tên dáng</string>
+    <string name="quick_save_library">Lưu vào thư viện dáng</string>
+    <string name="save_as">Lưu với tên %1$s</string>
+    <string name="pose_marketplace">Thư viện dáng</string>
+    <string name="search_poses">Tìm tên dáng...</string>
+    <string name="my_recordings">Chuyển động đã ghi</string>
+    <string name="frame_count">%1$d khung hình</string>
+    <string name="recently_used">Dùng gần đây</string>
+    <string name="explore_poses">Chọn dáng để chụp</string>
+    <string name="ai_pose_suggestion">Tìm dáng phù hợp</string>
+    <string name="location">Địa điểm</string>
+    <string name="outfit">Trang phục</string>
+    <string name="gender">Giới tính</string>
+    <string name="mood">Cảm xúc</string>
+    <string name="generate_recommendation">Gợi ý cho tôi</string>
+    <string name="hold_still">Đẹp rồi, giữ dáng nhé!</string>
+    <string name="pose_captured">Đã chụp ảnh! Xem trong Ảnh đã chụp.</string>
+    <string name="left_arm">tay trái</string>
+    <string name="right_arm">tay phải</string>
+    <string name="left_leg">chân trái</string>
+    <string name="right_leg">chân phải</string>
+    <string name="left_shoulder">vai trái</string>
+    <string name="right_shoulder">vai phải</string>
+    <string name="bend_joint">Co %1$s lại</string>
+    <string name="straighten_joint">Duỗi thẳng %1$s</string>
+    <string name="feedback_great">Bạn làm tốt lắm!</string>
+    <string name="feedback_perfect">Rất đẹp!</string>
+    <string name="feedback_aligned">Dáng đã khớp rồi!</string>
+    <string name="feedback_almost">Gần đúng rồi, tiếp tục nhé!</string>
+    <string name="feedback_close">Sắp được rồi!</string>
+    <string name="feedback_improving">Bạn đang tiến bộ!</string>
+    <string name="try_this_pose">Thử dáng này nhé!</string>
+    <string name="recommendation_description">Thử dáng %3$s cho cảm xúc %1$s tại %2$s. Góc máy: %4$s. Hướng người: %5$s. Vị trí tay: %6$s.</string>
+    <string name="get_ready">CHUẨN BỊ!\n%1$d</string>
+    <string name="time_left">CÒN: %1$d giây</string>
+    <string name="score_value">ĐIỂM: %1$d%%</string>
+    <string name="best_score">CAO NHẤT: %1$d%%</string>
+    <string name="pose_master">TẠO DÁNG RẤT ĐẸP!</string>
+    <string name="well_done">BẠN LÀM TỐT LẮM!</string>
+    <string name="your_accuracy">Độ khớp của bạn</string>
+    <string name="easy">Dễ</string>
+    <string name="medium">Vừa</string>
+    <string name="hard">Khó</string>
+    <string name="cool">Cá tính</string>
+    <string name="selfie">Tự chụp</string>
+    <string name="travel">Du lịch</string>
+    <string name="gym">Phòng tập</string>
+    <string name="outdoor">Ngoài trời</string>
+    <string name="indoor">Trong nhà</string>
+    <string name="nature">Thiên nhiên</string>
+    <string name="street">Đường phố</string>
+    <string name="casual">Thường ngày</string>
+    <string name="active">Năng động</string>
+    <string name="formal">Trang trọng</string>
+    <string name="streetwear">Thời trang đường phố</string>
+    <string name="male">Nam</string>
+    <string name="female">Nữ</string>
+    <string name="non_binary">Phi nhị nguyên</string>
+    <string name="confident">Tự tin</string>
+    <string name="relaxed">Thư giãn</string>
+    <string name="energetic">Tràn năng lượng</string>
+    <string name="serene">Thanh thản</string>
+    <string name="photo_editor">Chỉnh sửa ảnh</string>
+    <string name="no_photo_selected">Chọn một ảnh để bắt đầu chỉnh sửa</string>
+    <string name="choose_photo">Chọn ảnh</string>
+    <string name="brightness">Độ sáng</string>
+    <string name="contrast">Tương phản</string>
+    <string name="saturation">Độ bão hòa</string>
+    <string name="rotate">Xoay</string>
+    <string name="reset">Đặt lại</string>
+    <string name="save">Lưu</string>
+    <string name="photo_saved">Đã lưu ảnh chỉnh sửa</string>
+    <string name="photo_save_failed">Không thể lưu ảnh. Vui lòng thử lại.</string>
+    <string name="remove_background">Xóa nền</string>
+    <string name="extracting_subject">Đang tách chủ thể...</string>
+    <string name="video_editor">Cắt video</string>
+    <string name="auto_capture">Tự động chụp</string>
+    <string name="manual_capture_hint">Bấm nút chụp khi bạn sẵn sàng</string>
+    <string name="voice_guidance">Hướng dẫn bằng giọng nói</string>
+    <string name="step_into_frame">Đứng vào khung hình để camera thấy rõ cơ thể</string>
+    <string name="camera_start_failed">Không mở được camera. Hãy đóng ứng dụng dùng camera khác rồi thử lại.</string>
+    <string name="no_recommendation">Chưa có dáng phù hợp. Thử cảm xúc khác hoặc mở thư viện dáng.</string>
+    <string name="share_photo">Chia sẻ ảnh</string>
+    <string name="open_photo">Xem ảnh</string>
+    <string name="capture_photo">Chụp ảnh</string>
+    <string name="favorites">Yêu thích</string>
+    <string name="empty_favorites">Chạm trái tim trên dáng bạn thích để lưu vào đây</string>
+    <string name="clear_filters">Xóa bộ lọc</string>
+    <string name="open_settings">Mở cài đặt</string>
+    <string name="no_pose_in_image">Chưa thấy dáng rõ. Chọn ảnh thấy rõ vai, hông và tay chân.</string>
+    <string name="pose_save_failed">Không lưu được dáng. Vui lòng thử lại.</string>
+    <string name="photo_load_failed">Không mở được ảnh. Vui lòng chọn ảnh khác.</string>
+    <string name="background_failed">Chưa xóa được nền. Kiểm tra kết nối mạng rồi thử lại.</string>
+    <string name="undo">Hoàn tác</string>
+    <string name="redo">Làm lại</string>
+    <string name="export">Xuất ảnh</string>
+    <string name="filters">Bộ lọc</string>
+    <string name="adjust">Điều chỉnh</string>
+    <string name="crop">Cắt ảnh</string>
+    <string name="original">Gốc</string>
+    <string name="replace">Đổi ảnh</string>
+    <string name="show_original">Xem ảnh gốc</string>
+    <string name="show_edit">Xem chỉnh sửa</string>
+    <string name="flip_horizontal">Lật ngang</string>
+    <string name="flip_vertical">Lật dọc</string>
+    <string name="background_hint">Xóa nền ảnh; bấm Hoàn tác để khôi phục. Lần đầu có thể cần tải mô hình.</string>
+    <string name="video_pick">Chọn video</string>
+    <string name="video_empty">Chọn video cần cắt</string>
+    <string name="video_hint">Cắt đoạn video và chọn giữ hoặc tắt âm thanh.</string>
+    <string name="video_trim_hint">Cắt nhanh bắt đầu từ khung hình chính gần trước đó, nên có thể giữ thêm một đoạn ngắn.</string>
+    <string name="video_audio">Giữ âm thanh gốc</string>
+    <string name="video_export">Xuất video</string>
+    <string name="video_exporting">Đang xuất...</string>
+    <string name="video_exported">Đã xuất video</string>
+    <string name="video_error">Không xuất được video này. Vui lòng thử video khác.</string>
+    <string name="video_load_error">Không phát được video. Vui lòng chọn tệp khác.</string>
+    <string name="play">Phát</string>
+    <string name="pause">Tạm dừng</string>
+    <string name="start">Bắt đầu</string>
+    <string name="end">Kết thúc</string>
+    <string name="discard_edits">Bỏ các chỉnh sửa?</string>
+    <string name="discard_message">Các thay đổi chưa lưu sẽ bị mất.</string>
+    <string name="discard">Bỏ thay đổi</string>
+    <string name="recording_empty">Chưa ghi được chuyển động. Đứng vào khung hình rồi thử lại.</string>
+    <string name="recording_saved">Đã lưu chuyển động vào thư viện dáng</string>
+    <string name="recording_failed">Không lưu được chuyển động. Vui lòng thử lại.</string>
 </resources>

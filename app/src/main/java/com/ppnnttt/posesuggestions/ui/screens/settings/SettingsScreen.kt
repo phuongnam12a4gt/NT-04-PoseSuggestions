@@ -3,6 +3,8 @@ package com.ppnnttt.posesuggestions.ui.screens.settings
 import com.ppnnttt.posesuggestions.AppLanguageManager
 import com.ppnnttt.posesuggestions.R
 
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -28,9 +30,9 @@ fun SettingsScreen(onNavigateBack: () -> Unit) {
     val languages = listOf(
         LanguageOption("en", "English", "EN"),
         LanguageOption("vi", "Tiếng Việt", "VI"),
-        LanguageOption("th", "ไทย", "TH"),
-        LanguageOption("ko", "한국어", "KO"),
-        LanguageOption("ja", "日本語", "JA")
+        LanguageOption("th", "ไทย · Beta", "TH"),
+        LanguageOption("ko", "한국어 · Beta", "KO"),
+        LanguageOption("ja", "日本語 · Beta", "JA")
     )
 
     Scaffold(
@@ -53,7 +55,7 @@ fun SettingsScreen(onNavigateBack: () -> Unit) {
         }
     ) { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 20.dp)
+            modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 20.dp).verticalScroll(rememberScrollState())
         ) {
             Text(
                 stringResource(R.string.language),

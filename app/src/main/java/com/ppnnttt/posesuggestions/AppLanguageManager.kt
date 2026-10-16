@@ -22,6 +22,12 @@ object AppLanguageManager {
             context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
                 .edit().putString(LANGUAGE_KEY, languageTag).apply()
         }
-        AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(languageTag))
+        if (android.os.Build.VERSION.SDK_INT >= 33) {
+            val manager = context.applicationContext.getSystemService(android.app.LocaleManager::class.java)
+            val locales = android.os.LocaleList.forLanguageTags(languageTag)
+            if (manager.applicationLocales != locales) manager.applicationLocales = locales
+        } else {
+            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(languageTag))
+        }
     }
 }

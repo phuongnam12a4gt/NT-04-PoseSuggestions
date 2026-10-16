@@ -1,23 +1,175 @@
 <resources>
-    <string name="app_name">PoseSuggestions</string><string name="settings">설정</string><string name="back">뒤로</string>
-    <string name="language">앱 언어</string><string name="language_description">앱 전체에서 사용할 언어를 선택하세요.</string>
-    <string name="choose_pose">포즈 선택</string><string name="choose_pose_hint">포즈를 눌러 맞추기를 시작하세요</string><string name="done">완료</string>
-    <string name="all">전체</string><string name="no_poses">이 카테고리에 포즈가 없습니다</string><string name="pose_visibility">포즈 투명도</string>
-    <string name="ai_suggest">AI 추천</string><string name="challenge">챌린지</string><string name="record_pose">포즈 녹화</string>
-    <string name="stop_recording">녹화 중지</string><string name="explore">둘러보기</string><string name="selected_pose">선택한 포즈</string>
-    <string name="change_pose">포즈 변경</string><string name="customize">맞춤 설정</string><string name="close">닫기</string><string name="flip_camera">카메라 전환</string>
-    <string name="auto_capture_hint">포즈를 유지하세요 — 일치도가 충분하면 자동으로 촬영합니다</string><string name="pose_match">일치도 %1$d%%</string>
-    <string name="smart_photo_assistant">스마트 사진 도우미</string><string name="smart_photo_description">AI 안내와 자동 포즈 촬영으로 더 멋진 사진을 찍으세요.</string><string name="create_more">더 창의적으로</string>
-    <string name="pose_studio">포즈 스튜디오</string><string name="pose_studio_description">마음에 드는 포즈를 업로드해 나만의 템플릿으로 만드세요.</string><string name="history">기록</string><string name="pose_challenge">포즈 챌린지</string><string name="zoom_tip">팁: 두 손가락으로 포즈 크기를 조절해 몸에 맞추세요.</string><string name="most_popular">가장 인기 있음</string>
-    <string name="captured_poses">촬영한 포즈</string><string name="no_captured_poses">촬영한 포즈가 없습니다</string><string name="delete_photo_title">사진을 삭제할까요?</string><string name="delete_photo_message">이 포즈 사진을 삭제하시겠습니까?</string><string name="delete">삭제</string><string name="cancel">취소</string>
-    <string name="place_body_here">여기에 몸을 맞추세요</string><string name="stop_replay">재생 중지</string><string name="camera_permission_needed">카메라 접근 권한이 필요합니다</string><string name="grant_permission">권한 허용</string>
-    <string name="choose_method">방법 선택</string><string name="upload_image">이미지 업로드</string><string name="use_camera">카메라 사용</string><string name="timer_3s">3초 타이머</string><string name="preview_drag_zoom">미리보기 — 드래그 및 확대</string><string name="pose_name">포즈 이름</string><string name="quick_save_library">라이브러리에 빠른 저장</string><string name="save_as">“%1$s”(으)로 저장</string>
-    <string name="pose_marketplace">포즈 마켓</string><string name="search_poses">포즈 검색…</string><string name="my_recordings">내 녹화</string><string name="frame_count">%1$d 프레임</string><string name="recently_used">최근 사용</string><string name="explore_poses">포즈 둘러보기</string>
-    <string name="ai_pose_suggestion">AI 포즈 추천</string><string name="location">장소</string><string name="outfit">의상</string><string name="gender">성별</string><string name="mood">분위기</string><string name="generate_recommendation">추천 생성</string><string name="hold_still">그대로 유지하세요!</string><string name="pose_captured">포즈를 촬영했습니다!</string>
-    <string name="left_arm">왼팔</string><string name="right_arm">오른팔</string><string name="left_leg">왼쪽 다리</string><string name="right_leg">오른쪽 다리</string><string name="left_shoulder">왼쪽 어깨</string><string name="right_shoulder">오른쪽 어깨</string><string name="bend_joint">%1$s을(를) 굽히세요</string><string name="straighten_joint">%1$s을(를) 펴세요</string><string name="feedback_great">아주 좋아요!</string><string name="feedback_perfect">완벽해요!</string><string name="feedback_aligned">정확하게 맞췄어요!</string><string name="feedback_almost">거의 다 됐어요!</string><string name="feedback_close">정말 가까워요!</string><string name="feedback_improving">점점 좋아지고 있어요!</string>
-    <string name="try_this_pose">이 포즈를 시도해 보세요!</string><string name="recommendation_description">%2$s에서 %1$s 분위기라면 “%3$s” 포즈를 추천합니다. 카메라 각도는 %4$s, 몸 방향은 %5$s, 손은 %6$s에 놓으세요.</string>
-    <string name="get_ready">준비!\n%1$d</string><string name="time_left">시간: %1$d</string><string name="score_value">점수: %1$d%%</string><string name="best_score">최고: %1$d%%</string><string name="pose_master">포즈 마스터!</string><string name="well_done">잘했어요!</string><string name="your_accuracy">정확도</string>
-    <string name="easy">쉬움</string><string name="medium">보통</string><string name="hard">어려움</string><string name="cool">쿨</string><string name="selfie">셀피</string><string name="travel">여행</string><string name="gym">헬스장</string><string name="outdoor">야외</string><string name="indoor">실내</string><string name="nature">자연</string><string name="street">거리</string><string name="casual">캐주얼</string><string name="active">활동적</string><string name="formal">포멀</string><string name="streetwear">스트리트웨어</string><string name="male">남성</string><string name="female">여성</string><string name="non_binary">논바이너리</string><string name="confident">자신감</string><string name="relaxed">편안함</string><string name="energetic">활기참</string><string name="serene">차분함</string>
-    <string name="photo_editor">사진 편집</string><string name="no_photo_selected">편집할 사진을 선택하세요</string><string name="choose_photo">사진 선택</string><string name="brightness">밝기</string><string name="contrast">대비</string><string name="saturation">채도</string><string name="rotate">회전</string><string name="reset">초기화</string><string name="save">저장</string><string name="photo_saved">편집한 사진을 저장했습니다</string><string name="photo_save_failed">사진을 저장할 수 없습니다</string>
-    <string name="remove_background">피사체 추출 · 배경 제거</string><string name="extracting_subject">피사체 추출 중…</string>
+    <string name="app_name">PoseSuggestions</string>
+    <string name="settings">설정</string>
+    <string name="back">뒤로</string>
+    <string name="language">앱 언어</string>
+    <string name="language_description">일부 항목은 영어로 표시됩니다.</string>
+    <string name="choose_pose">포즈 선택</string>
+    <string name="choose_pose_hint">Tap a pose to start aligning</string>
+    <string name="done">완료</string>
+    <string name="all">전체</string>
+    <string name="no_poses">No poses in this category</string>
+    <string name="pose_visibility">Pose visibility</string>
+    <string name="ai_suggest">AI suggestion</string>
+    <string name="challenge">Challenge</string>
+    <string name="record_pose">Record pose</string>
+    <string name="stop_recording">Stop recording</string>
+    <string name="explore">포즈 둘러보기</string>
+    <string name="selected_pose">SELECTED POSE</string>
+    <string name="change_pose">Change pose</string>
+    <string name="customize">Customize</string>
+    <string name="close">닫기</string>
+    <string name="flip_camera">Flip camera</string>
+    <string name="auto_capture_hint">Hold the pose — the app captures automatically when your match is high enough</string>
+    <string name="pose_match">Match %1$d%%</string>
+    <string name="smart_photo_assistant">Smart Photo Assistant</string>
+    <string name="smart_photo_description">Choose a pose, follow the guide and capture when ready.</string>
+    <string name="create_more">Create more</string>
+    <string name="pose_studio">Pose Studio</string>
+    <string name="pose_studio_description">Upload a pose you like and turn it into your own template.</string>
+    <string name="history">History</string>
+    <string name="pose_challenge">Pose challenge</string>
+    <string name="zoom_tip">Tip: Use two fingers to resize and align the pose with your body.</string>
+    <string name="most_popular">START SHOOTING</string>
+    <string name="captured_poses">Captured poses</string>
+    <string name="no_captured_poses">No captured poses yet</string>
+    <string name="delete_photo_title">Delete photo?</string>
+    <string name="delete_photo_message">Are you sure you want to delete this captured pose?</string>
+    <string name="delete">삭제</string>
+    <string name="cancel">취소</string>
+    <string name="place_body_here">PLACE YOUR BODY HERE</string>
+    <string name="stop_replay">STOP REPLAY</string>
+    <string name="camera_permission_needed">Camera access is needed</string>
+    <string name="grant_permission">Grant permission</string>
+    <string name="choose_method">CHOOSE A METHOD</string>
+    <string name="upload_image">Upload image</string>
+    <string name="use_camera">Use camera</string>
+    <string name="timer_3s">3-second timer</string>
+    <string name="preview_drag_zoom">PREVIEW — DRAG &amp; ZOOM</string>
+    <string name="pose_name">Pose name</string>
+    <string name="quick_save_library">Quick save to library</string>
+    <string name="save_as">Save as “%1$s”</string>
+    <string name="pose_marketplace">Pose library</string>
+    <string name="search_poses">Search poses…</string>
+    <string name="my_recordings">My recordings</string>
+    <string name="frame_count">%1$d frames</string>
+    <string name="recently_used">Recently used</string>
+    <string name="explore_poses">Explore poses</string>
+    <string name="ai_pose_suggestion">AI pose suggestion</string>
+    <string name="location">Location</string>
+    <string name="outfit">Outfit</string>
+    <string name="gender">Gender</string>
+    <string name="mood">Mood</string>
+    <string name="generate_recommendation">Generate recommendation</string>
+    <string name="hold_still">Hold still!</string>
+    <string name="pose_captured">Pose captured!</string>
+    <string name="left_arm">left arm</string>
+    <string name="right_arm">right arm</string>
+    <string name="left_leg">left leg</string>
+    <string name="right_leg">right leg</string>
+    <string name="left_shoulder">left shoulder</string>
+    <string name="right_shoulder">right shoulder</string>
+    <string name="bend_joint">Bend your %1$s</string>
+    <string name="straighten_joint">Straighten your %1$s</string>
+    <string name="feedback_great">Great job!</string>
+    <string name="feedback_perfect">Perfect!</string>
+    <string name="feedback_aligned">Excellent alignment!</string>
+    <string name="feedback_almost">Almost there, keep going!</string>
+    <string name="feedback_close">So close!</string>
+    <string name="feedback_improving">You’re improving!</string>
+    <string name="try_this_pose">Try this pose!</string>
+    <string name="recommendation_description">For your %1$s mood at %2$s, try “%3$s”. Use a %4$s camera angle, orient your body %5$s, and place your hands %6$s.</string>
+    <string name="get_ready">GET READY!\n%1$d</string>
+    <string name="time_left">TIME: %1$d</string>
+    <string name="score_value">SCORE: %1$d%%</string>
+    <string name="best_score">BEST: %1$d%%</string>
+    <string name="pose_master">POSE MASTER!</string>
+    <string name="well_done">WELL DONE!</string>
+    <string name="your_accuracy">Your accuracy</string>
+    <string name="easy">Easy</string>
+    <string name="medium">Medium</string>
+    <string name="hard">Hard</string>
+    <string name="cool">Cool</string>
+    <string name="selfie">Selfie</string>
+    <string name="travel">Travel</string>
+    <string name="gym">Gym</string>
+    <string name="outdoor">Outdoor</string>
+    <string name="indoor">Indoor</string>
+    <string name="nature">Nature</string>
+    <string name="street">Street</string>
+    <string name="casual">Casual</string>
+    <string name="active">Active</string>
+    <string name="formal">Formal</string>
+    <string name="streetwear">Streetwear</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="non_binary">Non-binary</string>
+    <string name="confident">Confident</string>
+    <string name="relaxed">Relaxed</string>
+    <string name="energetic">Energetic</string>
+    <string name="serene">Serene</string>
+    <string name="photo_editor">사진 편집</string>
+    <string name="no_photo_selected">Choose a photo to start editing</string>
+    <string name="choose_photo">사진 선택</string>
+    <string name="brightness">밝기</string>
+    <string name="contrast">대비</string>
+    <string name="saturation">채도</string>
+    <string name="rotate">회전</string>
+    <string name="reset">초기화</string>
+    <string name="save">저장</string>
+    <string name="photo_saved">Edited photo saved</string>
+    <string name="photo_save_failed">Could not save photo</string>
+    <string name="remove_background">배경 제거</string>
+    <string name="extracting_subject">Extracting subject…</string>
+    <string name="video_editor">동영상 자르기</string>
+    <string name="auto_capture">자동 촬영</string>
+    <string name="manual_capture_hint">준비되면 촬영 버튼을 누르세요</string>
+    <string name="voice_guidance">음성 안내</string>
+    <string name="step_into_frame">몸이 보이도록 화면 안에 서 주세요</string>
+    <string name="camera_start_failed">카메라를 열 수 없습니다. 다른 카메라 앱을 닫고 다시 시도하세요.</string>
+    <string name="no_recommendation">맞는 포즈가 없습니다. 조건을 바꿔 보세요.</string>
+    <string name="share_photo">사진 공유</string>
+    <string name="open_photo">사진 보기</string>
+    <string name="capture_photo">사진 촬영</string>
+    <string name="favorites">즐겨찾기</string>
+    <string name="empty_favorites">포즈의 하트를 누르면 여기에 저장됩니다</string>
+    <string name="clear_filters">필터 초기화</string>
+    <string name="open_settings">설정 열기</string>
+    <string name="no_pose_in_image">어깨, 엉덩이, 팔다리가 잘 보이는 사진을 선택하세요.</string>
+    <string name="pose_save_failed">포즈를 저장하지 못했습니다. 다시 시도하세요.</string>
+    <string name="photo_load_failed">사진을 열 수 없습니다. 다른 사진을 선택하세요.</string>
+    <string name="background_failed">배경을 제거하지 못했습니다. 연결을 확인하세요.</string>
+    <string name="undo">실행 취소</string>
+    <string name="redo">다시 실행</string>
+    <string name="export">내보내기</string>
+    <string name="filters">필터</string>
+    <string name="adjust">조정</string>
+    <string name="crop">자르기</string>
+    <string name="original">원본</string>
+    <string name="replace">사진 변경</string>
+    <string name="show_original">원본 보기</string>
+    <string name="show_edit">편집 보기</string>
+    <string name="flip_horizontal">좌우 반전</string>
+    <string name="flip_vertical">상하 반전</string>
+    <string name="background_hint">배경을 제거하고 실행 취소로 복원할 수 있습니다. 처음에는 모델 다운로드가 필요할 수 있습니다.</string>
+    <string name="video_pick">동영상 선택</string>
+    <string name="video_empty">자를 동영상을 선택하세요</string>
+    <string name="video_hint">동영상을 자르고 원본 소리를 유지할지 선택하세요.</string>
+    <string name="video_trim_hint">빠른 자르기는 앞선 키프레임에서 시작하므로 짧은 구간이 추가될 수 있습니다.</string>
+    <string name="video_audio">원본 소리 유지</string>
+    <string name="video_export">동영상 내보내기</string>
+    <string name="video_exporting">내보내는 중...</string>
+    <string name="video_exported">동영상을 내보냈습니다</string>
+    <string name="video_error">내보내지 못했습니다. 다른 동영상을 시도하세요.</string>
+    <string name="video_load_error">재생할 수 없습니다. 다른 파일을 선택하세요.</string>
+    <string name="play">재생</string>
+    <string name="pause">일시 정지</string>
+    <string name="start">시작</string>
+    <string name="end">끝</string>
+    <string name="discard_edits">변경 사항을 버릴까요?</string>
+    <string name="discard_message">저장하지 않은 변경 사항이 사라집니다.</string>
+    <string name="discard">버리기</string>
+    <string name="recording_empty">기록된 움직임이 없습니다. 화면 안에 서서 다시 시도하세요.</string>
+    <string name="recording_saved">움직임을 포즈 라이브러리에 저장했습니다</string>
+    <string name="recording_failed">움직임을 저장하지 못했습니다. 다시 시도하세요.</string>
 </resources>

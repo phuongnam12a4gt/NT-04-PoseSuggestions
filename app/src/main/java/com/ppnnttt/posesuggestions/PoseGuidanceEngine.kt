@@ -38,14 +38,15 @@ class PoseGuidanceEngine(private val context: Context) {
             val templateAngle = calculateAngleFromTemplate(
                 templateLandmarks[joint.p1],
                 templateLandmarks[joint.p2],
-                templateLandmarks[joint.p3]
+                templateLandmarks[joint.p3],
+                template.sourceAspectRatio
             )
 
             if (userAngle != null && templateAngle != null) {
                 val diff = templateAngle - userAngle
                 if (abs(diff) > maxError) {
                     maxError = abs(diff)
-                    val messageRes = if (diff > 0) R.string.bend_joint else R.string.straighten_joint
+                    val messageRes = if (diff > 0) R.string.straighten_joint else R.string.bend_joint
                     bestGuidance = Guidance(
                         message = context.getString(messageRes, context.getString(joint.nameRes)),
                         jointType = joint.p2,
@@ -61,13 +62,13 @@ class PoseGuidanceEngine(private val context: Context) {
     private data class JointAngle(val p1: Int, val p2: Int, val p3: Int, val nameRes: Int)
 
     private fun calculateAngle(first: PoseLandmarkData?, mid: PoseLandmarkData?, last: PoseLandmarkData?): Float? {
-        if (first == null || mid == null || last == null || mid.inFrameLikelihood < 0.5f) return null
+        if (first == null || mid == null || last == null || listOf(first, mid, last).any { it.inFrameLikelihood < 0.5f }) return null
         return calculateAngleBetweenPoints(first.x, first.y, mid.x, mid.y, last.x, last.y)
     }
 
-    private fun calculateAngleFromTemplate(first: LandmarkTemplate?, mid: LandmarkTemplate?, last: LandmarkTemplate?): Float? {
+    private fun calculateAngleFromTemplate(first: LandmarkTemplate?, mid: LandmarkTemplate?, last: LandmarkTemplate?, aspectRatio: Float): Float? {
         if (first == null || mid == null || last == null) return null
-        return calculateAngleBetweenPoints(first.x, first.y, mid.x, mid.y, last.x, last.y)
+        return calculateAngleBetweenPoints(first.x * aspectRatio, first.y, mid.x * aspectRatio, mid.y, last.x * aspectRatio, last.y)
     }
 
     private fun calculateAngleBetweenPoints(x1: Float, y1: Float, x2: Float, y2: Float, x3: Float, y3: Float): Float {

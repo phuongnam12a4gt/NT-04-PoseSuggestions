@@ -16,7 +16,6 @@ class RecommendationEngine(private val repository: PoseTemplateRepository) {
         val queryTags = listOf(
             input.locationType,
             input.outfitStyle,
-            input.gender,
             input.mood
         ).map { it.lowercase() }
 

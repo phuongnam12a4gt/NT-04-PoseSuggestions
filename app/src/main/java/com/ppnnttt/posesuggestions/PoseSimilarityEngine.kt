@@ -14,9 +14,9 @@ class PoseSimilarityEngine {
         val userLandmarks = userPose.landmarks.associateBy { it.type }
         val templateLandmarks = template.landmarks.associateBy { it.type }
 
-        // We use the user's image dimensions as the reference for both
-        val targetWidth = userPose.imageWidth.toFloat()
-        val targetHeight = userPose.imageHeight.toFloat()
+        // Preserve the reference photo proportions regardless of the camera's aspect ratio.
+        val targetWidth = 1000f * template.sourceAspectRatio
+        val targetHeight = 1000f
 
         val anglesToCompare = listOf(
             Triple(PoseLandmark.LEFT_SHOULDER, PoseLandmark.LEFT_ELBOW, PoseLandmark.LEFT_WRIST),
@@ -29,6 +29,7 @@ class PoseSimilarityEngine {
 
         var totalScore = 0f
         var validAngles = 0
+        var referenceAngles = 0
 
         for (triple in anglesToCompare) {
             val userAngle = calculateAngle(
@@ -37,7 +38,7 @@ class PoseSimilarityEngine {
                 userLandmarks[triple.third]
             )
             
-            // IMPORTANT: Multiply template (0..1) by target dimensions to get consistent pixel-space angles
+            // Convert normalized reference points to the original photo proportions.
             val templateAngle = calculateAngleFromTemplate(
                 templateLandmarks[triple.first],
                 templateLandmarks[triple.second],
@@ -46,6 +47,7 @@ class PoseSimilarityEngine {
                 targetHeight
             )
 
+            if (templateAngle != null) referenceAngles++
             if (userAngle != null && templateAngle != null) {
                 val diff = abs(userAngle - templateAngle)
                 val angleScore = (1f - (diff / 45f)).coerceIn(0f, 1f) // 45 degrees diff = 0%
@@ -55,12 +57,12 @@ class PoseSimilarityEngine {
         }
 
         if (validAngles == 0) return 0f
-        val rawScore = (totalScore / validAngles) * 100f
+        val rawScore = (totalScore / referenceAngles) * 100f
         return normalizeScore(rawScore)
     }
 
     private fun calculateAngle(first: PoseLandmarkData?, mid: PoseLandmarkData?, last: PoseLandmarkData?): Float? {
-        if (first == null || mid == null || last == null || mid.inFrameLikelihood < 0.5f) return null
+        if (first == null || mid == null || last == null || listOf(first, mid, last).any { it.inFrameLikelihood < 0.5f }) return null
         return calculateAngleBetweenPoints(first.x, first.y, mid.x, mid.y, last.x, last.y)
     }
 

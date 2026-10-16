@@ -19,6 +19,7 @@ data class PoseTemplate(
     val landmarks: List<LandmarkTemplate>,
     val landmarksPartner: List<LandmarkTemplate>? = null, // For couple poses
     val recommendationMetadata: RecommendationMetadata? = null,
+    val sourceAspectRatio: Float = 1f,
     val isCustom: Boolean = false // Để biết đây là pose từ Studio hay có sẵn
 ) {
     val isCouple: Boolean get() = landmarksPartner != null

@@ -8,6 +8,10 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -43,10 +47,18 @@ fun StudioScreen(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     
+    DisposableEffect(viewModel, lifecycleOwner) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_STOP) viewModel.leave()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer); viewModel.leave() }
+    }
     val isProcessing by viewModel.isProcessing.collectAsState()
     val extractedPose by viewModel.extractedPose.collectAsState()
     val isCameraActive by viewModel.isCameraActive.collectAsState()
     val countdownValue by viewModel.countdownValue.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
     
     var poseName by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("cool") }
@@ -63,6 +75,7 @@ fun StudioScreen(
         if (granted) viewModel.setCameraActive(true)
     }
 
+    val reviewScroll = rememberScrollState()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -81,7 +94,9 @@ fun StudioScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(if (isCameraActive) 0.dp else 24.dp),
+                .padding(if (isCameraActive) 0.dp else 24.dp)
+                .imePadding()
+                .then(if (isCameraActive) Modifier else Modifier.verticalScroll(reviewScroll)),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (extractedPose == null) {
@@ -110,7 +125,8 @@ fun StudioScreen(
                         PremiumCountdown(countdownValue)
 
                         // Capture Button
-                        if (countdownValue == null) {
+                        if (isProcessing) CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = Color.Cyan)
+                        if (countdownValue == null && !isProcessing) {
                             Box(
                                 modifier = Modifier
                                     .align(Alignment.BottomCenter)
@@ -167,7 +183,7 @@ fun StudioScreen(
                                 .clip(RoundedCornerShape(24.dp))
                                 .background(Color.Cyan.copy(alpha = 0.1f))
                                 .border(1.dp, Color.Cyan.copy(alpha = 0.3f), RoundedCornerShape(24.dp))
-                                .clickable {
+                                .clickable(enabled = !isProcessing) {
                                     val hasPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
                                     if (hasPermission) {
                                         viewModel.setCameraActive(true)
@@ -220,25 +236,12 @@ fun StudioScreen(
                     SkeletonOverlay(
                         modifier = Modifier.fillMaxSize(),
                         detectedPose = extractedPose,
+                        fitCenter = true,
                         currentScore = 100f // Đã trích xuất xong nên coi như khớp 100%
                     )
 
                     // Tạo một Template tạm thời với thuật toán chuẩn hóa mới
-                    val tempTemplate = PoseTemplate(
-                        id = "preview",
-                        name = poseName,
-                        category = selectedCategory,
-                        difficulty = "Easy",
-                        previewImage = "",
-                        landmarks = normalizeLandmarks(extractedPose!!.landmarks, extractedPose!!.imageWidth, extractedPose!!.imageHeight)
-                    )
 
-                    // GhostOverlay để xem thử template sau khi chuẩn hóa (mờ hơn để thấy skeleton bên dưới)
-                    GhostOverlay(
-                        template = tempTemplate,
-                        opacity = 0.3f,
-                        modifier = Modifier.fillMaxSize()
-                    )
                 }
 
                 Spacer(Modifier.height(20.dp))
@@ -256,12 +259,15 @@ fun StudioScreen(
                     )
                 )
 
-                Spacer(Modifier.height(24.dp))
+                TextButton(enabled = !isProcessing, onClick = { launcher.launch("image/*") }) {
+                    Text(stringResource(R.string.choose_photo), color = Color.Cyan)
+                }
+                Spacer(Modifier.height(12.dp))
 
                 Button(
                     onClick = { 
                         viewModel.saveAsTemplate(
-                            if (poseName.isBlank()) "Pose_${System.currentTimeMillis()}" else poseName, 
+                            if (poseName.isBlank()) context.getString(R.string.selected_pose) else poseName,
                             selectedCategory,
                             onComplete = onNavigateBack
                         )
@@ -282,5 +288,11 @@ fun StudioScreen(
                 }
             }
         }
+    }
+    errorMessage?.let { message ->
+        Snackbar(
+            modifier = Modifier.padding(16.dp),
+            action = { TextButton(onClick = viewModel::clearError) { Text("Dismiss") } }
+        ) { Text(message) }
     }
 }

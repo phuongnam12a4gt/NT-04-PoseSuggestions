@@ -22,9 +22,13 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -41,7 +45,9 @@ import java.util.Locale
 @Composable
 fun CameraScreen(
     viewModel: CameraViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onOpenGallery: () -> Unit = {},
+    initialShowMarketplace: Boolean = false
 ) {
     val context = LocalContext.current
     var hasCameraPermission by remember {
@@ -55,6 +61,7 @@ fun CameraScreen(
         onResult = { granted -> hasCameraPermission = granted }
     )
 
+    val isFrontCamera by viewModel.isFrontCamera.collectAsState()
     val detectedPose by viewModel.detectedPose.collectAsState()
     val detectedPosePartner by viewModel.detectedPosePartner.collectAsState()
     val templates by viewModel.templates.collectAsState()
@@ -65,6 +72,7 @@ fun CameraScreen(
     val countdownValue by viewModel.countdownValue.collectAsState()
     val ghostOpacity by viewModel.ghostOpacity.collectAsState()
     val challengeState by viewModel.challengeState.collectAsState()
+    val challengeFinalScore by viewModel.challengeFinalScore.collectAsState()
     val challengeTimeLeft by viewModel.challengeTimeLeft.collectAsState()
     val recommendationText by viewModel.recommendationText.collectAsState()
     
@@ -72,13 +80,37 @@ fun CameraScreen(
     val replayFrame by viewModel.replayFrame.collectAsState()
     val isReplaying by viewModel.isReplaying.collectAsState()
     val lastCapturedPhoto by viewModel.lastCapturedPhoto.collectAsState()
+    val cameraError by viewModel.cameraError.collectAsState()
 
-    var showMarketplace by remember { mutableStateOf(false) }
+    val autoCaptureEnabled by viewModel.autoCaptureEnabled.collectAsState()
+    val voiceEnabled by viewModel.voiceEnabled.collectAsState()
+    var showMarketplace by rememberSaveable { mutableStateOf(initialShowMarketplace) }
+    LaunchedEffect(Unit) { viewModel.refreshLibrary() }
+    val lifecycleOwner = androidx.compose.ui.platform.LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                hasCameraPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    LaunchedEffect(recommendationText) {
+        if (recommendationText != null) { kotlinx.coroutines.delay(8000); viewModel.dismissRecommendation() }
+    }
     var showRecommendationDialog by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         if (hasCameraPermission) {
-            CameraPreview(viewModel = viewModel, modifier = Modifier.fillMaxSize())
+            if (!showMarketplace) CameraPreview(viewModel = viewModel, modifier = Modifier.fillMaxSize())
+
+            cameraError?.let { message ->
+                Snackbar(
+                    modifier = Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(16.dp),
+                    action = { TextButton(onClick = viewModel::clearCameraError) { Text("Dismiss") } }
+                ) { Text(message) }
+            }
 
             IconButton(
                 onClick = onNavigateBack,
@@ -101,26 +133,27 @@ fun CameraScreen(
             
             // Before a template is selected, show detection feedback only. Once a
             // template is active, the mannequin becomes the single visual target.
-            if (selectedTemplate == null) {
+            if (selectedTemplate == null || isReplaying) {
                 SkeletonOverlay(
                     modifier = Modifier.fillMaxSize(),
-                    detectedPose = detectedPose,
-                    detectedPosePartner = detectedPosePartner,
+                    detectedPose = if (isFrontCamera) detectedPose?.mirrored() else detectedPose,
+                    detectedPosePartner = if (isFrontCamera) detectedPosePartner?.mirrored() else detectedPosePartner,
                     templatePose = null,
-                    replayPose = replayFrame,
+                    replayPose = if (isFrontCamera) replayFrame?.mirrored() else replayFrame,
                     currentScore = currentScore
                 )
             }
 
             // Ghost Image Overlay (Scale & Drag)
             GhostOverlay(
-                template = selectedTemplate,
+                template = if (isReplaying) null else selectedTemplate,
+                isMirrored = isFrontCamera,
                 opacity = ghostOpacity,
                 modifier = Modifier.fillMaxSize()
             )
 
             // Top HUD: Similarity Score
-            PremiumTopHUD(currentScore, selectedTemplate != null)
+            PremiumTopHUD(currentScore, selectedTemplate != null && !isReplaying)
 
             // Replay HUD
             if (isReplaying) {
@@ -142,7 +175,7 @@ fun CameraScreen(
                 ChallengeOverlay(
                     state = challengeState, 
                     timeLeft = challengeTimeLeft, 
-                    score = currentScore,
+                    score = if (challengeState == ChallengeState.FINISHED) challengeFinalScore else currentScore,
                     highScore = selectedTemplate?.let { viewModel.getHighScore(it.id) } ?: 0
                 )
             }
@@ -197,15 +230,15 @@ fun CameraScreen(
                 onDifficultySelect = { viewModel.setChallengeDifficulty(it) },
                 ghostOpacity = ghostOpacity,
                 onGhostOpacityChange = { viewModel.setGhostOpacity(it) },
-                onCaptureClick = { viewModel.takePhoto() }
+                onCaptureClick = { viewModel.takePhoto() },
+                onOpenGallery = onOpenGallery,
+                autoCaptureEnabled = autoCaptureEnabled,
+                onAutoCaptureChange = viewModel::setAutoCaptureEnabled,
+                voiceEnabled = voiceEnabled,
+                onVoiceChange = viewModel::setVoiceEnabled,
+                onChallengeClick = viewModel::startRandomChallenge
             )
 
-            if (showMarketplace) {
-                MarketplaceBottomSheet(
-                    viewModel = viewModel,
-                    onDismiss = { showMarketplace = false }
-                )
-            }
 
             if (showRecommendationDialog) {
                 RecommendationDialog(
@@ -225,6 +258,7 @@ fun CameraScreen(
                     modifier = Modifier
                         .clip(RoundedCornerShape(16.dp))
                         .background(Color.Cyan.copy(alpha = 0.9f))
+                        .clickable { viewModel.dismissRecommendation() }
                         .padding(16.dp)
                 ) {
                     Text(
@@ -238,7 +272,17 @@ fun CameraScreen(
             
         } else {
             PermissionRequestUI { launcher.launch(Manifest.permission.CAMERA) }
+            TextButton(onClick = onNavigateBack, modifier = Modifier.align(Alignment.TopStart).statusBarsPadding()) {
+                Text(stringResource(R.string.back))
+            }
+            TextButton(onClick = {
+                context.startActivity(android.content.Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    android.net.Uri.parse("package:${context.packageName}")))
+            }, modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding()) {
+                Text(stringResource(R.string.open_settings))
+            }
         }
+        if (showMarketplace) MarketplaceBottomSheet(viewModel, onDismiss = { showMarketplace = false })
     }
 }
 
@@ -347,11 +391,21 @@ fun PremiumBottomControls(
     onDifficultySelect: (String) -> Unit,
     ghostOpacity: Float,
     onGhostOpacityChange: (Float) -> Unit,
-    onCaptureClick: () -> Unit
+    onCaptureClick: () -> Unit,
+    onOpenGallery: () -> Unit,
+    autoCaptureEnabled: Boolean,
+    onAutoCaptureChange: (Boolean) -> Unit,
+    voiceEnabled: Boolean,
+    onVoiceChange: (Boolean) -> Unit,
+    onChallengeClick: () -> Unit
 ) {
+    val captureLabel = stringResource(R.string.capture_photo)
     val categories = listOf("All", "cool", "selfie", "travel", "gym")
     var showPosePicker by remember { mutableStateOf(selectedTemplate == null) }
     var showMoreTools by remember { mutableStateOf(false) }
+    LaunchedEffect(selectedTemplate?.id) {
+        if (selectedTemplate != null) showPosePicker = false
+    }
 
     Column(
         modifier = modifier
@@ -444,6 +498,14 @@ fun PremiumBottomControls(
                     .background(Color(0xFF17191D).copy(alpha = 0.96f))
                     .padding(16.dp)
             ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(R.string.auto_capture), color = Color.White, modifier = Modifier.weight(1f))
+                    Switch(checked = autoCaptureEnabled, onCheckedChange = onAutoCaptureChange)
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(R.string.voice_guidance), color = Color.White, modifier = Modifier.weight(1f))
+                    Switch(checked = voiceEnabled, onCheckedChange = onVoiceChange)
+                }
                 Text(stringResource(R.string.pose_visibility), color = Color.White, fontWeight = FontWeight.SemiBold)
                 Slider(value = ghostOpacity, onValueChange = onGhostOpacityChange, valueRange = 0.15f..1f)
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -455,6 +517,14 @@ fun PremiumBottomControls(
                         )
                     }
                     item { AssistChip(onClick = onExploreClick, label = { Text(stringResource(R.string.explore)) }) }
+                    item { AssistChip(onClick = onChallengeClick, label = { Text(stringResource(R.string.challenge)) }) }
+                }
+                Text(stringResource(R.string.pose_challenge), color = Color.White, modifier = Modifier.padding(top = 8.dp))
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(listOf("Easy", "Medium", "Hard")) { difficulty ->
+                        FilterChip(selected = selectedDifficulty == difficulty,
+                            onClick = { onDifficultySelect(difficulty) }, label = { Text(localizedOptionLabel(difficulty)) })
+                    }
                 }
             }
         }
@@ -500,6 +570,7 @@ fun PremiumBottomControls(
                         .padding(6.dp)
                         .clip(CircleShape)
                         .background(Color.White)
+                        .semantics { contentDescription = captureLabel }
                         .clickable { onCaptureClick() },
                     contentAlignment = Alignment.Center
                 ) {
@@ -514,220 +585,23 @@ fun PremiumBottomControls(
                         .clickable { onFlipCamera() },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(stringResource(R.string.flip_camera), color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.flip_camera), tint = Color.White, modifier = Modifier.size(24.dp))
+                }
+            }
+            Row(Modifier.fillMaxWidth().padding(horizontal = 24.dp), verticalAlignment = Alignment.CenterVertically) {
+                TextButton(onClick = onOpenGallery) { Text(stringResource(R.string.captured_poses), color = Color.Cyan) }
+                lastCapturedPhoto?.let { photo ->
+                    AsyncImage(model = photo, contentDescription = stringResource(R.string.open_photo),
+                        modifier = Modifier.size(40.dp).clip(RoundedCornerShape(8.dp)).clickable(onClick = onOpenGallery),
+                        contentScale = ContentScale.Crop)
                 }
             }
             Text(
-                stringResource(R.string.auto_capture_hint),
+                stringResource(if (autoCaptureEnabled && selectedTemplate != null) R.string.auto_capture_hint else R.string.manual_capture_hint),
                 color = Color.White.copy(alpha = 0.55f),
                 fontSize = 11.sp,
                 modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 4.dp)
             )
-        }
-    }
-}
-
-@Composable
-private fun LegacyPremiumBottomControls(
-    modifier: Modifier = Modifier,
-    templates: List<PoseTemplate>,
-    selectedTemplate: PoseTemplate?,
-    selectedCategory: String,
-    onCategorySelect: (String) -> Unit,
-    onTemplateSelect: (PoseTemplate) -> Unit,
-    onExploreClick: () -> Unit,
-    onChallengeClick: () -> Unit,
-    onRecommendClick: () -> Unit,
-    isRecording: Boolean,
-    onRecordToggle: () -> Unit,
-    onFlipCamera: () -> Unit,
-    lastCapturedPhoto: java.io.File?,
-    selectedDifficulty: String,
-    onDifficultySelect: (String) -> Unit
-) {
-    val categories = listOf("All", "cool", "selfie", "travel", "gym")
-    val difficulties = listOf("Easy", "Medium", "Hard")
-
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .navigationBarsPadding()
-    ) {
-        // AI & Marketplace Actions
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            // Marketplace Entry
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color.White.copy(alpha = 0.1f))
-                    .clickable { onExploreClick() }
-                    .padding(12.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Star, contentDescription = null, tint = Color.Cyan, modifier = Modifier.size(14.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text("Market", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                }
-            }
-
-            // AI Recommendation
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color.Cyan.copy(alpha = 0.2f))
-                    .clickable { onRecommendClick() }
-                    .padding(12.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Star, contentDescription = null, tint = Color.Cyan, modifier = Modifier.size(14.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text("AI Suggest", color = Color.Cyan, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                }
-            }
-
-            // Challenge Button
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color.Yellow.copy(alpha = 0.2f))
-                    .clickable { onChallengeClick() }
-                    .padding(12.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("🏆", fontSize = 14.sp)
-                    Spacer(Modifier.width(6.dp))
-                    Text("Challenge", color = Color.Yellow, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                }
-            }
-        }
-
-        // Difficulty Selector
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            difficulties.forEach { diff ->
-                val isSelected = selectedDifficulty == diff
-                Text(
-                    text = diff,
-                    color = if (isSelected) Color.Yellow else Color.White.copy(alpha = 0.5f),
-                    fontSize = 11.sp,
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .clickable { onDifficultySelect(diff) }
-                )
-            }
-        }
-        // Glassmorphism Template Row
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .clip(RoundedCornerShape(32.dp))
-                .background(Color.White.copy(alpha = 0.1f))
-                .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(32.dp))
-                .padding(vertical = 12.dp)
-        ) {
-            Column {
-                // Category Tabs (TikTok Style)
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    contentPadding = PaddingValues(horizontal = 24.dp)
-                ) {
-                    items(categories) { category ->
-                        val isSelected = selectedCategory == category
-                        Text(
-                            text = category.uppercase(Locale.ROOT),
-                            color = if (isSelected) Color.White else Color.White.copy(alpha = 0.5f),
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                            fontSize = 12.sp,
-                            modifier = Modifier
-                                .padding(horizontal = 12.dp)
-                                .clickable { onCategorySelect(category) }
-                        )
-                    }
-                }
-
-                // Horizontal Template List
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(templates) { template ->
-                        PremiumTemplateItem(
-                            template = template,
-                            isSelected = selectedTemplate?.id == template.id,
-                            onClick = { onTemplateSelect(template) }
-                        )
-                    }
-                }
-            }
-        }
-
-        // Shutter & Actions Area
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 24.dp, top = 8.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Thumbnail
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.15f))
-                    .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                if (lastCapturedPhoto != null) {
-                    AsyncImage(
-                        model = lastCapturedPhoto,
-                        contentDescription = "Last captured",
-                        modifier = Modifier.fillMaxSize().clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Icon(Icons.Default.Star, contentDescription = null, tint = Color.White)
-                }
-            }
-
-            // Main Premium Shutter Button
-            Box(
-                modifier = Modifier
-                    .size(84.dp)
-                    .border(4.dp, Color.White, CircleShape)
-                    .padding(6.dp)
-                    .clip(CircleShape)
-                    .background(Color.White),
-                contentAlignment = Alignment.Center
-            ) {
-                // Shutter ring
-            }
-
-            // Flip Camera Button
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.15f))
-                    .clickable { onFlipCamera() },
-                contentAlignment = Alignment.Center
-            ) {
-                Text("🔄", fontSize = 20.sp)
-            }
         }
     }
 }
@@ -754,7 +628,7 @@ fun PremiumTemplateItem(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Text("📸", fontSize = 32.sp)
+            PoseThumbnail(template, Modifier.fillMaxSize().padding(4.dp))
         }
         Spacer(Modifier.height(4.dp))
         Text(

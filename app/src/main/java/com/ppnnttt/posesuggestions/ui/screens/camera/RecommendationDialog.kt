@@ -3,6 +3,8 @@ package com.ppnnttt.posesuggestions.ui.screens.camera
 import com.ppnnttt.posesuggestions.*
 import com.ppnnttt.posesuggestions.R
 
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -28,12 +30,11 @@ fun RecommendationDialog(
 ) {
     var location by remember { mutableStateOf("Outdoor") }
     var outfit by remember { mutableStateOf("Casual") }
-    var gender by remember { mutableStateOf("Male") }
+    val gender = ""
     var mood by remember { mutableStateOf("Confident") }
 
     val locations = listOf("Outdoor", "Indoor", "Nature", "Gym", "Street")
     val outfits = listOf("Casual", "Active", "Formal", "Streetwear")
-    val genders = listOf("Male", "Female", "Non-binary")
     val moods = listOf("Confident", "Relaxed", "Energetic", "Serene", "Cool")
 
     Dialog(onDismissRequest = onDismiss) {
@@ -45,7 +46,7 @@ fun RecommendationDialog(
             colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A))
         ) {
             Column(
-                modifier = Modifier.padding(24.dp),
+                modifier = Modifier.padding(24.dp).verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -58,7 +59,6 @@ fun RecommendationDialog(
 
                 SelectionRow(stringResource(R.string.location), locations, location) { location = it }
                 SelectionRow(stringResource(R.string.outfit), outfits, outfit) { outfit = it }
-                SelectionRow(stringResource(R.string.gender), genders, gender) { gender = it }
                 SelectionRow(stringResource(R.string.mood), moods, mood) { mood = it }
 
                 Spacer(Modifier.height(24.dp))

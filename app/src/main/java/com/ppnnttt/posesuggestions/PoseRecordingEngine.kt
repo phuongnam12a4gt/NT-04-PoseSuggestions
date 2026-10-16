@@ -10,23 +10,24 @@ class PoseRecorder {
     private var startTime = 0L
     private val frames = mutableListOf<PoseFrame>()
 
-    fun start() {
+    @Synchronized fun start() {
         isRecording = true
         startTime = System.currentTimeMillis()
         frames.clear()
     }
 
-    fun recordFrame(pose: DetectedPose) {
+    @Synchronized fun recordFrame(pose: DetectedPose) {
         if (!isRecording) return
         
         val timestamp = System.currentTimeMillis() - startTime
+        if (frames.size >= 1800 || (frames.isNotEmpty() && timestamp - frames.last().timestamp < 100)) return
         val landmarkTemplates = pose.landmarks.map {
             LandmarkTemplate(it.type, it.x / pose.imageWidth, it.y / pose.imageHeight)
         }
         frames.add(PoseFrame(timestamp, landmarkTemplates))
     }
 
-    fun stop(name: String, templateId: String?): PoseRecording? {
+    @Synchronized fun stop(name: String, templateId: String?): PoseRecording? {
         if (!isRecording) return null
         isRecording = false
         val duration = System.currentTimeMillis() - startTime
@@ -72,6 +73,7 @@ class ReplayEngine {
                 }
             }
             _isPlaying.value = false
+            _currentFrame.value = null
         }
     }
 

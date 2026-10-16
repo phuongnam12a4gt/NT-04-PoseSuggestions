@@ -24,13 +24,18 @@ import kotlin.math.roundToInt
 fun GhostOverlay(
     template: PoseTemplate?,
     opacity: Float,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isMirrored: Boolean = false
 ) {
     if (template == null) return
 
-    var offset by remember { mutableStateOf(Offset.Zero) }
-    var scale by remember { mutableFloatStateOf(1f) }
+    var offset by remember(template.id) { mutableStateOf(Offset.Zero) }
+    var scale by remember(template.id) { mutableFloatStateOf(1f) }
     
+    val customImage = remember(template.id, template.previewImage) {
+        if (template.isCustom) BitmapFactory.decodeFile(template.previewImage)?.asImageBitmap() else null
+    }
+    val displayTemplate = if (isMirrored) template.copy(landmarks = template.landmarks.map { it.copy(x = 1f - it.x) }) else template
     val frameSize = 320.dp
     val placeBodyText = stringResource(R.string.place_body_here)
 
@@ -39,7 +44,7 @@ fun GhostOverlay(
             .fillMaxSize()
             .pointerInput(Unit) {
                 detectTransformGestures { _, pan, zoom, _ ->
-                    scale *= zoom
+                    scale = (scale * zoom).coerceIn(0.3f, 3f)
                     offset += pan
                 }
             }
@@ -47,11 +52,12 @@ fun GhostOverlay(
         // Lớp phủ màu đen với lỗ thủng ở giữa
         Canvas(modifier = Modifier.fillMaxSize().graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)) {
             // 1. Vẽ nền đen mờ toàn màn hình
-            drawRect(color = Color.Black.copy(alpha = 0.7f))
+            drawRect(color = Color.Black.copy(alpha = 0.25f))
 
             // 2. Tính toán kích thước và vị trí lỗ thủng dựa trên offset và scale
-            val w = frameSize.toPx() * scale
-            val h = frameSize.toPx() * scale
+            val aspect = template.sourceAspectRatio.coerceIn(.3f, 3f)
+            val w = frameSize.toPx() * scale * minOf(1f, aspect)
+            val h = frameSize.toPx() * scale / maxOf(1f, aspect)
             val x = (size.width - w) / 2 + offset.x
             val y = (size.height - h) / 2 + offset.y
 
@@ -64,16 +70,18 @@ fun GhostOverlay(
                 blendMode = BlendMode.Clear
             )
 
+            val p = 20.dp.toPx()
             // 4. Hiển thị Ảnh thật của người mẫu (nếu có)
             if (template.isCustom) {
-                val bitmap = BitmapFactory.decodeFile(template.previewImage)?.asImageBitmap()
+                val bitmap = customImage
                 if (bitmap != null) {
                     withTransform({
-                        translate(left = x, top = y)
+                        translate(left = if (isMirrored) x + w - p else x + p, top = y + p)
+                        if (isMirrored) scale(-1f, 1f, pivot = Offset.Zero)
                     }) {
                         drawImage(
                             image = bitmap,
-                            dstSize = IntSize(w.toInt(), h.toInt()),
+                            dstSize = IntSize((w - 2*p).toInt(), (h - 2*p).toInt()),
                             alpha = opacity * 0.8f
                         )
                     }
@@ -81,7 +89,6 @@ fun GhostOverlay(
             }
 
             // 5. Vẽ bộ xương mẫu đè lên ảnh
-            val p = 20.dp.toPx()
             withTransform({
                 translate(left = x + p, top = y + p)
                 clipRect(left = -p, top = -p, right = w - p, bottom = h - p) // Cắt bỏ mọi thứ nằm ngoài viền khung
@@ -90,7 +97,7 @@ fun GhostOverlay(
                 val innerH = h - 2 * p
                 
                 drawHumanMannequin(
-                    pose = template.toDetectedPose(1, 1),
+                    pose = displayTemplate.toDetectedPose(1, 1),
                     opacity = opacity,
                     targetSize = Size(innerW, innerH)
                 )

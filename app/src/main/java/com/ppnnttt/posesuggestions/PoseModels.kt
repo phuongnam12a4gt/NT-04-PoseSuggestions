@@ -26,3 +26,12 @@ fun Pose.toDetectedPose(width: Int, height: Int): DetectedPose {
     }
     return DetectedPose(landmarksData, width, height)
 }
+
+/** Avoid accepting faces, empty photos or low-confidence inferred bodies as templates. */
+fun DetectedPose.hasUsableBody(): Boolean {
+    val visible = landmarks.filter { it.inFrameLikelihood >= .5f }.map { it.type }.toSet()
+    return listOf(11, 12, 23, 24).all { it in visible } &&
+        visible.count { it in listOf(13, 14, 15, 16, 25, 26, 27, 28) } >= 4
+}
+
+fun DetectedPose.mirrored(): DetectedPose = copy(landmarks = landmarks.map { it.copy(x = imageWidth - it.x) })

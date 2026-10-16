@@ -18,9 +18,13 @@ class CoordinateMapper(
     private val imageHeight: Int,
     private val screenWidth: Float,
     private val screenHeight: Float,
+    fitCenter: Boolean = false
 ) {
-    fun mapX(x: Float): Float = x * (screenWidth / imageWidth)
-    fun mapY(y: Float): Float = y * (screenHeight / imageHeight)
+    private val scale = if (fitCenter) minOf(screenWidth / imageWidth, screenHeight / imageHeight) else maxOf(screenWidth / imageWidth, screenHeight / imageHeight)
+    private val offsetX = (screenWidth - imageWidth * scale) / 2f
+    private val offsetY = (screenHeight - imageHeight * scale) / 2f
+    fun mapX(x: Float): Float = x * scale + offsetX
+    fun mapY(y: Float): Float = y * scale + offsetY
     fun mapOffset(x: Float, y: Float): Offset = Offset(mapX(x), mapY(y))
 }
 
@@ -115,7 +119,8 @@ fun SkeletonOverlay(
     detectedPosePartner: DetectedPose? = null,
     templatePose: PoseTemplate? = null,
     replayPose: DetectedPose? = null,
-    currentScore: Float = 0f
+    currentScore: Float = 0f,
+    fitCenter: Boolean = false
 ) {
     // Smart HUD: Fade out guide when pose is nearly perfect
     val guideAlpha by animateFloatAsState(
@@ -125,9 +130,9 @@ fun SkeletonOverlay(
     )
 
     Canvas(modifier = modifier.fillMaxSize()) {
-        val activePose = detectedPose ?: replayPose ?: templatePose?.toDetectedPose(1, 1)
+        val activePose = replayPose ?: detectedPose ?: templatePose?.toDetectedPose(1, 1)
         val mapper = activePose?.let {
-            CoordinateMapper(it.imageWidth, it.imageHeight, size.width, size.height)
+            CoordinateMapper(it.imageWidth, it.imageHeight, size.width, size.height, fitCenter)
         }
 
         mapper?.let { m ->

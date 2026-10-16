@@ -1,23 +1,175 @@
 <resources>
-    <string name="app_name">PoseSuggestions</string><string name="settings">การตั้งค่า</string><string name="back">ย้อนกลับ</string>
-    <string name="language">ภาษาของแอป</string><string name="language_description">เลือกภาษาที่ใช้ทั่วทั้งแอป</string>
-    <string name="choose_pose">เลือกท่าโพส</string><string name="choose_pose_hint">แตะท่าโพสเพื่อเริ่มจัดตำแหน่ง</string><string name="done">เสร็จ</string>
-    <string name="all">ทั้งหมด</string><string name="no_poses">ไม่มีท่าโพสในหมวดหมู่นี้</string><string name="pose_visibility">ความชัดของท่าโพส</string>
-    <string name="ai_suggest">คำแนะนำ AI</string><string name="challenge">ชาเลนจ์</string><string name="record_pose">บันทึกท่า</string>
-    <string name="stop_recording">หยุดบันทึก</string><string name="explore">สำรวจ</string><string name="selected_pose">ท่าโพสที่เลือก</string>
-    <string name="change_pose">เปลี่ยนท่า</string><string name="customize">ปรับแต่ง</string><string name="close">ปิด</string><string name="flip_camera">สลับกล้อง</string>
-    <string name="auto_capture_hint">ค้างท่าไว้ — แอปจะถ่ายอัตโนมัติเมื่อคะแนนตรงกันสูงพอ</string><string name="pose_match">ตรงกัน %1$d%%</string>
-    <string name="smart_photo_assistant">ผู้ช่วยถ่ายภาพอัจฉริยะ</string><string name="smart_photo_description">ถ่ายภาพให้ดีขึ้นด้วยคำแนะนำ AI และการถ่ายอัตโนมัติ</string><string name="create_more">สร้างสรรค์เพิ่มเติม</string>
-    <string name="pose_studio">สตูดิโอท่าโพส</string><string name="pose_studio_description">อัปโหลดท่าโพสที่ชอบและสร้างเป็นแม่แบบของคุณ</string><string name="history">ประวัติ</string><string name="pose_challenge">ชาเลนจ์ท่าโพส</string><string name="zoom_tip">เคล็ดลับ: ใช้สองนิ้วปรับขนาดและจัดท่าให้ตรงกับร่างกาย</string><string name="most_popular">ยอดนิยม</string>
-    <string name="captured_poses">ท่าโพสที่ถ่ายไว้</string><string name="no_captured_poses">ยังไม่มีภาพท่าโพส</string><string name="delete_photo_title">ลบรูปภาพ?</string><string name="delete_photo_message">คุณแน่ใจหรือไม่ว่าต้องการลบภาพนี้?</string><string name="delete">ลบ</string><string name="cancel">ยกเลิก</string>
-    <string name="place_body_here">วางร่างกายตรงนี้</string><string name="stop_replay">หยุดเล่นซ้ำ</string><string name="camera_permission_needed">จำเป็นต้องเข้าถึงกล้อง</string><string name="grant_permission">อนุญาต</string>
-    <string name="choose_method">เลือกวิธี</string><string name="upload_image">อัปโหลดรูปภาพ</string><string name="use_camera">ใช้กล้อง</string><string name="timer_3s">ตั้งเวลา 3 วินาที</string><string name="preview_drag_zoom">ตัวอย่าง — ลากและซูม</string><string name="pose_name">ชื่อท่าโพส</string><string name="quick_save_library">บันทึกด่วนไปยังคลัง</string><string name="save_as">บันทึกเป็น “%1$s”</string>
-    <string name="pose_marketplace">คลังท่าโพส</string><string name="search_poses">ค้นหาท่าโพส…</string><string name="my_recordings">การบันทึกของฉัน</string><string name="frame_count">%1$d เฟรม</string><string name="recently_used">ใช้ล่าสุด</string><string name="explore_poses">สำรวจท่าโพส</string>
-    <string name="ai_pose_suggestion">คำแนะนำท่าโพส AI</string><string name="location">สถานที่</string><string name="outfit">ชุด</string><string name="gender">เพศ</string><string name="mood">อารมณ์</string><string name="generate_recommendation">สร้างคำแนะนำ</string><string name="hold_still">อยู่นิ่ง ๆ!</string><string name="pose_captured">ถ่ายท่าโพสแล้ว!</string>
-    <string name="left_arm">แขนซ้าย</string><string name="right_arm">แขนขวา</string><string name="left_leg">ขาซ้าย</string><string name="right_leg">ขาขวา</string><string name="left_shoulder">ไหล่ซ้าย</string><string name="right_shoulder">ไหล่ขวา</string><string name="bend_joint">งอ%1$s</string><string name="straighten_joint">เหยียด%1$s</string><string name="feedback_great">เยี่ยมมาก!</string><string name="feedback_perfect">สมบูรณ์แบบ!</string><string name="feedback_aligned">จัดตำแหน่งได้ดีมาก!</string><string name="feedback_almost">เกือบแล้ว ไปต่อเลย!</string><string name="feedback_close">ใกล้มาก!</string><string name="feedback_improving">คุณกำลังดีขึ้น!</string>
-    <string name="try_this_pose">ลองท่าโพสนี้!</string><string name="recommendation_description">สำหรับอารมณ์ %1$s ที่ %2$s ลอง “%3$s” ใช้มุมกล้อง %4$s จัดร่างกาย %5$s และวางมือ %6$s</string>
-    <string name="get_ready">เตรียมพร้อม!\n%1$d</string><string name="time_left">เวลา: %1$d</string><string name="score_value">คะแนน: %1$d%%</string><string name="best_score">ดีที่สุด: %1$d%%</string><string name="pose_master">สุดยอดนักโพส!</string><string name="well_done">ทำได้ดีมาก!</string><string name="your_accuracy">ความแม่นยำ</string>
-    <string name="easy">ง่าย</string><string name="medium">ปานกลาง</string><string name="hard">ยาก</string><string name="cool">เท่</string><string name="selfie">เซลฟี่</string><string name="travel">ท่องเที่ยว</string><string name="gym">ยิม</string><string name="outdoor">กลางแจ้ง</string><string name="indoor">ในร่ม</string><string name="nature">ธรรมชาติ</string><string name="street">ถนน</string><string name="casual">ลำลอง</string><string name="active">แอคทีฟ</string><string name="formal">ทางการ</string><string name="streetwear">สตรีทแวร์</string><string name="male">ชาย</string><string name="female">หญิง</string><string name="non_binary">นอนไบนารี</string><string name="confident">มั่นใจ</string><string name="relaxed">ผ่อนคลาย</string><string name="energetic">มีพลัง</string><string name="serene">สงบ</string>
-    <string name="photo_editor">แก้ไขรูปภาพ</string><string name="no_photo_selected">เลือกรูปภาพเพื่อเริ่มแก้ไข</string><string name="choose_photo">เลือกรูปภาพ</string><string name="brightness">ความสว่าง</string><string name="contrast">คอนทราสต์</string><string name="saturation">ความอิ่มสี</string><string name="rotate">หมุน</string><string name="reset">รีเซ็ต</string><string name="save">บันทึก</string><string name="photo_saved">บันทึกรูปที่แก้ไขแล้ว</string><string name="photo_save_failed">ไม่สามารถบันทึกรูปภาพ</string>
-    <string name="remove_background">แยกวัตถุ · ลบพื้นหลัง</string><string name="extracting_subject">กำลังแยกวัตถุ…</string>
+    <string name="app_name">PoseSuggestions</string>
+    <string name="settings">การตั้งค่า</string>
+    <string name="back">กลับ</string>
+    <string name="language">ภาษาแอป</string>
+    <string name="language_description">บางรายการจะแสดงเป็นภาษาอังกฤษ</string>
+    <string name="choose_pose">เลือกท่า</string>
+    <string name="choose_pose_hint">Tap a pose to start aligning</string>
+    <string name="done">เสร็จสิ้น</string>
+    <string name="all">ทั้งหมด</string>
+    <string name="no_poses">No poses in this category</string>
+    <string name="pose_visibility">Pose visibility</string>
+    <string name="ai_suggest">AI suggestion</string>
+    <string name="challenge">Challenge</string>
+    <string name="record_pose">Record pose</string>
+    <string name="stop_recording">Stop recording</string>
+    <string name="explore">ค้นหาท่า</string>
+    <string name="selected_pose">SELECTED POSE</string>
+    <string name="change_pose">Change pose</string>
+    <string name="customize">Customize</string>
+    <string name="close">ปิด</string>
+    <string name="flip_camera">Flip camera</string>
+    <string name="auto_capture_hint">Hold the pose — the app captures automatically when your match is high enough</string>
+    <string name="pose_match">Match %1$d%%</string>
+    <string name="smart_photo_assistant">Smart Photo Assistant</string>
+    <string name="smart_photo_description">Choose a pose, follow the guide and capture when ready.</string>
+    <string name="create_more">Create more</string>
+    <string name="pose_studio">Pose Studio</string>
+    <string name="pose_studio_description">Upload a pose you like and turn it into your own template.</string>
+    <string name="history">History</string>
+    <string name="pose_challenge">Pose challenge</string>
+    <string name="zoom_tip">Tip: Use two fingers to resize and align the pose with your body.</string>
+    <string name="most_popular">START SHOOTING</string>
+    <string name="captured_poses">Captured poses</string>
+    <string name="no_captured_poses">No captured poses yet</string>
+    <string name="delete_photo_title">Delete photo?</string>
+    <string name="delete_photo_message">Are you sure you want to delete this captured pose?</string>
+    <string name="delete">ลบ</string>
+    <string name="cancel">ยกเลิก</string>
+    <string name="place_body_here">PLACE YOUR BODY HERE</string>
+    <string name="stop_replay">STOP REPLAY</string>
+    <string name="camera_permission_needed">Camera access is needed</string>
+    <string name="grant_permission">Grant permission</string>
+    <string name="choose_method">CHOOSE A METHOD</string>
+    <string name="upload_image">Upload image</string>
+    <string name="use_camera">Use camera</string>
+    <string name="timer_3s">3-second timer</string>
+    <string name="preview_drag_zoom">PREVIEW — DRAG &amp; ZOOM</string>
+    <string name="pose_name">Pose name</string>
+    <string name="quick_save_library">Quick save to library</string>
+    <string name="save_as">Save as “%1$s”</string>
+    <string name="pose_marketplace">Pose library</string>
+    <string name="search_poses">Search poses…</string>
+    <string name="my_recordings">My recordings</string>
+    <string name="frame_count">%1$d frames</string>
+    <string name="recently_used">Recently used</string>
+    <string name="explore_poses">Explore poses</string>
+    <string name="ai_pose_suggestion">AI pose suggestion</string>
+    <string name="location">Location</string>
+    <string name="outfit">Outfit</string>
+    <string name="gender">Gender</string>
+    <string name="mood">Mood</string>
+    <string name="generate_recommendation">Generate recommendation</string>
+    <string name="hold_still">Hold still!</string>
+    <string name="pose_captured">Pose captured!</string>
+    <string name="left_arm">left arm</string>
+    <string name="right_arm">right arm</string>
+    <string name="left_leg">left leg</string>
+    <string name="right_leg">right leg</string>
+    <string name="left_shoulder">left shoulder</string>
+    <string name="right_shoulder">right shoulder</string>
+    <string name="bend_joint">Bend your %1$s</string>
+    <string name="straighten_joint">Straighten your %1$s</string>
+    <string name="feedback_great">Great job!</string>
+    <string name="feedback_perfect">Perfect!</string>
+    <string name="feedback_aligned">Excellent alignment!</string>
+    <string name="feedback_almost">Almost there, keep going!</string>
+    <string name="feedback_close">So close!</string>
+    <string name="feedback_improving">You’re improving!</string>
+    <string name="try_this_pose">Try this pose!</string>
+    <string name="recommendation_description">For your %1$s mood at %2$s, try “%3$s”. Use a %4$s camera angle, orient your body %5$s, and place your hands %6$s.</string>
+    <string name="get_ready">GET READY!\n%1$d</string>
+    <string name="time_left">TIME: %1$d</string>
+    <string name="score_value">SCORE: %1$d%%</string>
+    <string name="best_score">BEST: %1$d%%</string>
+    <string name="pose_master">POSE MASTER!</string>
+    <string name="well_done">WELL DONE!</string>
+    <string name="your_accuracy">Your accuracy</string>
+    <string name="easy">Easy</string>
+    <string name="medium">Medium</string>
+    <string name="hard">Hard</string>
+    <string name="cool">Cool</string>
+    <string name="selfie">Selfie</string>
+    <string name="travel">Travel</string>
+    <string name="gym">Gym</string>
+    <string name="outdoor">Outdoor</string>
+    <string name="indoor">Indoor</string>
+    <string name="nature">Nature</string>
+    <string name="street">Street</string>
+    <string name="casual">Casual</string>
+    <string name="active">Active</string>
+    <string name="formal">Formal</string>
+    <string name="streetwear">Streetwear</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="non_binary">Non-binary</string>
+    <string name="confident">Confident</string>
+    <string name="relaxed">Relaxed</string>
+    <string name="energetic">Energetic</string>
+    <string name="serene">Serene</string>
+    <string name="photo_editor">แก้ไขรูปภาพ</string>
+    <string name="no_photo_selected">Choose a photo to start editing</string>
+    <string name="choose_photo">เลือกรูปภาพ</string>
+    <string name="brightness">ความสว่าง</string>
+    <string name="contrast">ความเปรียบต่าง</string>
+    <string name="saturation">ความอิ่มสี</string>
+    <string name="rotate">หมุน</string>
+    <string name="reset">รีเซ็ต</string>
+    <string name="save">บันทึก</string>
+    <string name="photo_saved">Edited photo saved</string>
+    <string name="photo_save_failed">Could not save photo</string>
+    <string name="remove_background">ลบพื้นหลัง</string>
+    <string name="extracting_subject">Extracting subject…</string>
+    <string name="video_editor">ตัดวิดีโอ</string>
+    <string name="auto_capture">ถ่ายอัตโนมัติ</string>
+    <string name="manual_capture_hint">กดปุ่มถ่ายเมื่อพร้อม</string>
+    <string name="voice_guidance">คำแนะนำด้วยเสียง</string>
+    <string name="step_into_frame">ยืนในกรอบให้กล้องเห็นร่างกาย</string>
+    <string name="camera_start_failed">เปิดกล้องไม่ได้ กรุณาปิดแอปกล้องอื่นแล้วลองอีกครั้ง</string>
+    <string name="no_recommendation">ไม่พบท่าที่ตรงกัน ลองเปลี่ยนเงื่อนไข</string>
+    <string name="share_photo">แชร์รูปภาพ</string>
+    <string name="open_photo">ดูรูปภาพ</string>
+    <string name="capture_photo">ถ่ายรูป</string>
+    <string name="favorites">รายการโปรด</string>
+    <string name="empty_favorites">แตะหัวใจบนท่าที่ชอบเพื่อบันทึกที่นี่</string>
+    <string name="clear_filters">ล้างตัวกรอง</string>
+    <string name="open_settings">เปิดการตั้งค่า</string>
+    <string name="no_pose_in_image">เลือกรูปที่เห็นไหล่ สะโพก แขนและขาชัดเจน</string>
+    <string name="pose_save_failed">บันทึกท่าไม่ได้ กรุณาลองอีกครั้ง</string>
+    <string name="photo_load_failed">เปิดรูปไม่ได้ กรุณาเลือกรูปอื่น</string>
+    <string name="background_failed">ลบพื้นหลังไม่ได้ กรุณาตรวจสอบการเชื่อมต่อ</string>
+    <string name="undo">เลิกทำ</string>
+    <string name="redo">ทำซ้ำ</string>
+    <string name="export">ส่งออก</string>
+    <string name="filters">ฟิลเตอร์</string>
+    <string name="adjust">ปรับแต่ง</string>
+    <string name="crop">ครอบตัด</string>
+    <string name="original">ต้นฉบับ</string>
+    <string name="replace">เปลี่ยนรูป</string>
+    <string name="show_original">ดูต้นฉบับ</string>
+    <string name="show_edit">ดูการแก้ไข</string>
+    <string name="flip_horizontal">พลิกแนวนอน</string>
+    <string name="flip_vertical">พลิกแนวตั้ง</string>
+    <string name="background_hint">ลบพื้นหลังและเลิกทำเพื่อคืนค่าได้ ครั้งแรกอาจต้องดาวน์โหลดโมเดล</string>
+    <string name="video_pick">เลือกวิดีโอ</string>
+    <string name="video_empty">เลือกวิดีโอที่ต้องการตัด</string>
+    <string name="video_hint">ตัดคลิปและเลือกว่าจะเก็บเสียงต้นฉบับหรือไม่</string>
+    <string name="video_trim_hint">การตัดแบบเร็วเริ่มจากคีย์เฟรมก่อนหน้า จึงอาจมีช่วงสั้นๆ เพิ่มเข้ามา</string>
+    <string name="video_audio">เก็บเสียงต้นฉบับ</string>
+    <string name="video_export">ส่งออกวิดีโอ</string>
+    <string name="video_exporting">กำลังส่งออก...</string>
+    <string name="video_exported">ส่งออกวิดีโอแล้ว</string>
+    <string name="video_error">ส่งออกไม่ได้ กรุณาลองวิดีโออื่น</string>
+    <string name="video_load_error">เล่นวิดีโอไม่ได้ กรุณาเลือกไฟล์อื่น</string>
+    <string name="play">เล่น</string>
+    <string name="pause">หยุดชั่วคราว</string>
+    <string name="start">เริ่ม</string>
+    <string name="end">สิ้นสุด</string>
+    <string name="discard_edits">ละทิ้งการแก้ไขหรือไม่</string>
+    <string name="discard_message">การเปลี่ยนแปลงที่ยังไม่บันทึกจะหายไป</string>
+    <string name="discard">ละทิ้ง</string>
+    <string name="recording_empty">ยังไม่มีการเคลื่อนไหวที่บันทึก ยืนในกรอบแล้วลองอีกครั้ง</string>
+    <string name="recording_saved">บันทึกการเคลื่อนไหวในคลังท่าแล้ว</string>
+    <string name="recording_failed">บันทึกการเคลื่อนไหวไม่ได้ กรุณาลองอีกครั้ง</string>
 </resources>

@@ -25,11 +25,14 @@ class ChallengeEngine(
     private val _timeLeft = MutableStateFlow(0)
     val timeLeft = _timeLeft.asStateFlow()
 
+    private val _finalScore = MutableStateFlow(0f)
+    val finalScore = _finalScore.asStateFlow()
     private var maxScoreAchieved = 0f
 
     fun startChallenge(durationSeconds: Int = 10) {
         challengeJob?.cancel()
         maxScoreAchieved = 0f
+        _finalScore.value = 0f
         challengeJob = scope.launch {
             // Pre-start countdown
             updateState(ChallengeState.COUNTDOWN)
@@ -47,6 +50,7 @@ class ChallengeEngine(
                 delay(1000)
             }
 
+            _finalScore.value = maxScoreAchieved
             updateState(ChallengeState.FINISHED)
             onChallengeFinished(maxScoreAchieved)
             

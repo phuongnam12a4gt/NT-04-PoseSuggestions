@@ -7,17 +7,105 @@
       "difficulty": "Easy",
       "previewImage": "cool_lean_preview",
       "landmarks": [
-        {"type": 11, "x": 0.4, "y": 0.2},
-        {"type": 12, "x": 0.6, "y": 0.2},
-        {"type": 23, "x": 0.45, "y": 0.5},
-        {"type": 24, "x": 0.55, "y": 0.5}
+        {
+          "type": 0,
+          "x": 0.509569,
+          "y": 0.098086
+        },
+        {
+          "type": 11,
+          "x": 0.58453,
+          "y": 0.199362
+        },
+        {
+          "type": 12,
+          "x": 0.398724,
+          "y": 0.1874
+        },
+        {
+          "type": 13,
+          "x": 0.599681,
+          "y": 0.349282
+        },
+        {
+          "type": 14,
+          "x": 0.367624,
+          "y": 0.35327
+        },
+        {
+          "type": 15,
+          "x": 0.565391,
+          "y": 0.444976
+        },
+        {
+          "type": 16,
+          "x": 0.370813,
+          "y": 0.49362
+        },
+        {
+          "type": 23,
+          "x": 0.562201,
+          "y": 0.438596
+        },
+        {
+          "type": 24,
+          "x": 0.42823,
+          "y": 0.443381
+        },
+        {
+          "type": 25,
+          "x": 0.566188,
+          "y": 0.629984
+        },
+        {
+          "type": 26,
+          "x": 0.455343,
+          "y": 0.668262
+        },
+        {
+          "type": 27,
+          "x": 0.403509,
+          "y": 0.799841
+        },
+        {
+          "type": 28,
+          "x": 0.492026,
+          "y": 0.868421
+        },
+        {
+          "type": 29,
+          "x": 0.393939,
+          "y": 0.818182
+        },
+        {
+          "type": 30,
+          "x": 0.491228,
+          "y": 0.888357
+        },
+        {
+          "type": 31,
+          "x": 0.409888,
+          "y": 0.916268
+        },
+        {
+          "type": 32,
+          "x": 0.469697,
+          "y": 0.941786
+        }
       ],
       "recommendationMetadata": {
         "cameraAngle": "Eye level",
         "bodyOrientation": "Leaning against wall",
         "handPlacement": "One hand in pocket",
-        "tags": ["street", "casual", "relaxed", "male", "female"]
-      }
+        "tags": [
+          "street",
+          "casual",
+          "relaxed",
+          "male",
+          "female"
+        ]
+      },
+      "sourceAspectRatio": 1.0
     },
     {
       "id": "selfie_1",
@@ -26,17 +114,105 @@
       "difficulty": "Easy",
       "previewImage": "mirror_selfie_preview",
       "landmarks": [
-        {"type": 11, "x": 0.3, "y": 0.3},
-        {"type": 12, "x": 0.7, "y": 0.3},
-        {"type": 14, "x": 0.8, "y": 0.5},
-        {"type": 16, "x": 0.9, "y": 0.7}
+        {
+          "type": 0,
+          "x": 0.510367,
+          "y": 0.171451
+        },
+        {
+          "type": 11,
+          "x": 0.535885,
+          "y": 0.247209
+        },
+        {
+          "type": 12,
+          "x": 0.398724,
+          "y": 0.247209
+        },
+        {
+          "type": 13,
+          "x": 0.589314,
+          "y": 0.335726
+        },
+        {
+          "type": 14,
+          "x": 0.411483,
+          "y": 0.361244
+        },
+        {
+          "type": 15,
+          "x": 0.569378,
+          "y": 0.260766
+        },
+        {
+          "type": 16,
+          "x": 0.443381,
+          "y": 0.448963
+        },
+        {
+          "type": 23,
+          "x": 0.556619,
+          "y": 0.440191
+        },
+        {
+          "type": 24,
+          "x": 0.451356,
+          "y": 0.441786
+        },
+        {
+          "type": 25,
+          "x": 0.551834,
+          "y": 0.640351
+        },
+        {
+          "type": 26,
+          "x": 0.433014,
+          "y": 0.64673
+        },
+        {
+          "type": 27,
+          "x": 0.518341,
+          "y": 0.862041
+        },
+        {
+          "type": 28,
+          "x": 0.510367,
+          "y": 0.858852
+        },
+        {
+          "type": 29,
+          "x": 0.532695,
+          "y": 0.874801
+        },
+        {
+          "type": 30,
+          "x": 0.511164,
+          "y": 0.874003
+        },
+        {
+          "type": 31,
+          "x": 0.507177,
+          "y": 0.91866
+        },
+        {
+          "type": 32,
+          "x": 0.4689,
+          "y": 0.910686
+        }
       ],
       "recommendationMetadata": {
         "cameraAngle": "Mirror reflected",
         "bodyOrientation": "Slightly turned",
         "handPlacement": "Holding phone at chest level",
-        "tags": ["indoor", "casual", "confident", "female", "male"]
-      }
+        "tags": [
+          "indoor",
+          "casual",
+          "confident",
+          "female",
+          "male"
+        ]
+      },
+      "sourceAspectRatio": 1.0
     },
     {
       "id": "travel_1",
@@ -45,17 +221,106 @@
       "difficulty": "Medium",
       "previewImage": "mountain_pose_preview",
       "landmarks": [
-        {"type": 11, "x": 0.45, "y": 0.2},
-        {"type": 12, "x": 0.55, "y": 0.2},
-        {"type": 27, "x": 0.48, "y": 0.9},
-        {"type": 28, "x": 0.52, "y": 0.9}
+        {
+          "type": 0,
+          "x": 0.496013,
+          "y": 0.11563
+        },
+        {
+          "type": 11,
+          "x": 0.558214,
+          "y": 0.223285
+        },
+        {
+          "type": 12,
+          "x": 0.421053,
+          "y": 0.223285
+        },
+        {
+          "type": 13,
+          "x": 0.595694,
+          "y": 0.370813
+        },
+        {
+          "type": 14,
+          "x": 0.393939,
+          "y": 0.371611
+        },
+        {
+          "type": 15,
+          "x": 0.606061,
+          "y": 0.502392
+        },
+        {
+          "type": 16,
+          "x": 0.38118,
+          "y": 0.502392
+        },
+        {
+          "type": 23,
+          "x": 0.553429,
+          "y": 0.440989
+        },
+        {
+          "type": 24,
+          "x": 0.438596,
+          "y": 0.440989
+        },
+        {
+          "type": 25,
+          "x": 0.600478,
+          "y": 0.651515
+        },
+        {
+          "type": 26,
+          "x": 0.445774,
+          "y": 0.651515
+        },
+        {
+          "type": 27,
+          "x": 0.633971,
+          "y": 0.856459
+        },
+        {
+          "type": 28,
+          "x": 0.448166,
+          "y": 0.857257
+        },
+        {
+          "type": 29,
+          "x": 0.619617,
+          "y": 0.886762
+        },
+        {
+          "type": 30,
+          "x": 0.45933,
+          "y": 0.885167
+        },
+        {
+          "type": 31,
+          "x": 0.681818,
+          "y": 0.914673
+        },
+        {
+          "type": 32,
+          "x": 0.429027,
+          "y": 0.909888
+        }
       ],
       "recommendationMetadata": {
         "cameraAngle": "Low angle",
         "bodyOrientation": "Facing camera, standing tall",
         "handPlacement": "Relaxed at sides",
-        "tags": ["nature", "outdoor", "adventure", "serene", "male", "female"]
-      }
+        "tags": [
+          "nature",
+          "outdoor",
+          "adventure",
+          "serene",
+          "male",
+          "female"
+        ]
+      },
+      "sourceAspectRatio": 1.0
     },
     {
       "id": "gym_1",
@@ -64,16 +329,105 @@
       "difficulty": "Hard",
       "previewImage": "bicep_flex_preview",
       "landmarks": [
-        {"type": 11, "x": 0.4, "y": 0.3},
-        {"type": 13, "x": 0.3, "y": 0.2},
-        {"type": 15, "x": 0.4, "y": 0.1}
+        {
+          "type": 0,
+          "x": 0.531898,
+          "y": 0.101276
+        },
+        {
+          "type": 11,
+          "x": 0.553429,
+          "y": 0.215311
+        },
+        {
+          "type": 12,
+          "x": 0.357257,
+          "y": 0.221691
+        },
+        {
+          "type": 13,
+          "x": 0.688198,
+          "y": 0.201754
+        },
+        {
+          "type": 14,
+          "x": 0.322967,
+          "y": 0.369219
+        },
+        {
+          "type": 15,
+          "x": 0.621212,
+          "y": 0.101276
+        },
+        {
+          "type": 16,
+          "x": 0.34689,
+          "y": 0.528708
+        },
+        {
+          "type": 23,
+          "x": 0.551037,
+          "y": 0.451356
+        },
+        {
+          "type": 24,
+          "x": 0.420255,
+          "y": 0.451356
+        },
+        {
+          "type": 25,
+          "x": 0.569378,
+          "y": 0.661085
+        },
+        {
+          "type": 26,
+          "x": 0.403509,
+          "y": 0.660287
+        },
+        {
+          "type": 27,
+          "x": 0.613238,
+          "y": 0.879585
+        },
+        {
+          "type": 28,
+          "x": 0.376396,
+          "y": 0.883573
+        },
+        {
+          "type": 29,
+          "x": 0.590909,
+          "y": 0.905901
+        },
+        {
+          "type": 30,
+          "x": 0.39075,
+          "y": 0.912281
+        },
+        {
+          "type": 31,
+          "x": 0.685805,
+          "y": 0.920255
+        },
+        {
+          "type": 32,
+          "x": 0.354067,
+          "y": 0.931419
+        }
       ],
       "recommendationMetadata": {
         "cameraAngle": "Eye level",
         "bodyOrientation": "Side profile",
         "handPlacement": "Flexing arm up",
-        "tags": ["gym", "active", "energetic", "male", "female"]
-      }
+        "tags": [
+          "gym",
+          "active",
+          "energetic",
+          "male",
+          "female"
+        ]
+      },
+      "sourceAspectRatio": 1.0
     }
   ]
 }

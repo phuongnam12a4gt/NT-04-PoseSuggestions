@@ -20,6 +20,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,17 +42,21 @@ fun MarketplaceBottomSheet(
     val selectedDifficulty by viewModel.selectedDifficulty.collectAsState()
     val recordedPoses by viewModel.recordedPoses.collectAsState()
 
+    var favoritesOnly by remember { mutableStateOf(false) }
+    val shownTemplates = if (favoritesOnly) templates.filter { it.id in favorites } else templates
     val categories = listOf("All", "cool", "selfie", "travel", "gym")
     val difficulties = listOf("All", "Easy", "Medium", "Hard")
 
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
+        sheetState = sheetState,
         onDismissRequest = onDismiss,
         containerColor = Color(0xFF1A1A1A),
         scrimColor = Color.Black.copy(alpha = 0.5f)
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxHeight(0.94f)
                 .padding(horizontal = 16.dp)
         ) {
             Text(
@@ -103,7 +110,31 @@ fun MarketplaceBottomSheet(
                 }
             }
 
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            FilterChip(selected = favoritesOnly, onClick = { favoritesOnly = !favoritesOnly },
+                label = { Text(stringResource(R.string.favorites)) })
+            if (shownTemplates.isEmpty()) {
+                Text(stringResource(if (favoritesOnly) R.string.empty_favorites else R.string.no_poses),
+                    color = Color.White, modifier = Modifier.padding(vertical = 12.dp))
+                TextButton(onClick = {
+                    favoritesOnly = false; viewModel.setSearchQuery(""); viewModel.selectCategory("All"); viewModel.selectDifficulty("All")
+                }) { Text(stringResource(R.string.clear_filters)) }
+            }
+            LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                // All Templates
+                item {
+                    Text(stringResource(R.string.explore_poses), color = Color.Gray, style = MaterialTheme.typography.labelLarge)
+                }
+
+                items(shownTemplates.chunked(2)) { rowItems ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        rowItems.forEach { template ->
+                            Box(modifier = Modifier.weight(1f)) {
+                                PoseCard(template, favorites.contains(template.id), { viewModel.toggleFavorite(template.id) }, { viewModel.selectTemplate(template); onDismiss() })
+                            }
+                        }
+                        if (rowItems.size == 1) Spacer(Modifier.weight(1f))
+                    }
+                }
                 // My Recordings
                 if (recordedPoses.isNotEmpty()) {
                     item {
@@ -111,9 +142,9 @@ fun MarketplaceBottomSheet(
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 8.dp)) {
                             items(recordedPoses) { recording ->
                                 Card(
-                                    modifier = Modifier.size(120.dp, 80.dp).clickable { 
+                                    modifier = Modifier.size(120.dp, 80.dp).clickable {
                                         viewModel.playRecording(recording, 1000, 1000) // Default dimensions for replay
-                                        onDismiss() 
+                                        onDismiss()
                                     },
                                     colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.1f))
                                 ) {
@@ -128,32 +159,19 @@ fun MarketplaceBottomSheet(
                 }
 
                 // Recently Used
-                if (recentTemplates.isNotEmpty()) {
+                if (recentTemplates.isNotEmpty() && searchQuery.isBlank() && selectedCategory == "All" && selectedDifficulty == "All" && !favoritesOnly) {
                     item {
                         Text(stringResource(R.string.recently_used), color = Color.Gray, style = MaterialTheme.typography.labelLarge)
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 8.dp)) {
                             items(recentTemplates) { template ->
-                                PoseCard(template, favorites.contains(template.id), { viewModel.toggleFavorite(template.id) }, { viewModel.selectTemplate(template); onDismiss() })
+                                Box(Modifier.width(160.dp)) {
+                                    PoseCard(template, favorites.contains(template.id), { viewModel.toggleFavorite(template.id) }, { viewModel.selectTemplate(template); onDismiss() })
+                                }
                             }
                         }
                     }
                 }
 
-                // All Templates
-                item {
-                    Text(stringResource(R.string.explore_poses), color = Color.Gray, style = MaterialTheme.typography.labelLarge)
-                }
-                
-                items(templates.chunked(2)) { rowItems ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        rowItems.forEach { template ->
-                            Box(modifier = Modifier.weight(1f)) {
-                                PoseCard(template, favorites.contains(template.id), { viewModel.toggleFavorite(template.id) }, { viewModel.selectTemplate(template); onDismiss() })
-                            }
-                        }
-                        if (rowItems.size == 1) Spacer(Modifier.weight(1f))
-                    }
-                }
             }
         }
     }
@@ -184,7 +202,7 @@ fun PoseCard(
                         .background(Color.White.copy(alpha = 0.1f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("📸", fontSize = 40.sp)
+                    PoseThumbnail(template, Modifier.fillMaxSize())
                 }
                 Spacer(Modifier.height(8.dp))
                 Text(template.name, color = Color.White, fontWeight = FontWeight.Bold, maxLines = 1)

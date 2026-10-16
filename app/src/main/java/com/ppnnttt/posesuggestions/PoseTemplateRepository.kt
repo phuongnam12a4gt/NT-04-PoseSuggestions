@@ -14,9 +14,9 @@ class PoseTemplateRepository(private val context: Context) {
 
     fun loadTemplates(): List<PoseTemplate> {
         val assetTemplates = try {
-            val inputStream = context.assets.open("pose_templates.json")
-            val reader = InputStreamReader(inputStream)
-            val config = json.decodeFromString<PoseTemplatesConfig>(reader.readText())
+            val config = context.assets.open("pose_templates.json").bufferedReader().use {
+                json.decodeFromString<PoseTemplatesConfig>(it.readText())
+            }
             config.templates
         } catch (e: Exception) {
             e.printStackTrace()
@@ -48,7 +48,9 @@ class PoseTemplateRepository(private val context: Context) {
         difficulty: String = "All"
     ): List<PoseTemplate> {
         return loadTemplates().filter { template ->
-            val matchesQuery = template.name.contains(query, ignoreCase = true)
+            fun normalized(text: String) = java.text.Normalizer.normalize(text.lowercase(java.util.Locale.ROOT).replace('đ', 'd'), java.text.Normalizer.Form.NFD).replace(Regex("\\p{M}"), "")
+            val categoryName = mapOf("cool" to R.string.cool, "selfie" to R.string.selfie, "travel" to R.string.travel, "gym" to R.string.gym)[template.category]?.let { context.getString(it) }.orEmpty()
+            val matchesQuery = normalized("${template.name} ${template.category} $categoryName").contains(normalized(query.trim()))
             val matchesCategory = category == "All" || template.category.equals(category, ignoreCase = true)
             val matchesDifficulty = difficulty == "All" || template.difficulty.equals(difficulty, ignoreCase = true)
             matchesQuery && matchesCategory && matchesDifficulty
