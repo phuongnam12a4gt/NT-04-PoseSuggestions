@@ -39,7 +39,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PhotoEditorScreen(onNavigateBack: () -> Unit) {
+fun PhotoEditorScreen(onNavigateBack: () -> Unit, initialPhoto: String? = null) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbar = remember { SnackbarHostState() }
@@ -51,6 +51,20 @@ fun PhotoEditorScreen(onNavigateBack: () -> Unit) {
     var isRemovingBackground by remember { mutableStateOf(false) }
     val savedMessage = stringResource(R.string.photo_saved)
     val errorMessage = stringResource(R.string.photo_save_failed)
+
+    LaunchedEffect(initialPhoto) {
+        if (!initialPhoto.isNullOrBlank()) {
+            val loaded = withContext(Dispatchers.IO) {
+                runCatching {
+                    com.ppnnttt.posesuggestions.loadPhoto(
+                        context, android.net.Uri.fromFile(java.io.File(initialPhoto))
+                    )
+                }.getOrNull()
+            }
+            bitmap = loaded
+            if (loaded == null) snackbar.showSnackbar(errorMessage)
+        }
+    }
 
     val savePicker = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("image/png")
@@ -225,7 +239,7 @@ private fun editorColorMatrix(brightness: Float, contrast: Float, saturation: Fl
     return saturationMatrix
 }
 
-private fun saveEditedPhotoToUri(
+internal fun saveEditedPhotoToUri(
     context: android.content.Context,
     destination: android.net.Uri,
     source: Bitmap,
