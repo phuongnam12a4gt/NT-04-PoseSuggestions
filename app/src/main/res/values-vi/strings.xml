@@ -37,7 +37,7 @@
     <string name="delete_photo_message">Ảnh sẽ bị xóa khỏi ứng dụng. Hành động này không thể hoàn tác.</string>
     <string name="delete">Xóa</string>
     <string name="cancel">Hủy</string>
-    <string name="place_body_here">ĐỨNG THEO DÁNG MẪU</string>
+
     <string name="stop_replay">DỪNG PHÁT LẠI</string>
     <string name="camera_permission_needed">Cho phép camera để xem trước và chụp ảnh.</string>
     <string name="grant_permission">Cho phép camera</string>
@@ -50,15 +50,17 @@
     <string name="quick_save_library">Lưu vào thư viện dáng</string>
     <string name="save_as">Lưu với tên %1$s</string>
     <string name="pose_marketplace">Thư viện dáng</string>
-    <string name="search_poses">Tìm tên dáng...</string>
+    <string name="search_poses">Tìm tên dáng…</string>
     <string name="my_recordings">Chuyển động đã ghi</string>
-    <string name="frame_count">%1$d khung hình</string>
+    <plurals name="frame_count">
+        <item quantity="other">%1$d khung hình</item>
+    </plurals>
     <string name="recently_used">Dùng gần đây</string>
     <string name="explore_poses">Chọn dáng để chụp</string>
     <string name="ai_pose_suggestion">Tìm dáng phù hợp</string>
     <string name="location">Địa điểm</string>
     <string name="outfit">Trang phục</string>
-    <string name="gender">Giới tính</string>
+
     <string name="mood">Cảm xúc</string>
     <string name="generate_recommendation">Gợi ý cho tôi</string>
     <string name="hold_still">Đẹp rồi, giữ dáng nhé!</string>
@@ -120,7 +122,7 @@
     <string name="photo_saved">Đã lưu ảnh chỉnh sửa</string>
     <string name="photo_save_failed">Không thể lưu ảnh. Vui lòng thử lại.</string>
     <string name="remove_background">Xóa nền</string>
-    <string name="extracting_subject">Đang tách chủ thể...</string>
+
     <string name="video_editor">Cắt video</string>
     <string name="auto_capture">Tự động chụp</string>
     <string name="manual_capture_hint">Bấm nút chụp khi bạn sẵn sàng</string>
@@ -139,26 +141,14 @@
     <string name="pose_save_failed">Không lưu được dáng. Vui lòng thử lại.</string>
     <string name="photo_load_failed">Không mở được ảnh. Vui lòng chọn ảnh khác.</string>
     <string name="background_failed">Chưa xóa được nền. Kiểm tra kết nối mạng rồi thử lại.</string>
-    <string name="undo">Hoàn tác</string>
-    <string name="redo">Làm lại</string>
-    <string name="export">Xuất ảnh</string>
-    <string name="filters">Bộ lọc</string>
-    <string name="adjust">Điều chỉnh</string>
-    <string name="crop">Cắt ảnh</string>
-    <string name="original">Gốc</string>
-    <string name="replace">Đổi ảnh</string>
-    <string name="show_original">Xem ảnh gốc</string>
-    <string name="show_edit">Xem chỉnh sửa</string>
-    <string name="flip_horizontal">Lật ngang</string>
-    <string name="flip_vertical">Lật dọc</string>
-    <string name="background_hint">Xóa nền ảnh; bấm Hoàn tác để khôi phục. Lần đầu có thể cần tải mô hình.</string>
+
     <string name="video_pick">Chọn video</string>
     <string name="video_empty">Chọn video cần cắt</string>
     <string name="video_hint">Cắt đoạn video và chọn giữ hoặc tắt âm thanh.</string>
     <string name="video_trim_hint">Cắt nhanh bắt đầu từ khung hình chính gần trước đó, nên có thể giữ thêm một đoạn ngắn.</string>
     <string name="video_audio">Giữ âm thanh gốc</string>
     <string name="video_export">Xuất video</string>
-    <string name="video_exporting">Đang xuất...</string>
+    <string name="video_exporting">Đang xuất…</string>
     <string name="video_exported">Đã xuất video</string>
     <string name="video_error">Không xuất được video này. Vui lòng thử video khác.</string>
     <string name="video_load_error">Không phát được video. Vui lòng chọn tệp khác.</string>
@@ -172,4 +162,7 @@
     <string name="recording_empty">Chưa ghi được chuyển động. Đứng vào khung hình rồi thử lại.</string>
     <string name="recording_saved">Đã lưu chuyển động vào thư viện dáng</string>
     <string name="recording_failed">Không lưu được chuyển động. Vui lòng thử lại.</string>
+    <string name="pose_filters">Bộ lọc</string>
+    <string name="pose_difficulty">Độ khó</string>
+    <string name="reference_photo_hint">Chọn ảnh một người, thấy rõ cơ thể và đủ sáng.</string>
 </resources>

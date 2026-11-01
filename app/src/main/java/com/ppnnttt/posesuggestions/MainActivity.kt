@@ -31,10 +31,17 @@ class MainActivity : AppCompatActivity() {
         )
         setContent {
             androidx.compose.material3.MaterialTheme(colorScheme = androidx.compose.material3.darkColorScheme(
-                primary = androidx.compose.ui.graphics.Color.Cyan,
+                primary = androidx.compose.ui.graphics.Color(0xFF67D7CD),
+                secondary = androidx.compose.ui.graphics.Color(0xFF67D7CD),
+                tertiary = androidx.compose.ui.graphics.Color(0xFFB5C9C6),
+                primaryContainer = androidx.compose.ui.graphics.Color(0xFF204A47),
+                secondaryContainer = androidx.compose.ui.graphics.Color(0xFF204A47),
+                onPrimaryContainer = androidx.compose.ui.graphics.Color(0xFFB7F2E9),
+                onSecondaryContainer = androidx.compose.ui.graphics.Color(0xFFB7F2E9),
+                onSurfaceVariant = androidx.compose.ui.graphics.Color(0xFFBBC4C2),
                 onPrimary = androidx.compose.ui.graphics.Color.Black,
-                surface = androidx.compose.ui.graphics.Color(0xFF17171F),
-                background = androidx.compose.ui.graphics.Color(0xFF080808)
+                surface = androidx.compose.ui.graphics.Color(0xFF191E20),
+                background = androidx.compose.ui.graphics.Color(0xFF101416)
             )) {
             val navController = rememberNavController()
             val cameraViewModel: CameraViewModel = viewModel()

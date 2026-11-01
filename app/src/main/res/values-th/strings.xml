@@ -37,7 +37,7 @@
     <string name="delete_photo_message">Are you sure you want to delete this captured pose?</string>
     <string name="delete">ลบ</string>
     <string name="cancel">ยกเลิก</string>
-    <string name="place_body_here">PLACE YOUR BODY HERE</string>
+
     <string name="stop_replay">STOP REPLAY</string>
     <string name="camera_permission_needed">Camera access is needed</string>
     <string name="grant_permission">Grant permission</string>
@@ -52,13 +52,15 @@
     <string name="pose_marketplace">Pose library</string>
     <string name="search_poses">Search poses…</string>
     <string name="my_recordings">My recordings</string>
-    <string name="frame_count">%1$d frames</string>
+    <plurals name="frame_count">
+        <item quantity="other">%1$d frames</item>
+    </plurals>
     <string name="recently_used">Recently used</string>
     <string name="explore_poses">Explore poses</string>
     <string name="ai_pose_suggestion">AI pose suggestion</string>
     <string name="location">Location</string>
     <string name="outfit">Outfit</string>
-    <string name="gender">Gender</string>
+
     <string name="mood">Mood</string>
     <string name="generate_recommendation">Generate recommendation</string>
     <string name="hold_still">Hold still!</string>
@@ -120,7 +122,7 @@
     <string name="photo_saved">Edited photo saved</string>
     <string name="photo_save_failed">Could not save photo</string>
     <string name="remove_background">ลบพื้นหลัง</string>
-    <string name="extracting_subject">Extracting subject…</string>
+
     <string name="video_editor">ตัดวิดีโอ</string>
     <string name="auto_capture">ถ่ายอัตโนมัติ</string>
     <string name="manual_capture_hint">กดปุ่มถ่ายเมื่อพร้อม</string>
@@ -139,26 +141,14 @@
     <string name="pose_save_failed">บันทึกท่าไม่ได้ กรุณาลองอีกครั้ง</string>
     <string name="photo_load_failed">เปิดรูปไม่ได้ กรุณาเลือกรูปอื่น</string>
     <string name="background_failed">ลบพื้นหลังไม่ได้ กรุณาตรวจสอบการเชื่อมต่อ</string>
-    <string name="undo">เลิกทำ</string>
-    <string name="redo">ทำซ้ำ</string>
-    <string name="export">ส่งออก</string>
-    <string name="filters">ฟิลเตอร์</string>
-    <string name="adjust">ปรับแต่ง</string>
-    <string name="crop">ครอบตัด</string>
-    <string name="original">ต้นฉบับ</string>
-    <string name="replace">เปลี่ยนรูป</string>
-    <string name="show_original">ดูต้นฉบับ</string>
-    <string name="show_edit">ดูการแก้ไข</string>
-    <string name="flip_horizontal">พลิกแนวนอน</string>
-    <string name="flip_vertical">พลิกแนวตั้ง</string>
-    <string name="background_hint">ลบพื้นหลังและเลิกทำเพื่อคืนค่าได้ ครั้งแรกอาจต้องดาวน์โหลดโมเดล</string>
+
     <string name="video_pick">เลือกวิดีโอ</string>
     <string name="video_empty">เลือกวิดีโอที่ต้องการตัด</string>
     <string name="video_hint">ตัดคลิปและเลือกว่าจะเก็บเสียงต้นฉบับหรือไม่</string>
     <string name="video_trim_hint">การตัดแบบเร็วเริ่มจากคีย์เฟรมก่อนหน้า จึงอาจมีช่วงสั้นๆ เพิ่มเข้ามา</string>
     <string name="video_audio">เก็บเสียงต้นฉบับ</string>
     <string name="video_export">ส่งออกวิดีโอ</string>
-    <string name="video_exporting">กำลังส่งออก...</string>
+    <string name="video_exporting">กำลังส่งออก…</string>
     <string name="video_exported">ส่งออกวิดีโอแล้ว</string>
     <string name="video_error">ส่งออกไม่ได้ กรุณาลองวิดีโออื่น</string>
     <string name="video_load_error">เล่นวิดีโอไม่ได้ กรุณาเลือกไฟล์อื่น</string>
@@ -172,4 +162,7 @@
     <string name="recording_empty">ยังไม่มีการเคลื่อนไหวที่บันทึก ยืนในกรอบแล้วลองอีกครั้ง</string>
     <string name="recording_saved">บันทึกการเคลื่อนไหวในคลังท่าแล้ว</string>
     <string name="recording_failed">บันทึกการเคลื่อนไหวไม่ได้ กรุณาลองอีกครั้ง</string>
+    <string name="pose_filters">ตัวกรอง</string>
+    <string name="pose_difficulty">ระดับความยาก</string>
+    <string name="reference_photo_hint">เลือกภาพที่มีคนหนึ่งคน เห็นร่างกายชัดเจน และมีแสงเพียงพอ</string>
 </resources>

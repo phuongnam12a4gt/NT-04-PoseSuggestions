@@ -1,5 +1,6 @@
 package com.ppnnttt.posesuggestions
 
+import androidx.core.content.edit
 import android.content.Context
 
 class ScoreManager(context: Context) {
@@ -8,7 +9,7 @@ class ScoreManager(context: Context) {
     fun saveHighScore(poseId: String, score: Int) {
         val currentHighScore = getHighScore(poseId)
         if (score > currentHighScore) {
-            prefs.edit().putInt("high_score_$poseId", score).apply()
+            prefs.edit { putInt("high_score_$poseId", score) }
         }
     }
 

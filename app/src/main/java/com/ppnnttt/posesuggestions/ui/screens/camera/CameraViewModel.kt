@@ -3,6 +3,7 @@ package com.ppnnttt.posesuggestions.ui.screens.camera
 import com.ppnnttt.posesuggestions.*
 import com.ppnnttt.posesuggestions.R
 
+import androidx.core.content.edit
 import android.media.AudioManager
 import android.media.MediaActionSound
 import android.media.ToneGenerator
@@ -162,14 +163,14 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
 
     fun setAutoCaptureEnabled(enabled: Boolean) {
         _autoCaptureEnabled.value = enabled
-        settings.edit().putBoolean("auto_capture", enabled).apply()
+        settings.edit { putBoolean("auto_capture", enabled) }
         cancelCountdown()
         autoCaptureGate.reset()
     }
 
     fun setVoiceEnabled(enabled: Boolean) {
         _voiceEnabled.value = enabled
-        settings.edit().putBoolean("voice", enabled).apply()
+        settings.edit { putBoolean("voice", enabled) }
         if (!enabled) voiceGuideManager.stop()
     }
 
@@ -381,13 +382,15 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
                     it.setAnalyzer(cameraExecutor, PoseAnalyzer(poseProcessor) { poses, width, height ->
                         if (generation != bindingGeneration || !isCameraBound) return@PoseAnalyzer
                         val detectedList = poses.map { it.toDetectedPose(width, height) }
-                            .filter { pose -> pose.landmarks.count { it.inFrameLikelihood >= 0.5f } >= 6 }
+                            .filter { pose -> pose.hasTrackableBody() }
                         lastPoseTime = android.os.SystemClock.elapsedRealtime()
                         
                         // Lọc mượt cho từng người
                         val p1Raw = detectedList.getOrNull(0)
                         val p2Raw = detectedList.getOrNull(1)
                         
+                        if (p1Raw == null) smoothingFilter.reset()
+                        if (p2Raw == null) smoothingFilterPartner.reset()
                         val p1 = p1Raw?.let { smoothingFilter.filter(it) }
                         val p2 = p2Raw?.let { smoothingFilterPartner.filter(it) }
                         
@@ -528,7 +531,7 @@ class CameraViewModel(application: android.app.Application) : AndroidViewModel(a
     }
 
     override fun onCleared() {
-        super.onCleared()
+
         releaseCamera()
         poseProcessor.stop()
         shutterSound.release()

@@ -37,7 +37,7 @@ fun GhostOverlay(
     }
     val displayTemplate = if (isMirrored) template.copy(landmarks = template.landmarks.map { it.copy(x = 1f - it.x) }) else template
     val frameSize = 320.dp
-    val placeBodyText = stringResource(R.string.place_body_here)
+    val frameColor = androidx.compose.material3.MaterialTheme.colorScheme.primary
 
     Box(
         modifier = modifier
@@ -105,33 +105,13 @@ fun GhostOverlay(
 
             // 5. Vẽ viền lỗ thủng
             drawRoundRect(
-                color = Color.Cyan.copy(alpha = 0.5f),
+                color = frameColor.copy(alpha = 0.3f),
                 topLeft = Offset(x, y),
                 size = Size(w, h),
-                style = Stroke(width = 2.dp.toPx()),
+                style = Stroke(width = 1.dp.toPx()),
                 cornerRadius = CornerRadius(24.dp.toPx())
             )
         }
 
-        // Hướng dẫn chữ hiện lên phía trên lỗ thủng
-        Box(
-            modifier = Modifier
-                .offset {
-                    val x = offset.x.roundToInt()
-                    val y = offset.y.roundToInt() - (frameSize.toPx() * scale / 2).roundToInt() - 40
-                    IntOffset(x, y)
-                }
-                .align(Alignment.Center)
-        ) {
-            Text(
-                placeBodyText,
-                color = Color.Cyan,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                style = androidx.compose.ui.text.TextStyle(
-                    shadow = Shadow(color = Color.Black, blurRadius = 8f)
-                )
-            )
-        }
     }
 }

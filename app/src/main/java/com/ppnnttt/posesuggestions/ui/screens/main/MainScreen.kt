@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -35,7 +36,7 @@ fun MainScreen(
     onNavigateToSettings: () -> Unit
 ) {
     Scaffold(
-        containerColor = Color(0xFF080808)
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -52,7 +53,7 @@ fun MainScreen(
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
-                        .background(Brush.linearGradient(listOf(Color.Cyan, Color.Magenta))),
+                        .background(Brush.linearGradient(listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primaryContainer))),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(Icons.Default.Star, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
@@ -76,14 +77,14 @@ fun MainScreen(
                 }
             }
 
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(20.dp))
 
             // Hero Section
             MainActionCard(
                 title = stringResource(R.string.smart_photo_assistant),
                 subtitle = stringResource(R.string.smart_photo_description),
-                icon = Icons.Default.Add,
-                gradient = listOf(Color(0xFF6200EE), Color(0xFFB00020)),
+                icon = com.ppnnttt.posesuggestions.ui.AppIcons.Camera,
+                gradient = listOf(Color(0xFF204A47), Color(0xFF182E30)),
                 onClick = onNavigateToCamera
             )
 
@@ -112,14 +113,14 @@ fun MainScreen(
                         modifier = Modifier.weight(1f),
                         title = stringResource(R.string.explore),
                         icon = Icons.Default.Search,
-                        color = Color(0xFFBB86FC),
+                        color = MaterialTheme.colorScheme.primary,
                         onClick = onNavigateToMarketplace
                     )
                     SmallFeatureCard(
                         modifier = Modifier.weight(1f),
                         title = stringResource(R.string.history),
-                        icon = Icons.Default.List,
-                        color = Color(0xFFE91E63),
+                        icon = androidx.compose.material.icons.Icons.AutoMirrored.Filled.List,
+                        color = MaterialTheme.colorScheme.primary,
                         onClick = onNavigateToGallery
                     )
                 }
@@ -128,7 +129,7 @@ fun MainScreen(
                     modifier = Modifier.fillMaxWidth(),
                     title = stringResource(R.string.photo_editor),
                     icon = Icons.Default.Edit,
-                    color = Color(0xFFFFAB00),
+                    color = MaterialTheme.colorScheme.primary,
                     onClick = onNavigateToPhotoEditor
                 )
 
@@ -136,7 +137,7 @@ fun MainScreen(
                     modifier = Modifier.fillMaxWidth(),
                     title = stringResource(R.string.video_editor),
                     icon = Icons.Default.PlayArrow,
-                    color = Color(0xFF64B5F6),
+                    color = MaterialTheme.colorScheme.primary,
                     onClick = onNavigateToVideoEditor
                 )
             }
@@ -154,7 +155,7 @@ fun MainScreen(
                     Spacer(Modifier.width(12.dp))
                     Text(
                         stringResource(R.string.zoom_tip),
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 12.sp
                     )
                 }
@@ -168,20 +169,22 @@ fun MainActionCard(title: String, subtitle: String, icon: ImageVector, gradient:
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 200.dp)
-            .background(Brush.linearGradient(gradient), RoundedCornerShape(28.dp))
+            .heightIn(min = 144.dp)
+            .background(Brush.linearGradient(gradient), RoundedCornerShape(20.dp))
             .clickable { onClick() },
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        shape = RoundedCornerShape(28.dp)
+        shape = RoundedCornerShape(20.dp)
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(24.dp).align(Alignment.CenterStart).fillMaxWidth(0.88f)) {
+            Column(modifier = Modifier.padding(20.dp).align(Alignment.CenterStart).fillMaxWidth(0.88f)) {
                 Surface(color = Color.White.copy(alpha = 0.2f), shape = CircleShape) {
                     Text(stringResource(R.string.most_popular), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), fontSize = 10.sp, color = Color.White, fontWeight = FontWeight.Bold)
                 }
                 Spacer(Modifier.height(12.dp))
                 Text(title, style = MaterialTheme.typography.headlineSmall, color = Color.White, fontWeight = FontWeight.Bold)
-                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.8f))
+                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.85f))
+                Spacer(Modifier.height(12.dp))
+                FilledTonalButton(onClick = onClick) { Text(stringResource(R.string.capture_photo)) }
             }
             Icon(icon, contentDescription = null, modifier = Modifier.size(120.dp).align(Alignment.CenterEnd).offset(x = 30.dp), tint = Color.White.copy(alpha = 0.1f))
         }
@@ -192,7 +195,7 @@ fun MainActionCard(title: String, subtitle: String, icon: ImageVector, gradient:
 fun SecondaryActionCard(title: String, description: String, icon: ImageVector, color: Color, onClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth().clickable { onClick() },
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f))
     ) {
         Row(modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -202,7 +205,7 @@ fun SecondaryActionCard(title: String, description: String, icon: ImageVector, c
             Spacer(Modifier.width(16.dp))
             Column {
                 Text(title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                Text(description, color = Color.Gray, fontSize = 13.sp, lineHeight = 18.sp)
+                Text(description, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp, lineHeight = 18.sp)
             }
         }
     }
@@ -211,8 +214,8 @@ fun SecondaryActionCard(title: String, description: String, icon: ImageVector, c
 @Composable
 fun SmallFeatureCard(modifier: Modifier, title: String, icon: ImageVector, color: Color, onClick: () -> Unit) {
     Card(
-        modifier = modifier.heightIn(min = 88.dp).clickable { onClick() },
-        shape = RoundedCornerShape(24.dp),
+        modifier = modifier.heightIn(min = 72.dp).clickable { onClick() },
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f))
     ) {
         Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {

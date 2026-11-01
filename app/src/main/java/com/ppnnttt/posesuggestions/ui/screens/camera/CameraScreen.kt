@@ -3,12 +3,15 @@ package com.ppnnttt.posesuggestions.ui.screens.camera
 import com.ppnnttt.posesuggestions.*
 import com.ppnnttt.posesuggestions.R
 
+import androidx.core.net.toUri
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -86,7 +89,7 @@ fun CameraScreen(
     val voiceEnabled by viewModel.voiceEnabled.collectAsState()
     var showMarketplace by rememberSaveable { mutableStateOf(initialShowMarketplace) }
     LaunchedEffect(Unit) { viewModel.refreshLibrary() }
-    val lifecycleOwner = androidx.compose.ui.platform.LocalLifecycleOwner.current
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
             if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
@@ -153,7 +156,7 @@ fun CameraScreen(
             )
 
             // Top HUD: Similarity Score
-            PremiumTopHUD(currentScore, selectedTemplate != null && !isReplaying)
+            PremiumTopHUD(currentScore, selectedTemplate != null && detectedPose?.hasTrackableBody() == true && !isReplaying)
 
             // Replay HUD
             if (isReplaying) {
@@ -197,7 +200,7 @@ fun CameraScreen(
                 ) {
                     Text(
                         text = guidanceMessage ?: "",
-                        color = Color.Cyan,
+                        color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium)
                     )
                 }
@@ -257,7 +260,7 @@ fun CameraScreen(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color.Cyan.copy(alpha = 0.9f))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.9f))
                         .clickable { viewModel.dismissRecommendation() }
                         .padding(16.dp)
                 ) {
@@ -277,7 +280,7 @@ fun CameraScreen(
             }
             TextButton(onClick = {
                 context.startActivity(android.content.Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                    android.net.Uri.parse("package:${context.packageName}")))
+                    "package:${context.packageName}".toUri()))
             }, modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding()) {
                 Text(stringResource(R.string.open_settings))
             }
@@ -306,7 +309,7 @@ fun PremiumTopHUD(score: Float, isTemplateSelected: Boolean) {
                     Icon(
                         Icons.Default.Star,
                         contentDescription = null,
-                        tint = if (score > 80f) Color.Cyan else Color.White,
+                        tint = if (score > 80f) MaterialTheme.colorScheme.primary else Color.White,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(Modifier.width(8.dp))
@@ -337,7 +340,7 @@ fun PremiumTopHUD(score: Float, isTemplateSelected: Boolean) {
                         .fillMaxHeight()
                         .background(
                             Brush.horizontalGradient(
-                                listOf(Color.Cyan, Color(0xFFE91E63))
+                                listOf(MaterialTheme.colorScheme.primary, Color(0xFFE91E63))
                             )
                         )
                 )
@@ -374,6 +377,7 @@ fun PremiumCountdown(count: Int?) {
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun PremiumBottomControls(
     modifier: Modifier = Modifier,
     templates: List<PoseTemplate>,
@@ -441,7 +445,7 @@ fun PremiumBottomControls(
                     }
                     if (selectedTemplate != null) {
                         TextButton(onClick = { showPosePicker = false }) {
-                            Text(stringResource(R.string.done), color = Color.Cyan, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.done), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -456,7 +460,7 @@ fun PremiumBottomControls(
                             onClick = { onCategorySelect(category) },
                             label = { Text(localizedOptionLabel(category)) },
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = Color.Cyan,
+                                selectedContainerColor = MaterialTheme.colorScheme.primary,
                                 selectedLabelColor = Color.Black,
                                 labelColor = Color.White
                             )
@@ -490,14 +494,15 @@ fun PremiumBottomControls(
             }
         }
 
-        AnimatedVisibility(visible = showMoreTools && !showPosePicker) {
+        if (showMoreTools && !showPosePicker) {
+            ModalBottomSheet(onDismissRequest = { showMoreTools = false }, containerColor = MaterialTheme.colorScheme.surface) {
             Column(
                 modifier = Modifier
-                    .padding(horizontal = 20.dp, vertical = 8.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(Color(0xFF17191D).copy(alpha = 0.96f))
-                    .padding(16.dp)
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp, vertical = 12.dp)
             ) {
+                Text(stringResource(R.string.customize), style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(bottom = 12.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(R.string.auto_capture), color = Color.White, modifier = Modifier.weight(1f))
                     Switch(checked = autoCaptureEnabled, onCheckedChange = onAutoCaptureChange)
@@ -509,15 +514,15 @@ fun PremiumBottomControls(
                 Text(stringResource(R.string.pose_visibility), color = Color.White, fontWeight = FontWeight.SemiBold)
                 Slider(value = ghostOpacity, onValueChange = onGhostOpacityChange, valueRange = 0.15f..1f)
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    item { AssistChip(onClick = onRecommendClick, label = { Text(stringResource(R.string.ai_suggest)) }) }
+                    item { AssistChip(onClick = { showMoreTools = false; onRecommendClick() }, label = { Text(stringResource(R.string.ai_suggest)) }) }
                     item {
                         AssistChip(
                             onClick = onRecordToggle,
                             label = { Text(stringResource(if (isRecording) R.string.stop_recording else R.string.record_pose)) }
                         )
                     }
-                    item { AssistChip(onClick = onExploreClick, label = { Text(stringResource(R.string.explore)) }) }
-                    item { AssistChip(onClick = onChallengeClick, label = { Text(stringResource(R.string.challenge)) }) }
+                    item { AssistChip(onClick = { showMoreTools = false; onExploreClick() }, label = { Text(stringResource(R.string.explore)) }) }
+                    item { AssistChip(onClick = { showMoreTools = false; onChallengeClick() }, label = { Text(stringResource(R.string.challenge)) }) }
                 }
                 Text(stringResource(R.string.pose_challenge), color = Color.White, modifier = Modifier.padding(top = 8.dp))
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -526,6 +531,7 @@ fun PremiumBottomControls(
                             onClick = { onDifficultySelect(difficulty) }, label = { Text(localizedOptionLabel(difficulty)) })
                     }
                 }
+            }
             }
         }
 
@@ -537,8 +543,10 @@ fun PremiumBottomControls(
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    PoseThumbnail(template, Modifier.size(44.dp).clip(RoundedCornerShape(8.dp)).background(Color.White.copy(alpha = 0.1f)))
+                    Spacer(Modifier.width(12.dp))
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(stringResource(R.string.selected_pose), color = Color.Cyan, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.selected_pose), color = MaterialTheme.colorScheme.primary, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                         Text(template.name, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold, maxLines = 1)
                     }
                     TextButton(onClick = { showPosePicker = true }) {
@@ -585,11 +593,11 @@ fun PremiumBottomControls(
                         .clickable { onFlipCamera() },
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.flip_camera), tint = Color.White, modifier = Modifier.size(24.dp))
+                    Icon(com.ppnnttt.posesuggestions.ui.AppIcons.FlipCamera, contentDescription = stringResource(R.string.flip_camera), tint = Color.White, modifier = Modifier.size(24.dp))
                 }
             }
             Row(Modifier.fillMaxWidth().padding(horizontal = 24.dp), verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = onOpenGallery) { Text(stringResource(R.string.captured_poses), color = Color.Cyan) }
+                TextButton(onClick = onOpenGallery) { Text(stringResource(R.string.captured_poses), color = MaterialTheme.colorScheme.primary) }
                 lastCapturedPhoto?.let { photo ->
                     AsyncImage(model = photo, contentDescription = stringResource(R.string.open_photo),
                         modifier = Modifier.size(40.dp).clip(RoundedCornerShape(8.dp)).clickable(onClick = onOpenGallery),
@@ -623,7 +631,7 @@ fun PremiumTemplateItem(
                 .background(if (isSelected) Color.White.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.1f))
                 .border(
                     width = if (isSelected) 2.dp else 0.dp,
-                    color = if (isSelected) Color.Cyan else Color.Transparent,
+                    color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
                     shape = RoundedCornerShape(16.dp)
                 ),
             contentAlignment = Alignment.Center
@@ -675,7 +683,7 @@ fun ChallengeOverlay(state: ChallengeState, timeLeft: Int, score: Float, highSco
                     Text(
                         text = stringResource(R.string.score_value, score.toInt()),
                         fontSize = 20.sp,
-                        color = Color.Cyan
+                        color = MaterialTheme.colorScheme.primary
                     )
                     if (highScore > 0) {
                         Text(
@@ -693,14 +701,14 @@ fun ChallengeOverlay(state: ChallengeState, timeLeft: Int, score: Float, highSco
                         .clip(RoundedCornerShape(32.dp))
                         .background(Color.Black.copy(alpha = 0.8f))
                         .padding(48.dp)
-                        .border(2.dp, Color.Cyan, RoundedCornerShape(32.dp))
+                        .border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(32.dp))
                         .padding(24.dp)
                 ) {
                     Text(
                         text = stringResource(if (score >= 80f) R.string.pose_master else R.string.well_done),
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Black,
-                        color = if (score >= 80f) Color.Cyan else Color.White
+                        color = if (score >= 80f) MaterialTheme.colorScheme.primary else Color.White
                     )
                     Spacer(Modifier.height(16.dp))
                     Text(
@@ -718,7 +726,7 @@ fun ChallengeOverlay(state: ChallengeState, timeLeft: Int, score: Float, highSco
                     LinearProgressIndicator(
                         progress = { score / 100f },
                         modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
-                        color = Color.Cyan,
+                        color = MaterialTheme.colorScheme.primary,
                         trackColor = Color.White.copy(alpha = 0.2f),
                     )
                 }
@@ -736,7 +744,7 @@ fun PermissionRequestUI(onClick: () -> Unit) {
             Spacer(Modifier.height(16.dp))
             Button(
                 onClick = onClick,
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Cyan)
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text(stringResource(R.string.grant_permission), color = Color.Black)
             }

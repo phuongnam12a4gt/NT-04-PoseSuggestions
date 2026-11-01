@@ -37,7 +37,7 @@
     <string name="delete_photo_message">Are you sure you want to delete this captured pose?</string>
     <string name="delete">삭제</string>
     <string name="cancel">취소</string>
-    <string name="place_body_here">PLACE YOUR BODY HERE</string>
+
     <string name="stop_replay">STOP REPLAY</string>
     <string name="camera_permission_needed">Camera access is needed</string>
     <string name="grant_permission">Grant permission</string>
@@ -52,13 +52,15 @@
     <string name="pose_marketplace">Pose library</string>
     <string name="search_poses">Search poses…</string>
     <string name="my_recordings">My recordings</string>
-    <string name="frame_count">%1$d frames</string>
+    <plurals name="frame_count">
+        <item quantity="other">%1$d frames</item>
+    </plurals>
     <string name="recently_used">Recently used</string>
     <string name="explore_poses">Explore poses</string>
     <string name="ai_pose_suggestion">AI pose suggestion</string>
     <string name="location">Location</string>
     <string name="outfit">Outfit</string>
-    <string name="gender">Gender</string>
+
     <string name="mood">Mood</string>
     <string name="generate_recommendation">Generate recommendation</string>
     <string name="hold_still">Hold still!</string>
@@ -120,7 +122,7 @@
     <string name="photo_saved">Edited photo saved</string>
     <string name="photo_save_failed">Could not save photo</string>
     <string name="remove_background">배경 제거</string>
-    <string name="extracting_subject">Extracting subject…</string>
+
     <string name="video_editor">동영상 자르기</string>
     <string name="auto_capture">자동 촬영</string>
     <string name="manual_capture_hint">준비되면 촬영 버튼을 누르세요</string>
@@ -139,26 +141,14 @@
     <string name="pose_save_failed">포즈를 저장하지 못했습니다. 다시 시도하세요.</string>
     <string name="photo_load_failed">사진을 열 수 없습니다. 다른 사진을 선택하세요.</string>
     <string name="background_failed">배경을 제거하지 못했습니다. 연결을 확인하세요.</string>
-    <string name="undo">실행 취소</string>
-    <string name="redo">다시 실행</string>
-    <string name="export">내보내기</string>
-    <string name="filters">필터</string>
-    <string name="adjust">조정</string>
-    <string name="crop">자르기</string>
-    <string name="original">원본</string>
-    <string name="replace">사진 변경</string>
-    <string name="show_original">원본 보기</string>
-    <string name="show_edit">편집 보기</string>
-    <string name="flip_horizontal">좌우 반전</string>
-    <string name="flip_vertical">상하 반전</string>
-    <string name="background_hint">배경을 제거하고 실행 취소로 복원할 수 있습니다. 처음에는 모델 다운로드가 필요할 수 있습니다.</string>
+
     <string name="video_pick">동영상 선택</string>
     <string name="video_empty">자를 동영상을 선택하세요</string>
     <string name="video_hint">동영상을 자르고 원본 소리를 유지할지 선택하세요.</string>
     <string name="video_trim_hint">빠른 자르기는 앞선 키프레임에서 시작하므로 짧은 구간이 추가될 수 있습니다.</string>
     <string name="video_audio">원본 소리 유지</string>
     <string name="video_export">동영상 내보내기</string>
-    <string name="video_exporting">내보내는 중...</string>
+    <string name="video_exporting">내보내는 중…</string>
     <string name="video_exported">동영상을 내보냈습니다</string>
     <string name="video_error">내보내지 못했습니다. 다른 동영상을 시도하세요.</string>
     <string name="video_load_error">재생할 수 없습니다. 다른 파일을 선택하세요.</string>
@@ -172,4 +162,7 @@
     <string name="recording_empty">기록된 움직임이 없습니다. 화면 안에 서서 다시 시도하세요.</string>
     <string name="recording_saved">움직임을 포즈 라이브러리에 저장했습니다</string>
     <string name="recording_failed">움직임을 저장하지 못했습니다. 다시 시도하세요.</string>
+    <string name="pose_filters">필터</string>
+    <string name="pose_difficulty">난이도</string>
+    <string name="reference_photo_hint">한 사람의 몸이 선명하게 보이는 밝은 사진을 선택하세요.</string>
 </resources>

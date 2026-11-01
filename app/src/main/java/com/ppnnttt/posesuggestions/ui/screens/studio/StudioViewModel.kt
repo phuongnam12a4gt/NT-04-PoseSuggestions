@@ -127,5 +127,5 @@ class StudioViewModel(application: Application) : AndroidViewModel(application) 
             finally { _isProcessing.value = false }
         }
     }
-    override fun onCleared() { leave(); processor.stop(); super.onCleared() }
+    override fun onCleared() { leave(); processor.stop() }
 }

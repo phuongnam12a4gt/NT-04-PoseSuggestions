@@ -17,8 +17,8 @@ import org.junit.Assert.*
 class ExampleInstrumentedTest {
     @Test
     fun useAppContext() {
-        // Context of the app under test.
+        // The isolated QA install keeps the production identity with a .qa suffix.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.ppnnttt.posesuggestions", appContext.packageName)
+        assertEquals("com.ppnnttt.posesuggestions", appContext.packageName.removeSuffix(".qa"))
     }
 }

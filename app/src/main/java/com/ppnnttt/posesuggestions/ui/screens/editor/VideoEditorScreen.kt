@@ -14,12 +14,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -36,6 +38,7 @@ import java.nio.ByteBuffer
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideoEditorScreen(onNavigateBack: () -> Unit) {
+    val resources = androidx.compose.ui.platform.LocalResources.current
     val context = LocalContext.current
     val owner = LocalLifecycleOwner.current
     val scope = rememberCoroutineScope()
@@ -70,8 +73,8 @@ fun VideoEditorScreen(onNavigateBack: () -> Unit) {
             try {
                 withContext(Dispatchers.IO) { exportTrimmedVideo(context, snapshot, destination) }
                 savedSelection = snapshot
-                snackbar.showSnackbar(context.getString(R.string.video_exported))
-            } catch (e: Exception) { snackbar.showSnackbar(context.getString(R.string.video_error)) }
+                snackbar.showSnackbar(resources.getString(R.string.video_exported))
+            } catch (e: Exception) { snackbar.showSnackbar(resources.getString(R.string.video_error)) }
             finally { exporting = false; exportSelection = null }
         }
     }
@@ -93,7 +96,7 @@ fun VideoEditorScreen(onNavigateBack: () -> Unit) {
     }
     Scaffold(containerColor = Color(0xFF0B0B10), snackbarHost = { SnackbarHost(snackbar) }, topBar = {
         Row(Modifier.fillMaxWidth().statusBarsPadding().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            TextButton(enabled = !exporting, onClick = { guarded(onNavigateBack) }) { Text(stringResource(R.string.back)) }
+            IconButton(enabled = !exporting, onClick = { guarded(onNavigateBack) }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back)) }
             Text(stringResource(R.string.video_editor), color = Color.White, modifier = Modifier.weight(1f))
             Button(enabled = duration > 0 && end > start && !exporting, onClick = {
                 exportSelection = selection; exporter.launch("Pose_${System.currentTimeMillis()}.mp4")
@@ -119,7 +122,7 @@ fun VideoEditorScreen(onNavigateBack: () -> Unit) {
                         setOnCompletionListener { playing = false; seekTo(start); position = start }
                         setOnErrorListener { _, _, _ ->
                             duration = 0; playing = false
-                            scope.launch { snackbar.showSnackbar(context.getString(R.string.video_load_error)) }; true
+                            scope.launch { snackbar.showSnackbar(resources.getString(R.string.video_load_error)) }; true
                         }
                         setVideoURI(source)
                     } }, modifier = Modifier.fillMaxSize())

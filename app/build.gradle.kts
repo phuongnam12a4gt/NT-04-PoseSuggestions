@@ -70,6 +70,10 @@ android {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
         }
     }
+    androidResources {
+        generateLocaleConfig = true
+        localeFilters += listOf("en", "vi", "ja", "ko", "th")
+    }
     buildFeatures {
         compose = true
     }
@@ -80,7 +84,6 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity.ktx)
-    implementation(libs.androidx.constraintlayout)
 
     // Compose
     implementation(platform(libs.androidx.compose.bom))
@@ -88,8 +91,10 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
 
@@ -97,11 +102,11 @@ dependencies {
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
-    implementation("com.google.mlkit:pose-detection-accurate:18.0.0-beta5")
-    implementation("com.google.android.gms:play-services-mlkit-subject-segmentation:16.0.0-beta1")
+    implementation(libs.mlkit.pose.detection)
+    implementation(libs.mlkit.subject.segmentation)
+    implementation(libs.androidx.exifinterface)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.coil.compose)
-    implementation(libs.androidx.work.runtime.ktx)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)

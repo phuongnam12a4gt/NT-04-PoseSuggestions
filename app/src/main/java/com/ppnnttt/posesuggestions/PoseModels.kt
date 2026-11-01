@@ -35,3 +35,17 @@ fun DetectedPose.hasUsableBody(): Boolean {
 }
 
 fun DetectedPose.mirrored(): DetectedPose = copy(landmarks = landmarks.map { it.copy(x = imageWidth - it.x) })
+
+/** Live scoring requires confident, in-frame torso and limb observations. */
+fun DetectedPose.hasTrackableBody(): Boolean {
+    if (imageWidth <= 0 || imageHeight <= 0) return false
+    val visible = landmarks.filter {
+        it.inFrameLikelihood >= .75f && it.x in 0f..imageWidth.toFloat() && it.y in 0f..imageHeight.toFloat()
+    }
+    val types = visible.map { it.type }.toSet()
+    if (!listOf(11, 12, 23, 24).all { it in types }) return false
+    if (types.count { it in listOf(13, 14, 15, 16, 25, 26, 27, 28) } < 4) return false
+    val body = visible.filter { it.type in 11..16 || it.type in 23..28 }
+    return body.maxOf { it.y } - body.minOf { it.y } >= imageHeight * .35f &&
+        body.maxOf { it.x } - body.minOf { it.x } >= imageWidth * .1f
+}

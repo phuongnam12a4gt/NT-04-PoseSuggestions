@@ -1,5 +1,6 @@
 package com.ppnnttt.posesuggestions
 
+import androidx.core.content.edit
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
@@ -20,7 +21,7 @@ object AppLanguageManager {
     fun setLanguage(context: Context, languageTag: String, persist: Boolean = true) {
         if (persist) {
             context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-                .edit().putString(LANGUAGE_KEY, languageTag).apply()
+                .edit { putString(LANGUAGE_KEY, languageTag) }
         }
         if (android.os.Build.VERSION.SDK_INT >= 33) {
             val manager = context.applicationContext.getSystemService(android.app.LocaleManager::class.java)

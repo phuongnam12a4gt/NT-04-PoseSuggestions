@@ -34,6 +34,7 @@ fun GalleryScreen(viewModel: GalleryViewModel, onNavigateBack: () -> Unit,
     val deleteFailed by viewModel.deleteFailed.collectAsState()
     var selected by remember { mutableStateOf<File?>(null) }
     var pendingDelete by remember { mutableStateOf<File?>(null) }
+    val resources = androidx.compose.ui.platform.LocalResources.current
     val context = LocalContext.current
     val snackbar = remember { SnackbarHostState() }
     val error = stringResource(R.string.photo_save_failed)
@@ -74,7 +75,7 @@ fun GalleryScreen(viewModel: GalleryViewModel, onNavigateBack: () -> Unit,
                             clipData = ClipData.newRawUri("photo", uri)
                             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         }
-                        context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_photo)))
+                        context.startActivity(Intent.createChooser(intent, resources.getString(R.string.share_photo)))
                     }) { Text(stringResource(R.string.share_photo), color = Color.Cyan) }
                     TextButton(onClick = { selected = null; onEditPhoto(file) }) { Text(stringResource(R.string.photo_editor), color = Color.White) }
                     TextButton(onClick = { pendingDelete = file }) { Text(stringResource(R.string.delete), color = Color(0xFFFF8A80)) }

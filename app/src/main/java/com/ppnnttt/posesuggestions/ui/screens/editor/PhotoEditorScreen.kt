@@ -1,265 +1,209 @@
 package com.ppnnttt.posesuggestions.ui.screens.editor
 
-import com.ppnnttt.posesuggestions.R
-
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.ColorMatrix
-import android.graphics.ColorMatrixColorFilter
-import android.graphics.ImageDecoder
-import android.graphics.Matrix
-import android.graphics.Paint
-import android.os.Build
-import android.provider.MediaStore
-import android.widget.ImageView
-import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.segmentation.subject.SubjectSegmentation
-import com.google.mlkit.vision.segmentation.subject.SubjectSegmenterOptions
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.withTranslation
+import android.content.Context
+import android.graphics.*
+import android.net.Uri
+import android.view.View
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ppnnttt.posesuggestions.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PhotoEditorScreen(onNavigateBack: () -> Unit, initialPhoto: String? = null) {
+fun PhotoEditorScreen(
+    onNavigateBack: () -> Unit,
+    initialPhoto: String? = null,
+    model: PhotoEditorViewModel = viewModel()
+) {
+    val resources = androidx.compose.ui.platform.LocalResources.current
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val snackbar = remember { SnackbarHostState() }
-    var bitmap by remember { mutableStateOf<Bitmap?>(null) }
-    var brightness by remember { mutableFloatStateOf(0f) }
-    var contrast by remember { mutableFloatStateOf(1f) }
-    var saturation by remember { mutableFloatStateOf(1f) }
-    var rotation by remember { mutableIntStateOf(0) }
-    var isRemovingBackground by remember { mutableStateOf(false) }
-    val savedMessage = stringResource(R.string.photo_saved)
-    val errorMessage = stringResource(R.string.photo_save_failed)
-
-    LaunchedEffect(initialPhoto) {
-        if (!initialPhoto.isNullOrBlank()) {
-            val loaded = withContext(Dispatchers.IO) {
-                runCatching {
-                    com.ppnnttt.posesuggestions.loadPhoto(
-                        context, android.net.Uri.fromFile(java.io.File(initialPhoto))
-                    )
-                }.getOrNull()
-            }
-            bitmap = loaded
-            if (loaded == null) snackbar.showSnackbar(errorMessage)
+    var discard by rememberSaveable { mutableStateOf(false) }
+    var selectedTool by rememberSaveable { mutableIntStateOf(0) }
+    val edits = model.edits
+    LaunchedEffect(initialPhoto) { model.initialize(initialPhoto) }
+    LaunchedEffect(model.message, resources) {
+        model.message?.let {
+            snackbar.showSnackbar(resources.getString(it))
+            model.clearMessage()
         }
     }
-
-    val savePicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.CreateDocument("image/png")
-    ) { destination ->
-        if (destination != null) {
-            val source = bitmap ?: return@rememberLauncherForActivityResult
-            scope.launch {
-                val saved = withContext(Dispatchers.IO) {
-                    saveEditedPhotoToUri(
-                        context = context,
-                        destination = destination,
-                        source = source,
-                        brightness = brightness,
-                        contrast = contrast,
-                        saturation = saturation,
-                        rotation = rotation
-                    )
-                }
-                snackbar.showSnackbar(if (saved) savedMessage else errorMessage)
-            }
-        }
-    }
-
+    fun back() { if (!model.busy) { if (model.dirty) discard = true else onNavigateBack() } }
+    BackHandler(enabled = model.dirty || model.busy) { back() }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        if (uri != null) {
-            scope.launch {
-                bitmap = withContext(Dispatchers.IO) {
-                    runCatching {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                            ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, uri))
-                        } else {
-                            @Suppress("DEPRECATION")
-                            MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
-                        }
-                    }.getOrNull()
-                }
-                brightness = 0f; contrast = 1f; saturation = 1f; rotation = 0
-            }
-        }
+        uri?.let(model::importPhoto)
     }
-
-    val segmenter = remember {
-        SubjectSegmentation.getClient(
-            SubjectSegmenterOptions.Builder()
-                .enableForegroundBitmap()
-                .build()
-        )
-    }
-    DisposableEffect(segmenter) {
-        onDispose { segmenter.close() }
-    }
-
+    val exporter = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("image/png"), model::export)
+    if (discard) AlertDialog(
+        onDismissRequest = { discard = false },
+        title = { Text(stringResource(R.string.discard_edits)) },
+        text = { Text(stringResource(R.string.discard_message)) },
+        confirmButton = { TextButton(onClick = { discard = false; onNavigateBack() }) { Text(stringResource(R.string.discard)) } },
+        dismissButton = { TextButton(onClick = { discard = false }) { Text(stringResource(R.string.cancel)) } }
+    )
     Scaffold(
-        containerColor = Color(0xFF080808),
+        containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.photo_editor), color = Color.White, fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    TextButton(onClick = onNavigateBack) { Text(stringResource(R.string.back), color = Color.Cyan) }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                title = { Text(stringResource(R.string.photo_editor)) },
+                navigationIcon = { IconButton(enabled = !model.busy, onClick = ::back) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
+                } },
+                actions = {
+                    Button(enabled = model.original != null && !model.busy, onClick = {
+                        if (model.beginExport()) {
+                            try { exporter.launch("Pose_${System.currentTimeMillis()}.png") }
+                            catch (e: Exception) { model.export(null) }
+                        }
+                    }, modifier = Modifier.padding(end = 12.dp)) { Text(stringResource(R.string.save)) }
+                }
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Card(
-                modifier = Modifier.fillMaxWidth().weight(1f),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF15171B))
-            ) {
+        BoxWithConstraints(Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)) {
+        val toolsHeight = minOf(330.dp, maxHeight * 0.5f)
+        Column(Modifier.fillMaxSize()) {
+            Card(Modifier.fillMaxWidth().weight(1f), colors = CardDefaults.cardColors(containerColor = Color(0xFF15171B))) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    val source = bitmap
+                    val source = model.source
                     if (source == null) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(stringResource(R.string.no_photo_selected), color = Color.White.copy(alpha = 0.65f))
-                            Spacer(Modifier.height(16.dp))
-                            Button(onClick = { picker.launch("image/*") }) {
-                                Text(stringResource(R.string.choose_photo))
+                            Text(stringResource(R.string.no_photo_selected))
+                            Button(enabled = !model.busy, onClick = { picker.launch("image/*") }) { Text(stringResource(R.string.choose_photo)) }
+                        }
+                    } else AndroidView(
+                        factory = { PhotoPreview(it) },
+                        update = { it.source = source; it.edits = edits; it.invalidate() },
+                        modifier = Modifier.fillMaxSize().padding(8.dp)
+                    )
+                    if (model.busy) CircularProgressIndicator()
+                }
+            }
+            if (model.original != null) {
+                Column(Modifier.fillMaxWidth().heightIn(max = toolsHeight).verticalScroll(rememberScrollState()).padding(vertical = 12.dp)) {
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        item { FilterChip(selectedTool == 1, { selectedTool = if (selectedTool == 1) 0 else 1 }, label = { Text(stringResource(R.string.brightness)) }) }
+                        item { FilterChip(selectedTool == 2, { selectedTool = if (selectedTool == 2) 0 else 2 }, label = { Text(stringResource(R.string.contrast)) }) }
+                        item { FilterChip(selectedTool == 3, { selectedTool = if (selectedTool == 3) 0 else 3 }, label = { Text(stringResource(R.string.saturation)) }) }
+                        item { FilterChip(selectedTool == 4, { selectedTool = if (selectedTool == 4) 0 else 4 }, label = { Text(stringResource(R.string.remove_background)) }) }
+                    }
+                    when (selectedTool) {
+                        1 -> EditorSlider(stringResource(R.string.brightness), edits.brightness, -100f..100f, !model.busy) { model.update(edits.copy(brightness = it)) }
+                        2 -> EditorSlider(stringResource(R.string.contrast), edits.contrast, 0.5f..1.5f, !model.busy) { model.update(edits.copy(contrast = it)) }
+                        3 -> EditorSlider(stringResource(R.string.saturation), edits.saturation, 0f..2f, !model.busy) { model.update(edits.copy(saturation = it)) }
+                        4 -> {
+                            val backgroundLabel = stringResource(R.string.remove_background)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(backgroundLabel, Modifier.weight(1f))
+                                Switch(checked = edits.removeBackground, onCheckedChange = { model.toggleBackground() }, enabled = !model.busy,
+                                    modifier = Modifier.semantics { contentDescription = backgroundLabel })
                             }
                         }
-                    } else {
-                        AndroidView(
-                            factory = { ImageView(it).apply { scaleType = ImageView.ScaleType.FIT_CENTER } },
-                            update = { imageView ->
-                                imageView.setImageBitmap(source)
-                                imageView.rotation = rotation.toFloat()
-                                imageView.colorFilter = ColorMatrixColorFilter(editorColorMatrix(brightness, contrast, saturation))
-                            },
-                            modifier = Modifier.fillMaxSize().padding(8.dp)
-                        )
+                    }
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        OutlinedButton(enabled = !model.busy, onClick = { model.update(edits.copy(rotation = (edits.rotation + 90) % 360)) }) { Text(stringResource(R.string.rotate)) }
+                        TextButton(enabled = !model.busy, onClick = model::reset) { Text(stringResource(R.string.reset)) }
                     }
                 }
             }
-
-            if (bitmap != null) {
-                Column(Modifier.fillMaxWidth().padding(vertical = 12.dp)) {
-                    EditorSlider(stringResource(R.string.brightness), brightness, -100f..100f) { brightness = it }
-                    EditorSlider(stringResource(R.string.contrast), contrast, 0.5f..1.5f) { contrast = it }
-                    EditorSlider(stringResource(R.string.saturation), saturation, 0f..2f) { saturation = it }
-                    Button(
-                        onClick = {
-                            val source = bitmap ?: return@Button
-                            isRemovingBackground = true
-                            segmenter.process(InputImage.fromBitmap(source, 0))
-                                .addOnSuccessListener { result ->
-                                    result.foregroundBitmap?.let { foreground ->
-                                        bitmap = foreground.copy(Bitmap.Config.ARGB_8888, false)
-                                        brightness = 0f
-                                        contrast = 1f
-                                        saturation = 1f
-                                        rotation = 0
-                                    }
-                                    isRemovingBackground = false
-                                }
-                                .addOnFailureListener {
-                                    isRemovingBackground = false
-                                    scope.launch { snackbar.showSnackbar(errorMessage) }
-                                }
-                        },
-                        enabled = !isRemovingBackground,
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-                    ) {
-                        if (isRemovingBackground) {
-                            CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-                            Spacer(Modifier.width(8.dp))
-                        }
-                        Text(stringResource(if (isRemovingBackground) R.string.extracting_subject else R.string.remove_background))
-                    }
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedButton(onClick = { rotation = (rotation + 90) % 360 }, modifier = Modifier.weight(1f)) {
-                            Text(stringResource(R.string.rotate))
-                        }
-                        OutlinedButton(onClick = { brightness = 0f; contrast = 1f; saturation = 1f; rotation = 0 }, modifier = Modifier.weight(1f)) {
-                            Text(stringResource(R.string.reset))
-                        }
-                        Button(
-                            onClick = {
-                                val fileName = "Pose_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())}.png"
-                                savePicker.launch(fileName)
-                            },
-                            modifier = Modifier.weight(1f)
-                        ) { Text(stringResource(R.string.save)) }
-                    }
-                }
-            }
+        }
         }
     }
 }
 
 @Composable
-private fun EditorSlider(label: String, value: Float, range: ClosedFloatingPointRange<Float>, onChange: (Float) -> Unit) {
+private fun EditorSlider(label: String, value: Float, range: ClosedFloatingPointRange<Float>, enabled: Boolean, onChange: (Float) -> Unit) {
     Column {
-        Text(label, color = Color.White, style = MaterialTheme.typography.labelLarge)
-        Slider(value = value, onValueChange = onChange, valueRange = range)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(label, style = MaterialTheme.typography.labelLarge)
+            Text(String.format(androidx.compose.ui.platform.LocalLocale.current.platformLocale, "%.2f", value), style = MaterialTheme.typography.labelLarge)
+        }
+        Slider(value = value, onValueChange = onChange, valueRange = range, enabled = enabled, modifier = Modifier.semantics { contentDescription = label })
     }
 }
 
-private fun editorColorMatrix(brightness: Float, contrast: Float, saturation: Float): ColorMatrix {
-    val saturationMatrix = ColorMatrix().apply { setSaturation(saturation) }
-    val translate = (1f - contrast) * 128f + brightness
-    val adjustment = ColorMatrix(floatArrayOf(
-        contrast, 0f, 0f, 0f, translate,
-        0f, contrast, 0f, 0f, translate,
-        0f, 0f, contrast, 0f, translate,
-        0f, 0f, 0f, 1f, 0f
-    ))
-    saturationMatrix.postConcat(adjustment)
-    return saturationMatrix
+private class PhotoPreview(context: Context) : View(context) {
+    var source: Bitmap? = null
+    var edits = PhotoEdits()
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        val bitmap = source ?: return
+        val (outputWidth, outputHeight) = rotatedPhotoSize(bitmap, edits.rotation)
+        val scale = minOf(width.toFloat() / outputWidth, height.toFloat() / outputHeight)
+        canvas.withTranslation((width - outputWidth * scale) / 2f, (height - outputHeight * scale) / 2f) {
+            scale(scale, scale)
+            drawEditedPhoto(this, bitmap, edits)
+        }
+    }
+}
+
+internal fun rotatedPhotoSize(source: Bitmap, rotation: Int): Pair<Int, Int> =
+    if (rotation % 180 == 0) source.width to source.height else source.height to source.width
+
+private fun editorColorMatrix(edits: PhotoEdits): ColorMatrix {
+    val translate = (1f - edits.contrast) * 128f + edits.brightness
+    return ColorMatrix().apply {
+        setSaturation(edits.saturation)
+        postConcat(ColorMatrix(floatArrayOf(
+            edits.contrast, 0f, 0f, 0f, translate,
+            0f, edits.contrast, 0f, 0f, translate,
+            0f, 0f, edits.contrast, 0f, translate,
+            0f, 0f, 0f, 1f, 0f
+        )))
+    }
+}
+
+private fun drawEditedPhoto(canvas: Canvas, source: Bitmap, edits: PhotoEdits) {
+    val (width, height) = rotatedPhotoSize(source, edits.rotation)
+    val matrix = Matrix().apply {
+        postTranslate(-source.width / 2f, -source.height / 2f)
+        postRotate(edits.rotation.toFloat())
+        postTranslate(width / 2f, height / 2f)
+    }
+    canvas.drawBitmap(source, matrix, Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG).apply {
+        colorFilter = ColorMatrixColorFilter(editorColorMatrix(edits))
+    })
+}
+
+internal fun renderEditedPhoto(source: Bitmap, edits: PhotoEdits): Bitmap {
+    val (width, height) = rotatedPhotoSize(source, edits.rotation)
+    val output = createBitmap(width, height)
+    try { drawEditedPhoto(Canvas(output), source, edits) }
+    catch (e: Exception) { output.recycle(); throw e }
+    return output
 }
 
 internal fun saveEditedPhotoToUri(
-    context: android.content.Context,
-    destination: android.net.Uri,
-    source: Bitmap,
-    brightness: Float,
-    contrast: Float,
-    saturation: Float,
-    rotation: Int
+    context: Context, destination: Uri, source: Bitmap,
+    brightness: Float, contrast: Float, saturation: Float, rotation: Int
 ): Boolean = runCatching {
-    val filtered = Bitmap.createBitmap(source.width, source.height, Bitmap.Config.ARGB_8888)
-    Canvas(filtered).drawBitmap(source, 0f, 0f, Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        colorFilter = ColorMatrixColorFilter(editorColorMatrix(brightness, contrast, saturation))
-    })
-    val output = if (rotation == 0) filtered else Bitmap.createBitmap(
-        filtered, 0, 0, filtered.width, filtered.height,
-        Matrix().apply { postRotate(rotation.toFloat()) }, true
-    )
-    val compressed = context.contentResolver.openOutputStream(destination, "w")?.use {
-        output.compress(Bitmap.CompressFormat.PNG, 100, it)
-    } ?: false
-    if (output !== filtered) output.recycle()
-    filtered.recycle()
-    compressed
+    val output = renderEditedPhoto(source, PhotoEdits(brightness, contrast, saturation, rotation))
+    try {
+        context.contentResolver.openOutputStream(destination, "w")?.use {
+            output.compress(Bitmap.CompressFormat.PNG, 100, it)
+        } ?: false
+    } finally { output.recycle() }
 }.getOrDefault(false)

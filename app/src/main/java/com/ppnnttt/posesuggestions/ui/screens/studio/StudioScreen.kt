@@ -28,7 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,6 +44,7 @@ fun StudioScreen(
     viewModel: StudioViewModel,
     onNavigateBack: () -> Unit
 ) {
+    val resources = androidx.compose.ui.platform.LocalResources.current
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     
@@ -125,7 +126,7 @@ fun StudioScreen(
                         PremiumCountdown(countdownValue)
 
                         // Capture Button
-                        if (isProcessing) CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = Color.Cyan)
+                        if (isProcessing) CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = MaterialTheme.colorScheme.primary)
                         if (countdownValue == null && !isProcessing) {
                             Box(
                                 modifier = Modifier
@@ -144,12 +145,14 @@ fun StudioScreen(
                     // Selection Menu
                     Text(
                         stringResource(R.string.choose_method),
-                        color = Color.Cyan,
+                        color = MaterialTheme.colorScheme.primary,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 24.dp)
+                        modifier = Modifier.padding(bottom = 12.dp)
                     )
 
+                    Text(stringResource(R.string.reference_photo_hint), color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(bottom = 20.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -158,19 +161,19 @@ fun StudioScreen(
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .height(200.dp)
-                                .clip(RoundedCornerShape(24.dp))
+                                .heightIn(min = 140.dp)
+                                .clip(RoundedCornerShape(20.dp))
                                 .background(Color.White.copy(alpha = 0.05f))
                                 .clickable(enabled = !isProcessing) { launcher.launch("image/*") },
                             contentAlignment = Alignment.Center
                         ) {
                             if (isProcessing) {
-                                CircularProgressIndicator(color = Color.Cyan)
+                                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                             } else {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Icon(Icons.Default.Add, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(32.dp))
+                                    Icon(Icons.Default.Add, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(32.dp))
                                     Spacer(Modifier.height(12.dp))
-                                    Text(stringResource(R.string.upload_image), color = Color.Gray, fontSize = 14.sp)
+                                    Text(stringResource(R.string.upload_image), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
                                 }
                             }
                         }
@@ -179,10 +182,10 @@ fun StudioScreen(
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .height(200.dp)
-                                .clip(RoundedCornerShape(24.dp))
-                                .background(Color.Cyan.copy(alpha = 0.1f))
-                                .border(1.dp, Color.Cyan.copy(alpha = 0.3f), RoundedCornerShape(24.dp))
+                                .heightIn(min = 140.dp)
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
                                 .clickable(enabled = !isProcessing) {
                                     val hasPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
                                     if (hasPermission) {
@@ -194,10 +197,10 @@ fun StudioScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("📸", fontSize = 32.sp)
+                                Icon(com.ppnnttt.posesuggestions.ui.AppIcons.Camera, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
                                 Spacer(Modifier.height(12.dp))
-                                Text(stringResource(R.string.use_camera), color = Color.Cyan, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                                Text(stringResource(R.string.timer_3s), color = Color.Cyan.copy(alpha = 0.6f), fontSize = 10.sp)
+                                Text(stringResource(R.string.use_camera), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                Text(stringResource(R.string.timer_3s), color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f), fontSize = 10.sp)
                             }
                         }
                     }
@@ -206,7 +209,7 @@ fun StudioScreen(
                 // Review & Save State (Sử dụng GhostOverlay để xem thử tính năng kéo/zoom)
                 Text(
                     stringResource(R.string.preview_drag_zoom),
-                    color = Color.Cyan.copy(alpha = 0.7f),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -216,9 +219,9 @@ fun StudioScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(380.dp)
-                        .clip(RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(20.dp))
                         .background(Color.Black.copy(alpha = 0.5f))
-                        .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(24.dp)),
+                        .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(20.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     // Hiển thị ảnh gốc đã chụp/upload phía dưới
@@ -260,20 +263,20 @@ fun StudioScreen(
                 )
 
                 TextButton(enabled = !isProcessing, onClick = { launcher.launch("image/*") }) {
-                    Text(stringResource(R.string.choose_photo), color = Color.Cyan)
+                    Text(stringResource(R.string.choose_photo), color = MaterialTheme.colorScheme.primary)
                 }
                 Spacer(Modifier.height(12.dp))
 
                 Button(
                     onClick = { 
                         viewModel.saveAsTemplate(
-                            if (poseName.isBlank()) context.getString(R.string.selected_pose) else poseName,
+                            if (poseName.isBlank()) resources.getString(R.string.selected_pose) else poseName,
                             selectedCategory,
                             onComplete = onNavigateBack
                         )
                     },
                     modifier = Modifier.fillMaxWidth().height(56.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Cyan),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                     enabled = !isProcessing
                 ) {
                     if (isProcessing) {

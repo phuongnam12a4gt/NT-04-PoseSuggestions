@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -26,6 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,6 +45,7 @@ fun MarketplaceBottomSheet(
     val recordedPoses by viewModel.recordedPoses.collectAsState()
 
     var favoritesOnly by remember { mutableStateOf(false) }
+    var showFilters by remember { mutableStateOf(false) }
     val shownTemplates = if (favoritesOnly) templates.filter { it.id in favorites } else templates
     val categories = listOf("All", "cool", "selfie", "travel", "gym")
     val difficulties = listOf("All", "Easy", "Medium", "Hard")
@@ -51,20 +54,22 @@ fun MarketplaceBottomSheet(
     ModalBottomSheet(
         sheetState = sheetState,
         onDismissRequest = onDismiss,
-        containerColor = Color(0xFF1A1A1A),
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
         scrimColor = Color.Black.copy(alpha = 0.5f)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxHeight(0.94f)
-                .padding(horizontal = 16.dp)
+        LazyColumn(
+            modifier = Modifier.fillMaxHeight(0.94f).imePadding(),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            item { Column {
             Text(
                 stringResource(R.string.pose_marketplace),
                 style = MaterialTheme.typography.headlineSmall,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier.padding(bottom = 8.dp)
             )
 
             // Search Bar
@@ -72,8 +77,8 @@ fun MarketplaceBottomSheet(
                 value = searchQuery,
                 onValueChange = { viewModel.setSearchQuery(it) },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text(stringResource(R.string.search_poses), color = Color.Gray) },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray) },
+                placeholder = { Text(stringResource(R.string.search_poses), color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
                 colors = TextFieldDefaults.colors(
                     focusedTextColor = Color.White,
                     unfocusedTextColor = Color.White,
@@ -97,21 +102,25 @@ fun MarketplaceBottomSheet(
                 }
             }
 
-            LazyRow(
-                modifier = Modifier.padding(bottom = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(difficulties) { difficulty ->
-                    FilterChip(
-                        selected = selectedDifficulty == difficulty,
-                        onClick = { viewModel.selectDifficulty(difficulty) },
-                        label = { Text(localizedOptionLabel(difficulty)) }
-                    )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                FilterChip(selected = favoritesOnly, onClick = { favoritesOnly = !favoritesOnly },
+                    label = { Text(stringResource(R.string.favorites)) })
+                TextButton(onClick = { showFilters = !showFilters }) {
+                    Text(stringResource(R.string.pose_filters) + if (selectedDifficulty != "All") " · 1" else "")
                 }
             }
-
-            FilterChip(selected = favoritesOnly, onClick = { favoritesOnly = !favoritesOnly },
-                label = { Text(stringResource(R.string.favorites)) })
+            androidx.compose.animation.AnimatedVisibility(showFilters) {
+                Column {
+                    Text(stringResource(R.string.pose_difficulty), style = MaterialTheme.typography.labelLarge)
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(difficulties) { difficulty ->
+                            FilterChip(selected = selectedDifficulty == difficulty,
+                                onClick = { viewModel.selectDifficulty(difficulty) },
+                                label = { Text(localizedOptionLabel(difficulty)) })
+                        }
+                    }
+                }
+            }
             if (shownTemplates.isEmpty()) {
                 Text(stringResource(if (favoritesOnly) R.string.empty_favorites else R.string.no_poses),
                     color = Color.White, modifier = Modifier.padding(vertical = 12.dp))
@@ -119,10 +128,10 @@ fun MarketplaceBottomSheet(
                     favoritesOnly = false; viewModel.setSearchQuery(""); viewModel.selectCategory("All"); viewModel.selectDifficulty("All")
                 }) { Text(stringResource(R.string.clear_filters)) }
             }
-            LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            } }
                 // All Templates
                 item {
-                    Text(stringResource(R.string.explore_poses), color = Color.Gray, style = MaterialTheme.typography.labelLarge)
+                    Text(stringResource(R.string.explore_poses), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelLarge)
                 }
 
                 items(shownTemplates.chunked(2)) { rowItems ->
@@ -138,7 +147,7 @@ fun MarketplaceBottomSheet(
                 // My Recordings
                 if (recordedPoses.isNotEmpty()) {
                     item {
-                        Text(stringResource(R.string.my_recordings), color = Color.Gray, style = MaterialTheme.typography.labelLarge)
+                        Text(stringResource(R.string.my_recordings), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelLarge)
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 8.dp)) {
                             items(recordedPoses) { recording ->
                                 Card(
@@ -150,7 +159,7 @@ fun MarketplaceBottomSheet(
                                 ) {
                                     Column(Modifier.padding(8.dp), verticalArrangement = Arrangement.Center) {
                                         Text(recording.name, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1)
-                                        Text(stringResource(R.string.frame_count, recording.frames.size), color = Color.Gray, fontSize = 10.sp)
+                                        Text(pluralStringResource(R.plurals.frame_count, recording.frames.size, recording.frames.size), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                                     }
                                 }
                             }
@@ -161,7 +170,7 @@ fun MarketplaceBottomSheet(
                 // Recently Used
                 if (recentTemplates.isNotEmpty() && searchQuery.isBlank() && selectedCategory == "All" && selectedDifficulty == "All" && !favoritesOnly) {
                     item {
-                        Text(stringResource(R.string.recently_used), color = Color.Gray, style = MaterialTheme.typography.labelLarge)
+                        Text(stringResource(R.string.recently_used), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelLarge)
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 8.dp)) {
                             items(recentTemplates) { template ->
                                 Box(Modifier.width(160.dp)) {
@@ -172,7 +181,6 @@ fun MarketplaceBottomSheet(
                     }
                 }
 
-            }
         }
     }
 }
@@ -187,7 +195,7 @@ fun PoseCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(180.dp)
+            .heightIn(min = 208.dp)
             .clickable { onClick() },
         colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
         shape = RoundedCornerShape(16.dp)
@@ -197,7 +205,7 @@ fun PoseCard(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(100.dp)
+                        .height(144.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color.White.copy(alpha = 0.1f)),
                     contentAlignment = Alignment.Center
@@ -207,20 +215,21 @@ fun PoseCard(
                 Spacer(Modifier.height(8.dp))
                 Text(template.name, color = Color.White, fontWeight = FontWeight.Bold, maxLines = 1)
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(localizedOptionLabel(template.difficulty), color = Color.Cyan, fontSize = 10.sp)
+                    Text(localizedOptionLabel(template.difficulty), color = MaterialTheme.colorScheme.primary, fontSize = 10.sp)
                     Spacer(Modifier.width(8.dp))
-                    Text(localizedOptionLabel(template.category), color = Color.Gray, fontSize = 10.sp)
+                    Text(localizedOptionLabel(template.category), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 10.sp)
                 }
             }
 
             IconButton(
                 onClick = onFavoriteToggle,
-                modifier = Modifier.align(Alignment.TopEnd)
+                modifier = Modifier.align(Alignment.TopEnd).padding(6.dp)
+                    .background(Color.Black.copy(alpha = 0.65f), CircleShape)
             ) {
                 Icon(
                     if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = null,
-                    tint = if (isFavorite) Color.Red else Color.White
+                    contentDescription = stringResource(R.string.favorites),
+                    tint = if (isFavorite) MaterialTheme.colorScheme.primary else Color.White
                 )
             }
         }

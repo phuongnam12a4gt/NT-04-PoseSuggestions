@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,14 +38,14 @@ fun SettingsScreen(onNavigateBack: () -> Unit) {
     )
 
     Scaffold(
-        containerColor = Color(0xFF080808),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             Row(
                 modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TextButton(onClick = onNavigateBack) {
-                    Text(stringResource(R.string.back), color = Color.Cyan)
+                IconButton(onClick = onNavigateBack) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
                 }
                 Text(
                     stringResource(R.string.settings),
@@ -76,7 +78,7 @@ fun SettingsScreen(onNavigateBack: () -> Unit) {
                         .fillMaxWidth()
                         .padding(vertical = 5.dp)
                         .clip(RoundedCornerShape(18.dp))
-                        .background(if (selected) Color.Cyan.copy(alpha = 0.16f) else Color.White.copy(alpha = 0.06f))
+                        .background(if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.16f) else Color.White.copy(alpha = 0.06f))
                         .clickable {
                             selectedLanguage = language.tag
                             AppLanguageManager.setLanguage(context, language.tag)
@@ -86,7 +88,7 @@ fun SettingsScreen(onNavigateBack: () -> Unit) {
                 ) {
                     Box(
                         modifier = Modifier.size(42.dp).clip(CircleShape)
-                            .background(if (selected) Color.Cyan else Color.White.copy(alpha = 0.12f)),
+                            .background(if (selected) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.12f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(language.flag, color = if (selected) Color.Black else Color.White, fontWeight = FontWeight.Black)
@@ -103,7 +105,7 @@ fun SettingsScreen(onNavigateBack: () -> Unit) {
                             selectedLanguage = language.tag
                             AppLanguageManager.setLanguage(context, language.tag)
                         },
-                        colors = RadioButtonDefaults.colors(selectedColor = Color.Cyan)
+                        colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary)
                     )
                 }
             }

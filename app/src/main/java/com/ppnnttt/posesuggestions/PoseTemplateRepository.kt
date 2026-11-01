@@ -1,5 +1,6 @@
 package com.ppnnttt.posesuggestions
 
+import androidx.core.content.edit
 import android.content.Context
 import kotlinx.serialization.json.Json
 import java.io.InputStreamReader
@@ -39,7 +40,7 @@ class PoseTemplateRepository(private val context: Context) {
     fun saveCustomTemplate(template: PoseTemplate) {
         val customTemplates = loadCustomTemplates().toMutableList()
         customTemplates.add(template)
-        prefs.edit().putString("custom_templates", json.encodeToString(customTemplates)).apply()
+        prefs.edit { putString("custom_templates", json.encodeToString(customTemplates)) }
     }
 
     fun getTemplates(
@@ -65,7 +66,7 @@ class PoseTemplateRepository(private val context: Context) {
         } else {
             favorites.add(templateId)
         }
-        prefs.edit().putStringSet("favorites", favorites).apply()
+        prefs.edit { putStringSet("favorites", favorites) }
     }
 
     fun getFavorites(): Set<String> {
@@ -80,7 +81,7 @@ class PoseTemplateRepository(private val context: Context) {
         if (recent.size > 10) {
             recent.removeAt(recent.size - 1)
         }
-        prefs.edit().putString("recent", recent.joinToString(",")).apply()
+        prefs.edit { putString("recent", recent.joinToString(",")) }
     }
 
     fun getRecent(): List<String> {
