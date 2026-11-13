@@ -20,6 +20,9 @@
 
 # ML Kit Pose Detection
 -keep class com.google.mlkit.** { *; }
+-keepclasseswithmembers,includedescriptorclasses class com.google.android.gms.internal.mlkit_vision_mediapipe.** {
+    native <methods>;
+}
 -keep class com.google.android.gms.internal.mlkit_vision_pose.** { *; }
 -keep class com.google.android.gms.internal.mlkit_vision_subject_segmentation.** { *; }
 
