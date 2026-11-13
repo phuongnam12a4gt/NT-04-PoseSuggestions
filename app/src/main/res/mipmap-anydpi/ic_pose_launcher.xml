@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <size android:width="48dp" android:height="48dp" />
+            <solid android:color="@color/pose_launcher_background" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+    <item android:left="4dp" android:top="4dp" android:right="4dp" android:bottom="4dp" android:drawable="@drawable/pose_icon_mark" />
+</layer-list>
